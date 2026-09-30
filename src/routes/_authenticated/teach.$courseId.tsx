@@ -464,14 +464,13 @@ function LessonEditor({
         />
       </div>
 
-      {form.type === "text" ? (
-        <Textarea
-          rows={5}
-          placeholder={t("builder.lessonBody")}
-          value={form.body}
-          onChange={(e) => setForm({ ...form, body: e.target.value })}
-        />
-      ) : (
+      <Textarea
+        rows={form.type === "text" ? 8 : 4}
+        placeholder={t("builder.lessonBody")}
+        value={form.body}
+        onChange={(e) => setForm({ ...form, body: e.target.value })}
+      />
+      {form.type === "text" ? null : (
         <div className="flex flex-wrap items-center gap-3">
           <Input
             type="file"
@@ -526,6 +525,7 @@ function LessonEditor({
           </Button>
         </div>
       </div>
+      {lesson ? <LessonExtrasEditor lessonId={lesson.id} /> : null}
     </div>
   );
 }
