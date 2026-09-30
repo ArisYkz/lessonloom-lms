@@ -96,7 +96,7 @@ function CoursePage() {
               </Badge>
               <span>{t(`level.${course.level}` as keyof Dict)}</span>
             </div>
-            <h1 className="mt-5 font-display text-5xl sm:text-6xl">{course.title}</h1>
+            <h1 className="title-page mt-5">{course.title}</h1>
             <p className="mt-3 text-lg text-muted-foreground">{course.shortDescription}</p>
             <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
@@ -162,10 +162,10 @@ function CoursePage() {
 
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr]">
         <div>
-          <h2 className="text-xl font-semibold">{t("course.about")}</h2>
+          <h2 className="title-section">{t("course.about")}</h2>
           <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{course.description}</p>
 
-          <h2 className="mt-10 text-xl font-semibold">{t("course.curriculum")}</h2>
+          <h2 className="title-section mt-10">{t("course.curriculum")}</h2>
           <Accordion type="multiple" className="mt-3">
             {course.sections.map((s) => (
               <AccordionItem key={s.id} value={s.id}>
@@ -210,7 +210,7 @@ function CoursePage() {
 
         {course.teacher ? (
           <aside className="h-fit rounded-xl border border-border bg-card p-5">
-            <h3 className="font-semibold">{t("course.teacher")}</h3>
+            <h3 className="title-card">{t("course.teacher")}</h3>
             <p className="mt-2 text-lg">{course.teacher.name}</p>
             <p className="mt-1 text-sm text-muted-foreground">{course.teacher.headline}</p>
             <Button asChild variant="outline" size="sm" className="mt-4">

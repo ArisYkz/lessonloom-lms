@@ -26,7 +26,7 @@ function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("learn.myCourses")}</h1>
+      <h1 className="title-page">{t("learn.myCourses")}</h1>
 
       {isLoading ? (
         <p className="mt-8 text-muted-foreground">{t("common.loading")}</p>
@@ -56,7 +56,7 @@ function Dashboard() {
                 )}
               </div>
               <div className="flex flex-1 flex-col gap-2 p-4">
-                <h2 className="font-semibold">{c.title}</h2>
+                <h2 className="title-card">{c.title}</h2>
                 <p className="text-sm text-muted-foreground">{c.teacherName}</p>
                 <div className="mt-auto pt-3">
                   <Progress value={c.percent} />

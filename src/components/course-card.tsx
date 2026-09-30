@@ -44,7 +44,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
             </span>
           ) : null}
         </div>
-        <h3 className="text-lg font-semibold leading-snug tracking-tight text-foreground">{course.title}</h3>
+        <h3 className="title-card text-foreground">{course.title}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">{course.shortDescription}</p>
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
           <span className="text-sm text-muted-foreground">{course.teacherName}</span>

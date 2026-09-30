@@ -79,7 +79,7 @@ function Builder() {
           {t(`status.${data.course.status}` as keyof Dict)}
         </Badge>
       </div>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{data.course.title}</h1>
+      <h1 className="title-page mt-3">{data.course.title}</h1>
       {data.course.status === "rejected" && data.course.rejection_reason ? (
         <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
           <p className="font-semibold text-destructive">{t("teach.rejectedTitle")}</p>

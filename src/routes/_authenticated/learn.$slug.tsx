@@ -103,7 +103,7 @@ function Player() {
 
         {lesson ? (
           <div className="mt-4">
-            <h1 className="text-2xl font-semibold tracking-tight">{lesson.title}</h1>
+            <h1 className="title-page">{lesson.title}</h1>
 
             {lesson.type === "video" && lesson.mediaUrl ? (
               <DanmakuPlayer

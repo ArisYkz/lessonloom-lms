@@ -44,7 +44,7 @@ function Inbox() {
       <Link to="/teach" className="text-sm text-muted-foreground hover:underline">
         ← {t("nav.teach")}
       </Link>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight">{t("act.inbox")}</h1>
+      <h1 className="title-page mt-3">{t("act.inbox")}</h1>
       <p className="mt-1 text-muted-foreground">{t("act.inboxSub")}</p>
 
       <div className="mt-6 flex gap-2">
@@ -128,7 +128,7 @@ function Review({ id, onDone }: { id: string; onDone: () => void }) {
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold tracking-tight">{data.student}</h2>
+        <h2 className="title-panel">{data.student}</h2>
         <Badge variant="secondary" className="ml-auto">
           {t(`act.status.${data.status}` as keyof Dict)}
         </Badge>

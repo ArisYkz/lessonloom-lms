@@ -53,7 +53,7 @@ function Home() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-semibold tracking-tight">
+      <h1 className="title-page">
         {t("feed.hello")}
         {profile.data?.full_name ? `, ${profile.data.full_name.split(" ")[0]}` : ""}
       </h1>
@@ -120,7 +120,7 @@ function Row({ title, link, children }: { title: string; link?: ReactNode; child
   return (
     <section>
       <div className="mb-4 flex items-baseline justify-between">
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+        <h2 className="title-section">{title}</h2>
         {link}
       </div>
       {children}

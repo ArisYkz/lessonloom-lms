@@ -48,7 +48,7 @@ function AdminPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("admin.title")}</h1>
+      <h1 className="title-page">{t("admin.title")}</h1>
       <Tabs defaultValue="review" className="mt-8">
         <TabsList>
           <TabsTrigger value="review">{t("admin.review")}</TabsTrigger>
@@ -170,7 +170,7 @@ function ReviewTab() {
   return (
     <div className="mt-6 space-y-8">
       <section>
-        <h2 className="text-lg font-semibold">{t("admin.review")}</h2>
+        <h2 className="title-panel">{t("admin.review")}</h2>
         {pending.length === 0 ? (
           <p className="mt-3 text-muted-foreground">{t("admin.queueEmpty")}</p>
         ) : (
@@ -202,7 +202,7 @@ function ReviewTab() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold">{t("teach.courses")}</h2>
+        <h2 className="title-panel">{t("teach.courses")}</h2>
         <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-card">
           {rest.map((c) => (
             <div key={c.id} className="flex flex-wrap items-center gap-3 p-4">

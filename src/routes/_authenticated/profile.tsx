@@ -62,7 +62,7 @@ function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("profile.title")}</h1>
+      <h1 className="title-page">{t("profile.title")}</h1>
       <form onSubmit={submit} className="mt-8 space-y-5 rounded-xl border border-border bg-card p-6">
         <div>
           <Label htmlFor="fullName">{t("profile.name")}</Label>
