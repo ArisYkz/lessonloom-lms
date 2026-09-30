@@ -221,6 +221,12 @@ export const postDiscussion = createServerFn({ method: "POST" })
     await assertAccess(context.supabase, lc.courseId, context.userId);
     if (!lc.discussionEnabled) throw new Error("Discussion is off");
     if (!data.body) throw new Error("Empty message");
+    const since = new Date(Date.now() - 60_000).toISOString();
+    const [{ count: t1 }, { count: t2 }] = await Promise.all([
+      supabaseAdmin.from("discussion_threads").select("id", { count: "exact", head: true }).eq("user_id", context.userId).gte("created_at", since),
+      supabaseAdmin.from("discussion_replies").select("id", { count: "exact", head: true }).eq("user_id", context.userId).gte("created_at", since),
+    ]);
+    if ((t1 ?? 0) + (t2 ?? 0) >= 5) throw new Error("Too many messages. Please wait a minute.");
     const names = await namesFor([context.userId]);
     const who = names.get(context.userId) ?? "";
     const link = `/learn/${lc.slug}`;

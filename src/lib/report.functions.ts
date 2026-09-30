@@ -11,6 +11,12 @@ export const submitReport = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    const { count } = await context.supabase
+      .from("reports")
+      .select("id", { count: "exact", head: true })
+      .eq("reporter_id", context.userId)
+      .gte("created_at", new Date(Date.now() - 3600_000).toISOString());
+    if ((count ?? 0) >= 10) throw new Error("Too many reports. Please try again later.");
     const { error } = await context.supabase.from("reports").insert({
       reporter_id: context.userId,
       target_type: data.targetType,
