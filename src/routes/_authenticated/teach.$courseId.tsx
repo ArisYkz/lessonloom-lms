@@ -415,7 +415,7 @@ function LessonEditor({
           ...(lesson ? { id: lesson.id } : {}),
           courseId,
           sectionId,
-          title: form.title || "Untitled lesson",
+          title: form.title || t("builder.lessonTitle"),
           type: form.type,
           body: form.body,
           mediaPath: form.mediaPath || null,
