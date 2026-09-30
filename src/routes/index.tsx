@@ -48,7 +48,7 @@ function Home() {
             <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
               <Sparkles className="size-3.5" /> Қазақстан · Россия · English
             </span>
-            <h1 className="title-page mt-6 text-foreground">
+            <h1 className="font-display mt-6 text-5xl leading-tight text-foreground sm:text-7xl">
               {t("home.heroTitle")}
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">{t("home.heroSub")}</p>
