@@ -21,7 +21,6 @@
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --shadow-soft: var(--shadow-soft);
   --radius-sm: 6px;
 
   --radius-md: 8px;
