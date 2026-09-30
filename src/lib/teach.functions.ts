@@ -23,10 +23,18 @@ export const getMyOrg = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data } = await context.supabase
       .from("organizations")
-      .select("id, name, slug, headline, about, logo_url")
+      .select("id, name, slug, headline, about, logo_url, cover_url")
       .eq("owner_id", context.userId)
       .maybeSingle();
-    return data ?? null;
+    if (!data) return null;
+    const { data: sub } = await context.supabase
+      .from("org_subscriptions")
+      .select("plan_code, status")
+      .eq("organization_id", data.id)
+      .maybeSingle();
+    const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
+    const { data: plan } = await context.supabase.from("teacher_plans").select("code, name, price_kzt, max_courses").eq("code", planCode).maybeSingle();
+    return { ...data, plan: plan ?? { code: "starter", name: "Starter", price_kzt: 0, max_courses: 1 } };
   });
 
 export const createMyOrg = createServerFn({ method: "POST" })
@@ -54,10 +62,11 @@ export const createMyOrg = createServerFn({ method: "POST" })
 
 export const updateMyOrg = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { name: string; headline: string; about: string; logoPath?: string | null }) => input)
+  .inputValidator((input: { name: string; headline: string; about: string; logoPath?: string | null; coverPath?: string | null }) => input)
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = { name: data.name, headline: data.headline, about: data.about };
     if (data.logoPath !== undefined) patch["logo_url"] = data.logoPath;
+    if (data.coverPath !== undefined) patch["cover_url"] = data.coverPath;
     const { error } = await context.supabase.from("organizations").update(patch as never).eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -108,6 +117,21 @@ export const createCourse = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!org) throw new Error("Create a teacher account first");
     const orgId = org.id;
+    const { data: sub } = await context.supabase
+      .from("org_subscriptions")
+      .select("plan_code, status")
+      .eq("organization_id", orgId)
+      .maybeSingle();
+    const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
+    const { data: plan } = await context.supabase.from("teacher_plans").select("max_courses").eq("code", planCode).maybeSingle();
+    const max = plan ? plan.max_courses : 1;
+    if (max !== null) {
+      const { count } = await context.supabase
+        .from("courses")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId);
+      if ((count ?? 0) >= max) throw new Error("PLAN_LIMIT");
+    }
     const { data: course, error } = await context.supabase
       .from("courses")
       .insert({ organization_id: orgId, title: data.title.trim() || "Untitled course", slug: slugify(data.title) })

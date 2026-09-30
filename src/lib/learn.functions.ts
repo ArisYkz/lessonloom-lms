@@ -14,16 +14,17 @@ export const getMyProfile = createServerFn({ method: "GET" })
     const { signPath } = await import("./media.server");
     const { data } = await context.supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, bio, preferred_locale")
+      .select("id, full_name, avatar_url, bio, preferred_locale, default_mode")
       .eq("id", context.userId)
       .maybeSingle();
     if (!data) return null;
-    return { ...data, avatarUrl: await signPath(data.avatar_url) };
+    const { data: org } = await context.supabase.from("organizations").select("id").eq("owner_id", context.userId).maybeSingle();
+    return { ...data, hasOrg: !!org, avatarUrl: await signPath(data.avatar_url) };
   });
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { fullName: string; bio: string; preferredLocale: string; avatarPath?: string | null }) => input)
+  .inputValidator((input: { fullName: string; bio: string; preferredLocale: string; avatarPath?: string | null; defaultMode?: "student" | "teacher" }) => input)
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = {
       full_name: data.fullName,
@@ -31,6 +32,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferred_locale: data.preferredLocale,
     };
     if (data.avatarPath !== undefined) patch["avatar_url"] = data.avatarPath;
+    if (data.defaultMode) patch["default_mode"] = data.defaultMode === "teacher" ? "teacher" : "student";
     const { error } = await context.supabase.from("profiles").update(patch as never).eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -129,7 +131,7 @@ export const getPlayer = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: course } = await supabaseAdmin
       .from("courses")
-      .select("id, slug, title, organizations(name)")
+      .select("id, slug, title, status, price_model, preview_seconds, organizations(name, slug)")
       .eq("slug", data.slug)
       .maybeSingle();
     if (!course) return null;
@@ -138,7 +140,9 @@ export const getPlayer = createServerFn({ method: "GET" })
       _course: course.id,
       _user: context.userId,
     });
-    if (!access) return { title: course.title, access: false, sections: [], progress: [] };
+    const previewMode =
+      !access && course.status === "published" && course.price_model === "subscription" && course.preview_seconds > 0;
+    if (!access && !previewMode) return { title: course.title, access: false, preview: false, sections: [], progress: [] };
 
     const { data: sections } = await supabaseAdmin
       .from("sections")
@@ -147,9 +151,10 @@ export const getPlayer = createServerFn({ method: "GET" })
       .order("position");
     const { data: lessons } = await supabaseAdmin
       .from("lessons")
-      .select("id, section_id, title, type, position, duration_minutes")
+      .select("id, section_id, title, type, position, duration_minutes, is_preview")
       .eq("course_id", course.id)
       .order("position");
+    const visibleLessons = previewMode ? (lessons ?? []).filter((l) => l.type === "video" || l.is_preview) : (lessons ?? []);
     const { data: progress } = await context.supabase
       .from("lesson_progress")
       .select("lesson_id")
@@ -160,12 +165,17 @@ export const getPlayer = createServerFn({ method: "GET" })
       courseId: course.id,
       title: course.title,
       teacherName: (course.organizations as unknown as { name: string } | null)?.name ?? "",
+      teacherSlug: (course.organizations as unknown as { slug: string } | null)?.slug ?? "",
       access: true,
-      sections: (sections ?? []).map((s) => ({
-        id: s.id,
-        title: s.title,
-        lessons: (lessons ?? []).filter((l) => l.section_id === s.id),
-      })),
+      preview: previewMode,
+      previewSeconds: course.preview_seconds,
+      sections: (sections ?? [])
+        .map((s) => ({
+          id: s.id,
+          title: s.title,
+          lessons: visibleLessons.filter((l) => l.section_id === s.id),
+        }))
+        .filter((s) => s.lessons.length > 0),
       progress: (progress ?? []).map((p) => p.lesson_id),
     };
   });
@@ -178,7 +188,7 @@ export const getLessonContent = createServerFn({ method: "GET" })
     const { signPath } = await import("./media.server");
     const { data: lesson } = await supabaseAdmin
       .from("lessons")
-      .select("id, course_id, title, type, body, media_path, duration_minutes")
+      .select("id, course_id, title, type, body, media_path, duration_minutes, is_preview, danmaku_enabled, courses(status, price_model, preview_seconds)")
       .eq("id", data.lessonId)
       .maybeSingle();
     if (!lesson) throw new Error("Lesson not found");
@@ -187,15 +197,30 @@ export const getLessonContent = createServerFn({ method: "GET" })
       _course: lesson.course_id,
       _user: context.userId,
     });
-    if (!access) throw new Error("No access to this lesson");
+    const c = lesson.courses as unknown as { status: string; price_model: string; preview_seconds: number } | null;
+    let previewLimit: number | null = null;
+    if (!access) {
+      const published = c?.status === "published";
+      if (published && lesson.is_preview) {
+        previewLimit = null;
+      } else if (published && c?.price_model === "subscription" && lesson.type === "video" && c.preview_seconds > 0) {
+        previewLimit = c.preview_seconds;
+      } else {
+        throw new Error("No access to this lesson");
+      }
+    }
 
     return {
       id: lesson.id,
       title: lesson.title,
       type: lesson.type,
       body: lesson.body,
-      mediaUrl: await signPath(lesson.media_path, 60 * 60 * 4),
+      mediaUrl: await signPath(lesson.media_path, previewLimit ? 60 * 30 : 60 * 60 * 4),
       durationMinutes: lesson.duration_minutes,
+      courseId: lesson.course_id,
+      previewLimit,
+      hasAccess: !!access,
+      danmakuEnabled: lesson.danmaku_enabled,
     };
   });
 
