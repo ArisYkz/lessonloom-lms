@@ -9,6 +9,8 @@ import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
+import { LessonActivities } from "@/components/lesson-activities";
 
 export const Route = createFileRoute("/_authenticated/learn/$slug")({
   head: () => ({
@@ -75,7 +77,11 @@ function Player() {
   async function toggle() {
     if (!lessonId || !player) return;
     try {
-      await complete({ data: { lessonId, courseId: player.courseId!, completed: !isDone } });
+      const res = await complete({ data: { lessonId, courseId: player.courseId!, completed: !isDone } });
+      if (res.missing.length > 0) {
+        toast.error(res.missing.map((m) => t(m === "homework" ? "act.missingHomework" : "act.missingQuiz")).join(" "));
+        return;
+      }
       await queryClient.invalidateQueries({ queryKey: ["player", slug] });
       await queryClient.invalidateQueries({ queryKey: ["my-learning"] });
     } catch (e) {
@@ -111,8 +117,15 @@ function Player() {
             ) : null}
 
             {lesson.body ? (
-              <div className="prose mt-6 max-w-none whitespace-pre-wrap text-foreground">{lesson.body}</div>
+              <div className="mt-6 text-foreground">
+                <Markdown>{lesson.body}</Markdown>
+              </div>
             ) : null}
+
+            <LessonActivities
+              lessonId={lesson.id}
+              onChanged={() => void queryClient.invalidateQueries({ queryKey: ["player", slug] })}
+            />
 
             <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
               <Button variant={isDone ? "secondary" : "default"} onClick={toggle}>
@@ -144,6 +157,9 @@ function Player() {
       </div>
 
       <aside className="h-fit rounded-xl border border-border bg-card p-4 lg:sticky lg:top-20">
+        {percent === 100 ? (
+          <p className="mb-3 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary">{t("act.courseComplete")}</p>
+        ) : null}
         <Progress value={percent} />
         <p className="mt-2 text-xs text-muted-foreground">
           {done.size}/{flat.length} · {percent}% {t("learn.progress")}
