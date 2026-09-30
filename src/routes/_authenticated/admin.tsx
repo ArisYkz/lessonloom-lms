@@ -12,6 +12,7 @@ import {
   setUserRole,
   setUserSuspended,
 } from "@/lib/admin.functions";
+import { listReports, updateReport } from "@/lib/report.functions";
 import { getMyRoles } from "@/lib/learn.functions";
 import { listCategories } from "@/lib/catalog.functions";
 import { useI18n } from "@/i18n/provider";
@@ -50,11 +51,15 @@ function AdminPage() {
       <Tabs defaultValue="review" className="mt-8">
         <TabsList>
           <TabsTrigger value="review">{t("admin.review")}</TabsTrigger>
+          <TabsTrigger value="reports">{t("admin.tabs.reports")}</TabsTrigger>
           <TabsTrigger value="users">{t("admin.users")}</TabsTrigger>
           <TabsTrigger value="categories">{t("admin.categories")}</TabsTrigger>
         </TabsList>
         <TabsContent value="review">
           <ReviewTab />
+        </TabsContent>
+        <TabsContent value="reports">
+          <ReportsTab />
         </TabsContent>
         <TabsContent value="users">
           <UsersTab />
@@ -63,6 +68,75 @@ function AdminPage() {
           <CategoriesTab />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function ReportsTab() {
+  const { t } = useI18n();
+  const queryClient = useQueryClient();
+  const fetchReports = useServerFn(listReports);
+  const update = useServerFn(updateReport);
+  const { data, isLoading } = useQuery({ queryKey: ["admin-reports"], queryFn: () => fetchReports() });
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  async function act(id: string, status: "UNDER_REVIEW" | "RESOLVED" | "DISMISSED") {
+    try {
+      await update({ data: { id, status, adminNote: notes[id] ?? "" } });
+      await queryClient.invalidateQueries({ queryKey: ["admin-reports"] });
+      toast.success("OK");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("common.error"));
+    }
+  }
+
+  if (isLoading) return <p className="mt-6 text-muted-foreground">{t("common.loading")}</p>;
+  if (!data || data.length === 0) return <p className="mt-6 text-muted-foreground">{t("admin.reports.empty")}</p>;
+
+  return (
+    <div className="mt-6 space-y-4">
+      {data.map((r) => (
+        <div key={r.id} className="rounded-xl border border-border bg-card p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{t(`report.status.${r.status}` as keyof Dict)}</Badge>
+            <Badge variant="outline">{r.targetType}</Badge>
+            <span className="text-sm font-medium">{r.targetTitle || r.targetId}</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {new Date(r.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+          <p className="mt-2 text-sm font-medium">{r.reason}</p>
+          {r.description ? <p className="mt-1 text-sm text-muted-foreground">{r.description}</p> : null}
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t("admin.reports.reporter")}: {r.reporterName || "—"}
+          </p>
+          {r.status === "OPEN" || r.status === "UNDER_REVIEW" ? (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Input
+                className="h-9 w-64"
+                placeholder={t("admin.reports.note")}
+                value={notes[r.id] ?? ""}
+                onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
+              />
+              {r.status === "OPEN" ? (
+                <Button size="sm" variant="outline" onClick={() => act(r.id, "UNDER_REVIEW")}>
+                  {t("admin.reports.underReview")}
+                </Button>
+              ) : null}
+              <Button size="sm" onClick={() => act(r.id, "RESOLVED")}>
+                {t("admin.reports.resolve")}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => act(r.id, "DISMISSED")}>
+                {t("admin.reports.dismiss")}
+              </Button>
+            </div>
+          ) : r.adminNote ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("admin.reports.note")}: {r.adminNote}
+            </p>
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 }

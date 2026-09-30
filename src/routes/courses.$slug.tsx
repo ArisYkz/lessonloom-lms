@@ -11,6 +11,7 @@ import type { Dict } from "@/i18n/dictionary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ReportButton } from "@/components/report-button";
 
 const courseQuery = (slug: string) =>
   queryOptions({
@@ -145,6 +146,9 @@ function CoursePage() {
                 <p className="mt-2 text-center text-xs text-muted-foreground">{t("course.paymentsSoon")}</p>
               </>
             )}
+            <div className="mt-3 flex justify-center">
+              <ReportButton targetType="course" targetId={course.id} />
+            </div>
           </aside>
         </div>
       </section>

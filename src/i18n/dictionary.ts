@@ -192,6 +192,35 @@ const en = {
   "common.error": "Something went wrong.",
   "common.required": "Please fill in the required fields.",
   "common.soon": "Coming soon",
+
+  "notFound.title": "Page not found",
+  "notFound.body": "This page doesn't exist or may have been moved.",
+  "notFound.back": "Back to courses",
+
+  "report.title": "Report",
+  "report.course": "Report course",
+  "report.reason": "Reason",
+  "report.reasonPlaceholder": "e.g. inappropriate content, copyright issue",
+  "report.description": "Details (optional)",
+  "report.descriptionPlaceholder": "Tell us more about the problem",
+  "report.submit": "Send report",
+  "report.sent": "Thank you — our team will review this report.",
+  "report.status.OPEN": "Open",
+  "report.status.UNDER_REVIEW": "Under review",
+  "report.status.RESOLVED": "Resolved",
+  "report.status.DISMISSED": "Dismissed",
+
+  "admin.tabs.reports": "Reports",
+  "admin.reports.empty": "No reports yet.",
+  "admin.reports.reporter": "Reported by",
+  "admin.reports.target": "Target",
+  "admin.reports.note": "Admin note",
+  "admin.reports.resolve": "Resolve",
+  "admin.reports.dismiss": "Dismiss",
+  "admin.reports.underReview": "Mark under review",
+
+  "teach.rejectedTitle": "Course rejected",
+  "teach.rejectedReason": "Reason from the review team:",
 };
 
 export type Dict = typeof en;
@@ -376,6 +405,35 @@ const ru: Dict = {
   "common.error": "Что-то пошло не так.",
   "common.required": "Заполните обязательные поля.",
   "common.soon": "Скоро",
+
+  "notFound.title": "Страница не найдена",
+  "notFound.body": "Такой страницы нет или она была перемещена.",
+  "notFound.back": "К каталогу курсов",
+
+  "report.title": "Пожаловаться",
+  "report.course": "Пожаловаться на курс",
+  "report.reason": "Причина",
+  "report.reasonPlaceholder": "Например: неуместный контент, нарушение авторских прав",
+  "report.description": "Подробности (необязательно)",
+  "report.descriptionPlaceholder": "Расскажите подробнее о проблеме",
+  "report.submit": "Отправить жалобу",
+  "report.sent": "Спасибо — наша команда рассмотрит жалобу.",
+  "report.status.OPEN": "Открыта",
+  "report.status.UNDER_REVIEW": "На рассмотрении",
+  "report.status.RESOLVED": "Решена",
+  "report.status.DISMISSED": "Отклонена",
+
+  "admin.tabs.reports": "Жалобы",
+  "admin.reports.empty": "Жалоб пока нет.",
+  "admin.reports.reporter": "Отправитель",
+  "admin.reports.target": "Объект",
+  "admin.reports.note": "Заметка администратора",
+  "admin.reports.resolve": "Решить",
+  "admin.reports.dismiss": "Отклонить",
+  "admin.reports.underReview": "Взять в работу",
+
+  "teach.rejectedTitle": "Курс отклонён",
+  "teach.rejectedReason": "Причина от команды модерации:",
 };
 
 const kk: Dict = {
@@ -558,6 +616,35 @@ const kk: Dict = {
   "common.error": "Бірдеңе дұрыс болмады.",
   "common.required": "Міндетті өрістерді толтырыңыз.",
   "common.soon": "Жақында",
+
+  "notFound.title": "Бет табылмады",
+  "notFound.body": "Мұндай бет жоқ немесе ол жылжытылған.",
+  "notFound.back": "Курстар каталогына оралу",
+
+  "report.title": "Шағымдану",
+  "report.course": "Курсқа шағымдану",
+  "report.reason": "Себебі",
+  "report.reasonPlaceholder": "Мысалы: орынсыз мазмұн, авторлық құқық бұзушылығы",
+  "report.description": "Толығырақ (міндетті емес)",
+  "report.descriptionPlaceholder": "Мәселе туралы толығырақ жазыңыз",
+  "report.submit": "Шағым жіберу",
+  "report.sent": "Рақмет — командамыз шағымды қарайды.",
+  "report.status.OPEN": "Ашық",
+  "report.status.UNDER_REVIEW": "Қаралуда",
+  "report.status.RESOLVED": "Шешілді",
+  "report.status.DISMISSED": "Қабылданбады",
+
+  "admin.tabs.reports": "Шағымдар",
+  "admin.reports.empty": "Әзірге шағымдар жоқ.",
+  "admin.reports.reporter": "Жіберген",
+  "admin.reports.target": "Нысана",
+  "admin.reports.note": "Әкімші ескертпесі",
+  "admin.reports.resolve": "Шешу",
+  "admin.reports.dismiss": "Қабылдамау",
+  "admin.reports.underReview": "Қарауға алу",
+
+  "teach.rejectedTitle": "Курс қабылданбады",
+  "teach.rejectedReason": "Модерация командасының себебі:",
 };
 
 export const dictionaries: Record<Locale, Dict> = { en, ru, kk };

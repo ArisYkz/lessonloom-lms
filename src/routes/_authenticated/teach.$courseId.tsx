@@ -77,10 +77,12 @@ function Builder() {
         </Badge>
       </div>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{data.course.title}</h1>
-      {data.course.rejection_reason ? (
-        <p className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-          {data.course.rejection_reason}
-        </p>
+      {data.course.status === "rejected" && data.course.rejection_reason ? (
+        <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <p className="font-semibold text-destructive">{t("teach.rejectedTitle")}</p>
+          <p className="mt-1 text-muted-foreground">{t("teach.rejectedReason")}</p>
+          <p className="mt-1 text-foreground">{data.course.rejection_reason}</p>
+        </div>
       ) : null}
 
       <Tabs defaultValue="basics" className="mt-8">

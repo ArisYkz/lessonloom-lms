@@ -381,6 +381,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          description: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target_type"]
+        }
+        Relationships: []
+      }
       sections: {
         Row: {
           course_id: string
@@ -509,6 +548,8 @@ export type Database = {
         | "archived"
       lesson_type: "video" | "text" | "file"
       price_model: "free" | "subscription"
+      report_status: "OPEN" | "UNDER_REVIEW" | "RESOLVED" | "DISMISSED"
+      report_target_type: "course" | "teacher" | "lesson"
       subscription_status:
         | "ACTIVE"
         | "PAST_DUE"
@@ -653,6 +694,8 @@ export const Constants = {
       ],
       lesson_type: ["video", "text", "file"],
       price_model: ["free", "subscription"],
+      report_status: ["OPEN", "UNDER_REVIEW", "RESOLVED", "DISMISSED"],
+      report_target_type: ["course", "teacher", "lesson"],
       subscription_status: [
         "ACTIVE",
         "PAST_DUE",
