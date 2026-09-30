@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ModeProvider } from "@/hooks/useMode";
 import { I18nProvider } from "@/i18n/provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -164,8 +165,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <AuthProvider>
+          <ModeProvider>
           <AppFrame />
           <Toaster richColors position="top-center" />
+          </ModeProvider>
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>

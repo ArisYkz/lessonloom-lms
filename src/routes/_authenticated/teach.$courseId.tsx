@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { LessonExtrasEditor } from "@/components/lesson-extras-editor";
+import { DanmakuModeration } from "@/components/danmaku-moderation";
 
 export const Route = createFileRoute("/_authenticated/teach/$courseId")({
   head: () => ({
@@ -50,6 +51,7 @@ type LessonRow = {
   media_path: string | null;
   duration_minutes: number;
   is_preview: boolean;
+  danmaku_enabled?: boolean;
 };
 
 function Builder() {
@@ -93,6 +95,7 @@ function Builder() {
           <TabsTrigger value="pricing">{t("builder.pricing")}</TabsTrigger>
           <TabsTrigger value="publish">{t("builder.publish")}</TabsTrigger>
           <TabsTrigger value="students">{t("teach.students")}</TabsTrigger>
+          <TabsTrigger value="danmaku">{t("builder.tabs.danmaku")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basics">
@@ -109,6 +112,9 @@ function Builder() {
         </TabsContent>
         <TabsContent value="students">
           <StudentsTab courseId={courseId} />
+        </TabsContent>
+        <TabsContent value="danmaku">
+          <DanmakuModeration courseId={courseId} />
         </TabsContent>
       </Tabs>
     </div>
@@ -399,6 +405,7 @@ function LessonEditor({
     mediaPath: lesson?.media_path ?? "",
     durationMinutes: lesson?.duration_minutes ?? 0,
     isPreview: lesson?.is_preview ?? false,
+    danmakuEnabled: lesson?.danmaku_enabled ?? true,
   });
   const [busy, setBusy] = useState(false);
 
@@ -424,10 +431,11 @@ function LessonEditor({
           mediaPath: form.mediaPath || null,
           durationMinutes: Number(form.durationMinutes) || 0,
           isPreview: form.isPreview,
+          danmakuEnabled: form.danmakuEnabled,
         },
       });
       if (!lesson) {
-        setForm({ title: "", type: "video", body: "", mediaPath: "", durationMinutes: 0, isPreview: false });
+        setForm({ title: "", type: "video", body: "", mediaPath: "", durationMinutes: 0, isPreview: false, danmakuEnabled: true });
         setOpen(false);
       }
       onChanged();
@@ -504,6 +512,12 @@ function LessonEditor({
           <Switch checked={form.isPreview} onCheckedChange={(v) => setForm({ ...form, isPreview: v })} />
           {t("course.preview")}
         </label>
+        {form.type === "video" ? (
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Switch checked={form.danmakuEnabled} onCheckedChange={(v) => setForm({ ...form, danmakuEnabled: v })} />
+            {t("builder.danmaku")}
+          </label>
+        ) : null}
         <div className="ml-auto flex gap-2">
           {lesson ? (
             <Button
@@ -536,6 +550,7 @@ function PricingTab({ course, onSaved }: { course: any; onSaved: () => void }) {
   const save = useServerFn(updateCourse);
   const [priceModel, setPriceModel] = useState<string>(course.price_model);
   const [priceKzt, setPriceKzt] = useState<number>(course.price_kzt);
+  const [previewMin, setPreviewMin] = useState<number>(Math.round((course.preview_seconds ?? 600) / 60));
   const [busy, setBusy] = useState(false);
 
   async function submit() {
@@ -544,7 +559,11 @@ function PricingTab({ course, onSaved }: { course: any; onSaved: () => void }) {
       await save({
         data: {
           courseId: course.id,
-          patch: { price_model: priceModel, price_kzt: priceModel === "free" ? 0 : Number(priceKzt) || 0 },
+          patch: {
+            price_model: priceModel,
+            price_kzt: priceModel === "free" ? 0 : Number(priceKzt) || 0,
+            preview_seconds: Math.min(30, Math.max(0, Math.round(Number(previewMin) || 0))) * 60,
+          },
         },
       });
       onSaved();
@@ -588,6 +607,16 @@ function PricingTab({ course, onSaved }: { course: any; onSaved: () => void }) {
             onChange={(e) => setPriceKzt(Number(e.target.value))}
           />
           <p className="mt-2 text-sm text-muted-foreground">{t("builder.paymentsNote")}</p>
+          <Label className="mt-5 block">{t("builder.previewMinutes")}</Label>
+          <Input
+            type="number"
+            min={0}
+            max={30}
+            className="mt-1 max-w-xs"
+            value={previewMin}
+            onChange={(e) => setPreviewMin(Number(e.target.value))}
+          />
+          <p className="mt-2 text-sm text-muted-foreground">{t("builder.previewHelp")}</p>
         </div>
       ) : null}
 

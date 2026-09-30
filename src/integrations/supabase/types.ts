@@ -81,6 +81,7 @@ export type Database = {
           language: string
           level: Database["public"]["Enums"]["course_level"]
           organization_id: string
+          preview_seconds: number
           price_kzt: number
           price_model: Database["public"]["Enums"]["price_model"]
           published_at: string | null
@@ -101,6 +102,7 @@ export type Database = {
           language?: string
           level?: Database["public"]["Enums"]["course_level"]
           organization_id: string
+          preview_seconds?: number
           price_kzt?: number
           price_model?: Database["public"]["Enums"]["price_model"]
           published_at?: string | null
@@ -121,6 +123,7 @@ export type Database = {
           language?: string
           level?: Database["public"]["Enums"]["course_level"]
           organization_id?: string
+          preview_seconds?: number
           price_kzt?: number
           price_model?: Database["public"]["Enums"]["price_model"]
           published_at?: string | null
@@ -142,6 +145,99 @@ export type Database = {
           },
           {
             foreignKeyName: "courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      danmaku: {
+        Row: {
+          color: string
+          course_id: string
+          created_at: string
+          hidden: boolean
+          id: string
+          lesson_id: string
+          mode: string
+          text: string
+          time_ms: number
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          course_id: string
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          lesson_id: string
+          mode?: string
+          text: string
+          time_ms: number
+          user_id: string
+        }
+        Update: {
+          color?: string
+          course_id?: string
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          lesson_id?: string
+          mode?: string
+          text?: string
+          time_ms?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "danmaku_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "danmaku_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      danmaku_blocks: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "danmaku_blocks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "danmaku_blocks_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -481,6 +577,7 @@ export type Database = {
           body: string | null
           course_id: string
           created_at: string
+          danmaku_enabled: boolean
           discussion_enabled: boolean
           duration_minutes: number
           id: string
@@ -495,6 +592,7 @@ export type Database = {
           body?: string | null
           course_id: string
           created_at?: string
+          danmaku_enabled?: boolean
           discussion_enabled?: boolean
           duration_minutes?: number
           id?: string
@@ -509,6 +607,7 @@ export type Database = {
           body?: string | null
           course_id?: string
           created_at?: string
+          danmaku_enabled?: boolean
           discussion_enabled?: boolean
           duration_minutes?: number
           id?: string
@@ -566,9 +665,61 @@ export type Database = {
         }
         Relationships: []
       }
+      org_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          organization_id: string
+          plan_code: string
+          provider: string
+          provider_ref: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          organization_id: string
+          plan_code: string
+          provider?: string
+          provider_ref?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          organization_id?: string
+          plan_code?: string
+          provider?: string
+          provider_ref?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_subscriptions_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "teacher_plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           about: string | null
+          cover_url: string | null
           created_at: string
           headline: string | null
           id: string
@@ -579,6 +730,7 @@ export type Database = {
         }
         Insert: {
           about?: string | null
+          cover_url?: string | null
           created_at?: string
           headline?: string | null
           id?: string
@@ -589,6 +741,7 @@ export type Database = {
         }
         Update: {
           about?: string | null
+          cover_url?: string | null
           created_at?: string
           headline?: string | null
           id?: string
@@ -645,6 +798,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          default_mode: string
           full_name: string
           id: string
           preferred_locale: string
@@ -654,6 +808,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          default_mode?: string
           full_name?: string
           id: string
           preferred_locale?: string
@@ -663,6 +818,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          default_mode?: string
           full_name?: string
           id?: string
           preferred_locale?: string
@@ -972,6 +1128,33 @@ export type Database = {
           },
         ]
       }
+      teacher_plans: {
+        Row: {
+          code: string
+          id: string
+          max_courses: number | null
+          name: string
+          position: number
+          price_kzt: number
+        }
+        Insert: {
+          code: string
+          id?: string
+          max_courses?: number | null
+          name: string
+          position?: number
+          price_kzt?: number
+        }
+        Update: {
+          code?: string
+          id?: string
+          max_courses?: number | null
+          name?: string
+          position?: number
+          price_kzt?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1000,6 +1183,14 @@ export type Database = {
     Functions: {
       can_edit_course: { Args: { _course: string }; Returns: boolean }
       course_is_published: { Args: { _course: string }; Returns: boolean }
+      course_stats: {
+        Args: never
+        Returns: {
+          course_id: string
+          recent: number
+          students: number
+        }[]
+      }
       has_course_access: {
         Args: { _course: string; _user: string }
         Returns: boolean
@@ -1025,7 +1216,7 @@ export type Database = {
       lesson_type: "video" | "text" | "file"
       price_model: "free" | "subscription"
       report_status: "OPEN" | "UNDER_REVIEW" | "RESOLVED" | "DISMISSED"
-      report_target_type: "course" | "teacher" | "lesson"
+      report_target_type: "course" | "teacher" | "lesson" | "danmaku"
       submission_status: "submitted" | "needs_revision" | "reviewed"
       subscription_status:
         | "ACTIVE"
@@ -1172,7 +1363,7 @@ export const Constants = {
       lesson_type: ["video", "text", "file"],
       price_model: ["free", "subscription"],
       report_status: ["OPEN", "UNDER_REVIEW", "RESOLVED", "DISMISSED"],
-      report_target_type: ["course", "teacher", "lesson"],
+      report_target_type: ["course", "teacher", "lesson", "danmaku"],
       submission_status: ["submitted", "needs_revision", "reviewed"],
       subscription_status: [
         "ACTIVE",

@@ -13,6 +13,7 @@ import {
   setUserSuspended,
 } from "@/lib/admin.functions";
 import { listReports, updateReport } from "@/lib/report.functions";
+import { listTeacherPlans, setTeacherPlan } from "@/lib/admin.functions";
 import { getMyRoles } from "@/lib/learn.functions";
 import { listCategories } from "@/lib/catalog.functions";
 import { useI18n } from "@/i18n/provider";
@@ -54,6 +55,7 @@ function AdminPage() {
           <TabsTrigger value="reports">{t("admin.tabs.reports")}</TabsTrigger>
           <TabsTrigger value="users">{t("admin.users")}</TabsTrigger>
           <TabsTrigger value="categories">{t("admin.categories")}</TabsTrigger>
+          <TabsTrigger value="plans">{t("admin.tabs.plans")}</TabsTrigger>
         </TabsList>
         <TabsContent value="review">
           <ReviewTab />
@@ -63,6 +65,9 @@ function AdminPage() {
         </TabsContent>
         <TabsContent value="users">
           <UsersTab />
+        </TabsContent>
+        <TabsContent value="plans">
+          <PlansTab />
         </TabsContent>
         <TabsContent value="categories">
           <CategoriesTab />
@@ -352,6 +357,42 @@ function CategoriesTab() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function PlansTab() {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const fetchPlans = useServerFn(listTeacherPlans);
+  const setPlan = useServerFn(setTeacherPlan);
+  const { data } = useQuery({ queryKey: ["admin-plans"], queryFn: () => fetchPlans() });
+  if (!data) return <p className="mt-6 text-muted-foreground">{t("common.loading")}</p>;
+  return (
+    <div className="mt-6 divide-y divide-border rounded-xl border border-border bg-card">
+      {data.orgs.map((o) => (
+        <div key={o.id} className="flex flex-wrap items-center gap-3 p-4">
+          <p className="flex-1 font-medium">{o.name}</p>
+          {data.plans.map((p) => (
+            <Button
+              key={p.code}
+              size="sm"
+              variant={o.planCode === p.code ? "default" : "outline"}
+              onClick={async () => {
+                try {
+                  await setPlan({ data: { organizationId: o.id, planCode: p.code } });
+                  await qc.invalidateQueries({ queryKey: ["admin-plans"] });
+                  toast.success(t("builder.saved"));
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : t("common.error"));
+                }
+              }}
+            >
+              {p.name}
+            </Button>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

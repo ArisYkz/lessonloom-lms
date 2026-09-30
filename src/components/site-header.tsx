@@ -1,5 +1,8 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getMyProfile } from "@/lib/learn.functions";
+import { useMode } from "@/hooks/useMode";
 import { GraduationCap, Globe, Menu } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +26,23 @@ export function SiteHeader() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const { mode, setMode } = useMode();
+  const fetchProfile = useServerFn(getMyProfile);
+  const profile = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile(), enabled: !!user });
+  const hasOrg = !!profile.data?.hasOrg;
+  const teacherMode = !!user && mode === "teacher";
+
+  function switchMode() {
+    if (teacherMode) {
+      setMode("student");
+      navigate({ to: "/home" });
+    } else {
+      setMode("teacher");
+      navigate({ to: "/teach" });
+    }
+  }
+  const linkCls = "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground";
+  const activeCls = { className: "text-sm font-medium text-primary" };
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -32,41 +52,41 @@ export function SiteHeader() {
     navigate({ to: "/auth", replace: true });
   }
 
-  const links = (
+  const links = teacherMode ? (
     <>
-      <Link
-        to="/catalog"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        activeProps={{ className: "text-sm font-medium text-primary" }}
-        onClick={() => setOpen(false)}
-      >
-        {t("nav.catalog")}
-      </Link>
-      <Link
-        to="/teach"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        activeProps={{ className: "text-sm font-medium text-primary" }}
-        onClick={() => setOpen(false)}
-      >
+      <Link to="/teach" activeOptions={{ exact: true }} className={linkCls} activeProps={activeCls} onClick={() => setOpen(false)}>
         {t("nav.teach")}
       </Link>
+      <Link to="/teach/inbox" className={linkCls} activeProps={activeCls} onClick={() => setOpen(false)}>
+        {t("act.inbox")}
+      </Link>
+    </>
+  ) : (
+    <>
       {user ? (
-        <Link
-          to="/dashboard"
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          activeProps={{ className: "text-sm font-medium text-primary" }}
-          onClick={() => setOpen(false)}
-        >
-          {t("nav.dashboard")}
+        <Link to="/home" className={linkCls} activeProps={activeCls} onClick={() => setOpen(false)}>
+          {t("nav.home")}
         </Link>
       ) : null}
+      <Link to="/catalog" className={linkCls} activeProps={activeCls} onClick={() => setOpen(false)}>
+        {t("nav.catalog")}
+      </Link>
+      {user ? (
+        <Link to="/dashboard" className={linkCls} activeProps={activeCls} onClick={() => setOpen(false)}>
+          {t("nav.dashboard")}
+        </Link>
+      ) : (
+        <Link to="/teach" className={linkCls} activeProps={activeCls} onClick={() => setOpen(false)}>
+          {t("nav.teach")}
+        </Link>
+      )}
     </>
   );
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-[72px] max-w-6xl items-center gap-8 px-6">
-        <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link to={user ? (teacherMode ? "/teach" : "/home") : "/"} className="flex items-center gap-2 font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <GraduationCap className="size-5" />
           </span>
@@ -101,10 +121,18 @@ export function SiteHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">{teacherMode ? t("mode.teacher") : t("mode.student")}</div>
+                {hasOrg ? (
+                  <DropdownMenuItem onClick={switchMode}>
+                    {t("mode.switchTo")} {teacherMode ? t("mode.student").toLowerCase() : t("mode.teacher").toLowerCase()}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => navigate({ to: "/teach" })}>{t("mode.becomeTeacher")}</DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
                   {t("nav.dashboard")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/teach" })}>{t("nav.teach")}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>{t("nav.profile")}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>{t("nav.admin")}</DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -38,7 +38,7 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const target = search.redirect ?? "/dashboard";
+  const target = search.redirect ?? "/home";
 
   useEffect(() => {
     if (!loading && user) navigate({ to: target, replace: true });

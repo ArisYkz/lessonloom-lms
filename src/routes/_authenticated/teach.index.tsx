@@ -12,6 +12,85 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
+type Org = NonNullable<Awaited<ReturnType<typeof getMyOrg>>>;
+
+function OrgProfile({ org }: { org: Org }) {
+  const { t } = useI18n();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const save = useServerFn(updateMyOrg);
+  const [name, setName] = useState(org.name);
+  const [headline, setHeadline] = useState(org.headline ?? "");
+  const [about, setAbout] = useState(org.about ?? "");
+  const [busy, setBusy] = useState(false);
+
+  async function upload(file: File) {
+    const path = `${user!.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
+    const { error } = await supabase.storage.from("course-media").upload(path, file);
+    if (error) throw new Error(error.message);
+    return path;
+  }
+
+  async function submit(extra: { logoPath?: string; coverPath?: string } = {}) {
+    setBusy(true);
+    try {
+      await save({ data: { name, headline, about, ...extra } });
+      await queryClient.invalidateQueries({ queryKey: ["my-org"] });
+      toast.success(t("builder.saved"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("common.error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const plan = org.plan;
+  return (
+    <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-16 md:grid-cols-[1.5fr_1fr]">
+      <div className="space-y-4 rounded-xl border border-border bg-card p-6">
+        <div>
+          <Label>{t("teach.orgName")}</Label>
+          <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div>
+          <Label>{t("teach.headline")}</Label>
+          <Input className="mt-1" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+        </div>
+        <div>
+          <Label>{t("teach.about")}</Label>
+          <Textarea rows={3} className="mt-1" value={about} onChange={(e) => setAbout(e.target.value)} />
+        </div>
+        <div className="flex flex-wrap gap-6">
+          <label className="text-sm">
+            <span className="mb-1 block text-muted-foreground">{t("teacher.logo")}</span>
+            <input type="file" accept="image/*" disabled={busy} onChange={async (e) => { const f = e.target.files?.[0]; if (f) await submit({ logoPath: await upload(f) }); }} />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block text-muted-foreground">{t("teacher.cover")}</span>
+            <input type="file" accept="image/*" disabled={busy} onChange={async (e) => { const f = e.target.files?.[0]; if (f) await submit({ coverPath: await upload(f) }); }} />
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => submit()} disabled={busy}>{t("builder.save")}</Button>
+          <Button variant="outline" asChild>
+            <Link to="/teachers/$slug" params={{ slug: org.slug }}>{org.name} ↗</Link>
+          </Button>
+        </div>
+      </div>
+      <div className="h-fit rounded-xl border border-border bg-card p-6">
+        <p className="text-sm text-muted-foreground">{t("plan.title")}</p>
+        <p className="mt-1 text-2xl font-semibold">{plan.name}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {plan.price_kzt ? `${plan.price_kzt.toLocaleString("ru-RU")} ₸ ${t("plan.perMonth")}` : t("price.free")} · {t("plan.courses")}: {plan.max_courses ?? t("plan.unlimited")}
+        </p>
+        {plan.max_courses !== null ? <p className="mt-4 text-sm text-muted-foreground">{t("plan.upgradeSoon")}</p> : null}
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/teach/")({
   head: () => ({
@@ -32,7 +111,12 @@ function TeachHome() {
 
   if (isLoading) return <p className="mx-auto max-w-6xl px-4 py-12 text-muted-foreground">{t("common.loading")}</p>;
   if (!org) return <OrgSetup />;
-  return <CourseList orgName={org.name} />;
+  return (
+    <>
+      <CourseList orgName={org.name} />
+      <OrgProfile org={org} />
+    </>
+  );
 }
 
 function OrgSetup() {
@@ -101,7 +185,8 @@ function CourseList({ orgName }: { orgName: string }) {
       await navigate({ to: "/teach/$courseId", params: { courseId: course.id } });
       await queryClient.invalidateQueries({ queryKey: ["my-courses"] });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("common.error"));
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(msg.includes("PLAN_LIMIT") ? t("plan.limitReached") : msg || t("common.error"));
     } finally {
       setBusy(false);
     }

@@ -34,6 +34,7 @@ function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
   const [locale, setLocalePref] = useState("ru");
+  const [defaultMode, setDefaultMode] = useState<"student" | "teacher">("student");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -41,13 +42,14 @@ function ProfilePage() {
     setFullName(data.full_name ?? "");
     setBio(data.bio ?? "");
     setLocalePref(data.preferred_locale ?? "ru");
+    setDefaultMode(data.default_mode === "teacher" ? "teacher" : "student");
   }, [data]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
-      await save({ data: { fullName, bio, preferredLocale: locale } });
+      await save({ data: { fullName, bio, preferredLocale: locale, defaultMode } });
       setLocale(locale as "kk" | "ru" | "en");
       await queryClient.invalidateQueries({ queryKey: ["my-profile"] });
       toast.success(t("builder.saved"));
@@ -85,6 +87,20 @@ function ProfilePage() {
             </SelectContent>
           </Select>
         </div>
+        {data?.hasOrg ? (
+          <div>
+            <Label>{t("profile.defaultMode")}</Label>
+            <Select value={defaultMode} onValueChange={(v) => setDefaultMode(v as "student" | "teacher")}>
+              <SelectTrigger className="mt-1 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="student">{t("mode.student")}</SelectItem>
+                <SelectItem value="teacher">{t("mode.teacher")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
         <Button type="submit" disabled={busy}>
           {t("profile.save")}
         </Button>
