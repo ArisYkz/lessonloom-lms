@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 import { LessonActivities } from "@/components/lesson-activities";
+import { DanmakuPlayer } from "@/components/danmaku-player";
 
 export const Route = createFileRoute("/_authenticated/learn/$slug")({
   head: () => ({
@@ -105,7 +106,15 @@ function Player() {
             <h1 className="text-2xl font-semibold tracking-tight">{lesson.title}</h1>
 
             {lesson.type === "video" && lesson.mediaUrl ? (
-              <video src={lesson.mediaUrl} controls className="mt-5 aspect-video w-full rounded-xl bg-black" />
+              <DanmakuPlayer
+                key={lesson.id}
+                src={lesson.mediaUrl}
+                lessonId={lesson.id}
+                enabled={lesson.danmakuEnabled}
+                canPost={lesson.hasAccess}
+                previewLimit={lesson.previewLimit}
+                courseSlug={slug}
+              />
             ) : null}
 
             {lesson.type === "file" && lesson.mediaUrl ? (
@@ -122,7 +131,7 @@ function Player() {
               </div>
             ) : null}
 
-            <LessonActivities
+            {lesson.hasAccess ? <LessonActivities
               lessonId={lesson.id}
               onChanged={() => void queryClient.invalidateQueries({ queryKey: ["player", slug] })}
             />
