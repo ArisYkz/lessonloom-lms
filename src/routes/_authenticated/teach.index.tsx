@@ -89,7 +89,9 @@ function CourseList({ orgName }: { orgName: string }) {
   const queryClient = useQueryClient();
   const fetchCourses = useServerFn(getMyCourses);
   const create = useServerFn(createCourse);
-  const { data, isLoading } = useQuery({ queryKey: ["my-courses"], queryFn: () => fetchCourses() });
+  const { data: result, isLoading } = useQuery({ queryKey: ["my-courses"], queryFn: () => fetchCourses() });
+  const data = result?.courses;
+  const totalStudents = result?.totalStudents ?? 0;
   const [busy, setBusy] = useState(false);
 
   async function newCourse() {
@@ -105,7 +107,6 @@ function CourseList({ orgName }: { orgName: string }) {
     }
   }
 
-  const totalStudents = (data ?? []).reduce((sum, c) => sum + c.studentCount, 0);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -140,7 +141,7 @@ function CourseList({ orgName }: { orgName: string }) {
                 <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                   <Badge variant="secondary">{t(`status.${c.status}` as keyof Dict)}</Badge>
                   <span className="inline-flex items-center gap-1">
-                    <Users className="size-3" /> {c.studentCount}
+                    <Users className="size-3" /> {c.students}
                   </span>
                 </p>
               </div>

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONTENT_LANGUAGES } from "@/i18n/dictionary";
 
-type Search = { q?: string; category?: string; language?: string; level?: string };
+type Search = { q?: string | undefined; category?: string | undefined; language?: string | undefined; level?: string | undefined };
 
 const catalogQuery = (search: Search) =>
   queryOptions({
@@ -17,10 +17,10 @@ const catalogQuery = (search: Search) =>
     queryFn: async () => ({
       courses: await listCourses({
         data: {
-          search: search.q,
-          category: search.category,
-          language: search.language,
-          level: search.level,
+          ...(search.q ? { search: search.q } : {}),
+          ...(search.category ? { category: search.category } : {}),
+          ...(search.language ? { language: search.language } : {}),
+          ...(search.level ? { level: search.level } : {}),
         },
       }),
       categories: await listCategories(),
