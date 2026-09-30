@@ -40,14 +40,14 @@ function ProfilePage() {
     if (!data) return;
     setFullName(data.full_name ?? "");
     setBio(data.bio ?? "");
-    setLocalePref(data.locale ?? "ru");
+    setLocalePref(data.preferred_locale ?? "ru");
   }, [data]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
-      await save({ data: { fullName, bio, locale } });
+      await save({ data: { fullName, bio, preferredLocale: locale } });
       setLocale(locale as "kk" | "ru" | "en");
       await queryClient.invalidateQueries({ queryKey: ["my-profile"] });
       toast.success(t("builder.saved"));

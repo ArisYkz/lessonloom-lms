@@ -58,7 +58,7 @@ export const updateMyOrg = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = { name: data.name, headline: data.headline, about: data.about };
     if (data.logoPath !== undefined) patch["logo_url"] = data.logoPath;
-    const { error } = await context.supabase.from("organizations").update(patch).eq("owner_id", context.userId);
+    const { error } = await context.supabase.from("organizations").update(patch as never).eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -180,7 +180,21 @@ export const updateCourse = createServerFn({ method: "POST" })
     ];
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const key of allowed) if (key in data.patch) patch[key] = data.patch[key];
-    const { error } = await context.supabase.from("courses").update(patch).eq("id", data.courseId);
+
+    // Keep the public URL readable: refresh the slug from the title until the
+    // course has been published (published URLs must stay stable).
+    if (typeof patch["title"] === "string" && patch["title"].trim()) {
+      const { data: current } = await context.supabase
+        .from("courses")
+        .select("status, published_at")
+        .eq("id", data.courseId)
+        .maybeSingle();
+      if (current && current.status !== "published" && !current.published_at) {
+        patch["slug"] = slugify(patch["title"] as string);
+      }
+    }
+
+    const { error } = await context.supabase.from("courses").update(patch as never).eq("id", data.courseId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -213,7 +227,7 @@ export const saveSection = createServerFn({ method: "POST" })
     if (data.id) {
       const patch: Record<string, unknown> = { title: data.title };
       if (data.position !== undefined) patch["position"] = data.position;
-      const { error } = await context.supabase.from("sections").update(patch).eq("id", data.id);
+      const { error } = await context.supabase.from("sections").update(patch as never).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
@@ -267,7 +281,7 @@ export const saveLesson = createServerFn({ method: "POST" })
     if (data.isPreview !== undefined) patch["is_preview"] = data.isPreview;
 
     if (data.id) {
-      const { error } = await context.supabase.from("lessons").update(patch).eq("id", data.id);
+      const { error } = await context.supabase.from("lessons").update(patch as never).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
@@ -282,7 +296,7 @@ export const saveLesson = createServerFn({ method: "POST" })
         course_id: data.courseId,
         section_id: data.sectionId,
         position: data.position ?? count ?? 0,
-      })
+      } as never)
       .select("id")
       .single();
     if (error) throw new Error(error.message);
