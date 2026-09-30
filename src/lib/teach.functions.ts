@@ -101,7 +101,13 @@ export const createCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { title: string }) => input)
   .handler(async ({ data, context }) => {
-    const orgId = await requireOrg(context.supabase, context.userId);
+    const { data: org } = await context.supabase
+      .from("organizations")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!org) throw new Error("Create a teacher account first");
+    const orgId = org.id;
     const { data: course, error } = await context.supabase
       .from("courses")
       .insert({ organization_id: orgId, title: data.title.trim() || "Untitled course", slug: slugify(data.title) })
