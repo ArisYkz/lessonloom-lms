@@ -134,7 +134,7 @@ function Player() {
             {lesson.hasAccess ? <LessonActivities
               lessonId={lesson.id}
               onChanged={() => void queryClient.invalidateQueries({ queryKey: ["player", slug] })}
-            />
+            /> : null}
 
             <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
               <Button variant={isDone ? "secondary" : "default"} onClick={toggle}>
