@@ -5,7 +5,7 @@ const BANNED = ["http://", "https://", "www.", "хуй", "пизд", "бля", "
 const COLORS = ["#ffffff", "#fde047", "#86efac", "#93c5fd", "#fca5a5", "#f0abfc"];
 
 /** Student + teacher: visible comments for a lesson (RLS hides hidden ones from non-editors). */
-export const listDanmaku = createServerFn({ method: "GET" })
+export const listDanmaku = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { lessonId: string }) => input)
   .handler(async ({ data, context }) => {
@@ -79,7 +79,7 @@ export const postDanmaku = createServerFn({ method: "POST" })
   });
 
 /** Teacher: all comments across a course, for moderation. */
-export const listCourseDanmaku = createServerFn({ method: "GET" })
+export const listCourseDanmaku = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { courseId: string }) => input)
   .handler(async ({ data, context }) => {

@@ -8,7 +8,7 @@ async function assertAdmin(supabase: unknown, userId: string) {
   if (!data) throw new Error("Forbidden");
 }
 
-export const getReviewQueue = createServerFn({ method: "GET" })
+export const getReviewQueue = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -51,7 +51,7 @@ export const reviewCourse = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const listUsers = createServerFn({ method: "GET" })
+export const listUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -123,7 +123,7 @@ export const deleteCategory = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const listTeacherPlans = createServerFn({ method: "GET" })
+export const listTeacherPlans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);

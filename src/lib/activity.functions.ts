@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const clean = (s: string, max: number) => s.trim().slice(0, max);
 
-export const getLessonActivities = createServerFn({ method: "GET" })
+export const getLessonActivities = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { lessonId: string }) => input)
   .handler(async ({ data, context }) => {
@@ -264,7 +264,7 @@ export const moderateDiscussion = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const listNotifications = createServerFn({ method: "GET" })
+export const listNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data } = await context.supabase

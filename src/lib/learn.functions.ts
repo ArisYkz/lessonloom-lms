@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const getMyRoles = createServerFn({ method: "GET" })
+export const getMyRoles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
     return (data ?? []).map((r) => r.role as string);
   });
 
-export const getMyProfile = createServerFn({ method: "GET" })
+export const getMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { signPath } = await import("./media.server");
@@ -38,7 +38,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const getMyLearning = createServerFn({ method: "GET" })
+export const getMyLearning = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { signMany } = await import("./media.server");
@@ -101,7 +101,7 @@ export const enrollFree = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const getEnrollmentState = createServerFn({ method: "GET" })
+export const getEnrollmentState = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { courseId: string }) => input)
   .handler(async ({ data, context }) => {
@@ -118,7 +118,7 @@ export const getEnrollmentState = createServerFn({ method: "GET" })
     return { enrolled: !!enrolled, access: !!access };
   });
 
-export const getPlayer = createServerFn({ method: "GET" })
+export const getPlayer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { slug: string }) => input)
   .handler(async ({ data, context }) => {
@@ -174,7 +174,7 @@ export const getPlayer = createServerFn({ method: "GET" })
     };
   });
 
-export const getLessonContent = createServerFn({ method: "GET" })
+export const getLessonContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { lessonId: string }) => input)
   .handler(async ({ data, context }) => {
