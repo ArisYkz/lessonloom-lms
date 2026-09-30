@@ -204,6 +204,9 @@ export const setLessonComplete = createServerFn({ method: "POST" })
   .inputValidator((input: { lessonId: string; courseId: string; completed: boolean }) => input)
   .handler(async ({ data, context }) => {
     if (data.completed) {
+      const { unmetRequirements } = await import("./engine.server");
+      const missing = await unmetRequirements(data.lessonId, context.userId);
+      if (missing.length > 0) return { ok: false, missing };
       const { error } = await context.supabase
         .from("lesson_progress")
         .upsert(
@@ -218,5 +221,5 @@ export const setLessonComplete = createServerFn({ method: "POST" })
         .eq("user_id", context.userId)
         .eq("lesson_id", data.lessonId);
     }
-    return { ok: true };
+    return { ok: true, missing: [] as ("homework" | "quiz")[] };
   });
