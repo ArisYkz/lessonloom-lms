@@ -305,10 +305,14 @@ function CurriculumTab({
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    if (!newTitle.trim()) return;
-    await addSection({ data: { courseId, title: newTitle.trim() } });
-    setNewTitle("");
-    onChanged();
+    const title = newTitle.trim() || `${t("builder.sectionTitle")} ${sections.length + 1}`;
+    try {
+      await addSection({ data: { courseId, title } });
+      setNewTitle("");
+      onChanged();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("common.error"));
+    }
   }
 
   return (
