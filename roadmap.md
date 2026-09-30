@@ -10,10 +10,10 @@ Approved plan: .lovable/plan/bilim-road-to-production-revised-with-your-roadmap-
 - [ ] Payments (Freedom Pay merchant account + credentials)
 - [ ] Transactional email domain (SPF/DKIM/DMARC)
 
-## In progress this turn (Stage B buildables)
-- [ ] Reports/takedown: reports table, submit report, admin review queue
-- [ ] Teacher-facing rejection reason in course builder
-- [ ] 404 page + error/empty states on major screens
+## Done
+- [x] Reports/takedown: reports table + RLS, submit dialog on course pages, admin Reports tab (under review / resolve / dismiss + notes), audit logging
+- [x] Teacher-facing rejection reason with title in course builder
+- [x] 404 page verified; error + empty states present on major screens
 
 ## Later
 - [ ] Audit log extension (payments, payouts, role changes)
