@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getMyProfile } from "@/lib/learn.functions";
+import { getMyProfile, getMyRoles } from "@/lib/learn.functions";
 import { useMode } from "@/hooks/useMode";
 import { GraduationCap, Globe, Menu } from "lucide-react";
 import { useState } from "react";
@@ -29,6 +29,8 @@ export function SiteHeader() {
   const { mode, setMode } = useMode();
   const fetchProfile = useServerFn(getMyProfile);
   const profile = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile(), enabled: !!user });
+  const fetchRoles = useServerFn(getMyRoles);
+  const roles = useQuery({ queryKey: ["my-roles", user?.id], queryFn: () => fetchRoles(), enabled: !!user });
   const hasOrg = !!profile.data?.hasOrg;
   const teacherMode = !!user && mode === "teacher";
 
@@ -134,7 +136,9 @@ export function SiteHeader() {
                   {t("nav.dashboard")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>{t("nav.profile")}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>{t("nav.admin")}</DropdownMenuItem>
+                {roles.data?.includes("admin") && (
+                  <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>{t("nav.admin")}</DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>{t("nav.signOut")}</DropdownMenuItem>
               </DropdownMenuContent>
