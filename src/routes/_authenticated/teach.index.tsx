@@ -115,7 +115,10 @@ function CourseList({ orgName }: { orgName: string }) {
           <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("teach.title")}</h1>
           <p className="mt-1 text-muted-foreground">{orgName}</p>
         </div>
-        <Button className="ml-auto" onClick={newCourse} disabled={busy}>
+        <Button variant="outline" className="ml-auto" asChild>
+          <Link to="/teach/inbox">{t("act.inbox")}</Link>
+        </Button>
+        <Button onClick={newCourse} disabled={busy}>
           <Plus className="size-4" /> {t("teach.newCourse")}
         </Button>
       </div>
