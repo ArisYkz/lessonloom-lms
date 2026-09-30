@@ -17,4 +17,4 @@
 - Server logic lives in `src/lib/*.functions.ts` (`createServerFn`), split by audience: catalog (public), learn (student), teach (teacher), admin.
 - UI strings come from `src/i18n/dictionary.ts` (kk/ru/en) via `useI18n().t` — no hardcoded user-facing text in components.
 - Danmaku server logic lives in `src/lib/danmaku.functions.ts` (student posting + teacher moderation together) — one feature, both audiences, keeps the rules in one place.
-- Teacher platform plans: `teacher_plans` + `org_subscriptions` (per organization); course limits enforced in `createCourse` — keeps teacher fees separate from student course subscriptions.
+- Teacher platform plans: `teacher_plans` + `org_subscriptions` per organization; course limits are enforced in `createCourse` and unique-student limits in `enroll_free_course` — keeps teacher fees separate from student course subscriptions and centralizes enforcement.

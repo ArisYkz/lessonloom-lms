@@ -33,8 +33,8 @@ export const getMyOrg = createServerFn({ method: "GET" })
       .eq("organization_id", data.id)
       .maybeSingle();
     const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
-    const { data: plan } = await context.supabase.from("teacher_plans").select("code, name, price_kzt, max_courses").eq("code", planCode).maybeSingle();
-    return { ...data, plan: plan ?? { code: "starter", name: "Starter", price_kzt: 0, max_courses: 1 } };
+    const { data: plan } = await context.supabase.from("teacher_plans").select("code, name, price_kzt, max_courses, max_students").eq("code", planCode).maybeSingle();
+    return { ...data, plan: plan ?? { code: "starter", name: "Start", price_kzt: 4990, max_courses: 3, max_students: 100 } };
   });
 
 export const createMyOrg = createServerFn({ method: "POST" })
@@ -124,7 +124,7 @@ export const createCourse = createServerFn({ method: "POST" })
       .maybeSingle();
     const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
     const { data: plan } = await context.supabase.from("teacher_plans").select("max_courses").eq("code", planCode).maybeSingle();
-    const max = plan ? plan.max_courses : 1;
+    const max = plan ? plan.max_courses : 3;
     if (max !== null) {
       const { count } = await context.supabase
         .from("courses")

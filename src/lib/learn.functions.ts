@@ -92,18 +92,12 @@ export const enrollFree = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { courseId: string }) => input)
   .handler(async ({ data, context }) => {
-    const { data: course } = await context.supabase
-      .from("courses")
-      .select("id, price_model, status")
-      .eq("id", data.courseId)
-      .maybeSingle();
-    if (!course || course.status !== "published") throw new Error("Course unavailable");
-    if (course.price_model !== "free") throw new Error("This course requires a subscription");
-
-    const { error } = await context.supabase
-      .from("enrollments")
-      .insert({ user_id: context.userId, course_id: data.courseId });
-    if (error && !error.message.includes("duplicate")) throw new Error(error.message);
+    const { data: result, error } = await context.supabase.rpc("enroll_free_course", {
+      _course: data.courseId,
+      _user: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    if (result === "plan_student_limit") throw new Error("PLAN_STUDENT_LIMIT");
     return { ok: true };
   });
 
