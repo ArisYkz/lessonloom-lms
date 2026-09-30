@@ -70,7 +70,8 @@ function Player() {
     );
   }
 
-  const done = new Set(player.progress);
+  const visibleIds = new Set(flat.map((l) => l.id));
+  const done = new Set(player.progress.filter((id) => visibleIds.has(id)));
   const index = flat.findIndex((l) => l.id === lessonId);
   const percent = flat.length === 0 ? 0 : Math.round((done.size / flat.length) * 100);
   const isDone = lessonId ? done.has(lessonId) : false;
