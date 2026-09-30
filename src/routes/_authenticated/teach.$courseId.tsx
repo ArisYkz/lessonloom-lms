@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { LessonExtrasEditor } from "@/components/lesson-extras-editor";
 
 export const Route = createFileRoute("/_authenticated/teach/$courseId")({
   head: () => ({
@@ -675,7 +676,17 @@ function StudentsTab({ courseId }: { courseId: string }) {
         <div key={i} className="flex items-center gap-3 p-4">
           <Users className="size-4 text-muted-foreground" />
           <span className="flex-1 truncate">{s.name}</span>
-          <span className="text-sm text-muted-foreground">{s.percent}%</span>
+          {s.homeworkPending > 0 ? (
+            <Badge variant="secondary">
+              {s.homeworkPending} {t("act.pendingHw")}
+            </Badge>
+          ) : null}
+          {s.quizAverage !== null ? (
+            <span className="text-sm text-muted-foreground">
+              {t("act.quizAvg")}: {s.quizAverage}%
+            </span>
+          ) : null}
+          <span className="w-12 text-right text-sm text-muted-foreground">{s.percent}%</span>
         </div>
       ))}
     </div>
