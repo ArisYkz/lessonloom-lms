@@ -85,7 +85,7 @@ function AuthPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
-      <h1 className="font-display text-4xl">
+      <h1 className="title-page">
         {mode === "signin" ? t("auth.welcome") : t("auth.joinTitle")}
       </h1>
 

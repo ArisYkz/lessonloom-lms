@@ -55,7 +55,7 @@ function TeacherPage() {
             <Avatar name={data.name} url={data.logoUrl} size="size-28" />
           </div>
           <div className="pb-2">
-            <h1 className="font-display text-4xl sm:text-5xl">{data.name}</h1>
+            <h1 className="title-page">{data.name}</h1>
             {data.headline ? <p className="mt-1 text-muted-foreground">{data.headline}</p> : null}
             <p className="mt-1 text-sm text-muted-foreground">
               {data.courses.length} {t("feed.courses")} · {data.students.toLocaleString("ru-RU")} {t("feed.students")}
@@ -64,7 +64,7 @@ function TeacherPage() {
         </div>
         {data.about ? <p className="mt-6 max-w-3xl whitespace-pre-wrap text-muted-foreground">{data.about}</p> : null}
 
-        <h2 className="mt-12 text-xl font-semibold">{t("teach.courses")}</h2>
+        <h2 className="title-section mt-12">{t("teach.courses")}</h2>
         {data.courses.length === 0 ? (
           <p className="mt-4 pb-16 text-muted-foreground">{t("home.empty")}</p>
         ) : (

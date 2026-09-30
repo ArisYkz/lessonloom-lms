@@ -37,7 +37,7 @@ export function DanmakuModeration({ courseId }: { courseId: string }) {
     <div className="mt-6 space-y-6">
       {blockedUsers.length > 0 ? (
         <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="font-medium">{t("dm.blockedUsers")}</h3>
+          <h3 className="title-card">{t("dm.blockedUsers")}</h3>
           <ul className="mt-3 space-y-2">
             {blockedUsers.map((b) => (
               <li key={b.user_id} className="flex items-center gap-3 text-sm">
@@ -51,7 +51,7 @@ export function DanmakuModeration({ courseId }: { courseId: string }) {
         </div>
       ) : null}
       <div className="rounded-xl border border-border bg-card">
-        <h3 className="border-b border-border p-5 font-medium">{t("dm.moderation")}</h3>
+        <h3 className="title-card border-b border-border p-5">{t("dm.moderation")}</h3>
         {!data || data.comments.length === 0 ? (
           <p className="p-8 text-center text-sm text-muted-foreground">{t("dm.empty")}</p>
         ) : (

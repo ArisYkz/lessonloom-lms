@@ -48,7 +48,7 @@ function Card({ title, badge, children }: { title: string; badge?: React.ReactNo
   return (
     <section className="rounded-xl border border-border bg-card p-6">
       <div className="mb-4 flex items-center gap-2">
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <h2 className="title-card">{title}</h2>
         {badge}
       </div>
       {children}

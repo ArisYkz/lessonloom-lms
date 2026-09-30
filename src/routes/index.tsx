@@ -71,7 +71,7 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="font-display text-4xl sm:text-5xl">{t("home.featured")}</h2>
+        <h2 className="title-section">{t("home.featured")}</h2>
         {data.courses.length === 0 ? (
           <p className="mt-4 text-muted-foreground">{t("home.empty")}</p>
         ) : (
@@ -84,7 +84,7 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16">
-        <h2 className="font-display text-4xl sm:text-5xl">{t("home.categories")}</h2>
+        <h2 className="title-section">{t("home.categories")}</h2>
         <div className="mt-6 flex flex-wrap gap-3">
           {data.categories.map((c) => (
             <Link
@@ -101,7 +101,7 @@ function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pb-20">
         <div className="rounded-2xl border border-border bg-accent px-8 py-12 text-accent-foreground">
-          <h2 className="font-display text-4xl sm:text-5xl">{t("home.teacherTitle")}</h2>
+          <h2 className="title-section">{t("home.teacherTitle")}</h2>
           <p className="mt-2 max-w-2xl text-accent-foreground/80">{t("home.teacherSub")}</p>
           <Button asChild className="mt-6">
             <Link to="/teach">{t("home.teacherCta")}</Link>
