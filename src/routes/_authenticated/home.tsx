@@ -52,7 +52,7 @@ function Home() {
   const f = feed.data;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <h1 className="title-page">
         {t("feed.hello")}
         {profile.data?.full_name ? `, ${profile.data.full_name.split(" ")[0]}` : ""}

@@ -18,7 +18,7 @@ function slugify(input: string) {
   return (base || "course") + "-" + Math.random().toString(36).slice(2, 7);
 }
 
-export const getMyOrg = createServerFn({ method: "GET" })
+export const getMyOrg = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data } = await context.supabase
@@ -73,7 +73,7 @@ export const updateMyOrg = createServerFn({ method: "POST" })
   });
 
 
-export const getMyCourses = createServerFn({ method: "GET" })
+export const getMyCourses = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data: org } = await context.supabase
@@ -141,7 +141,7 @@ export const createCourse = createServerFn({ method: "POST" })
     return course;
   });
 
-export const getCourseForEdit = createServerFn({ method: "GET" })
+export const getCourseForEdit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { courseId: string }) => input)
   .handler(async ({ data, context }) => {
@@ -349,7 +349,7 @@ export const reorder = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const getCourseStudents = createServerFn({ method: "GET" })
+export const getCourseStudents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { courseId: string }) => input)
   .handler(async ({ data, context }) => {

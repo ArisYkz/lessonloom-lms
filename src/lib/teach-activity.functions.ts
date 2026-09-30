@@ -15,7 +15,7 @@ async function editableLesson(supabase: unknown, lessonId: string) {
   return lc;
 }
 
-export const getLessonExtras = createServerFn({ method: "GET" })
+export const getLessonExtras = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { lessonId: string }) => input)
   .handler(async ({ data, context }) => {
@@ -152,7 +152,7 @@ export const saveQuiz = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const getHomeworkInbox = createServerFn({ method: "GET" })
+export const getHomeworkInbox = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { status: "submitted" | "needs_revision" | "reviewed" }) => input)
   .handler(async ({ data, context }) => {
@@ -177,7 +177,7 @@ export const getHomeworkInbox = createServerFn({ method: "GET" })
     }));
   });
 
-export const getSubmission = createServerFn({ method: "GET" })
+export const getSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
