@@ -31,7 +31,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferred_locale: data.preferredLocale,
     };
     if (data.avatarPath !== undefined) patch["avatar_url"] = data.avatarPath;
-    const { error } = await context.supabase.from("profiles").update(patch).eq("id", context.userId);
+    const { error } = await context.supabase.from("profiles").update(patch as never).eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
