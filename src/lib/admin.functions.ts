@@ -131,7 +131,7 @@ export const listTeacherPlans = createServerFn({ method: "GET" })
     const [{ data: orgs }, { data: subs }, { data: plans }] = await Promise.all([
       supabaseAdmin.from("organizations").select("id, name, slug, owner_id").order("created_at", { ascending: false }),
       supabaseAdmin.from("org_subscriptions").select("organization_id, plan_code, status"),
-      supabaseAdmin.from("teacher_plans").select("code, name, price_kzt, max_courses").order("position"),
+      supabaseAdmin.from("teacher_plans").select("code, name, price_kzt, max_courses, max_students").order("position"),
     ]);
     return {
       plans: plans ?? [],
