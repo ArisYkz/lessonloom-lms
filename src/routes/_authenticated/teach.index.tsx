@@ -87,7 +87,7 @@ function OrgProfile({ org }: { org: Org }) {
           {`${plan.price_kzt.toLocaleString("ru-RU")} ₸ ${t("plan.perMonth")}`} · {t("plan.courses")}: {plan.max_courses ?? t("plan.unlimited")}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("plan.students")}: {plan.max_students.toLocaleString("ru-RU")}
+          {t("plan.students")}: {plan.max_students?.toLocaleString("ru-RU") ?? t("plan.unlimited")}
         </p>
         {plan.max_courses !== null ? <p className="mt-4 text-sm text-muted-foreground">{t("plan.upgradeSoon")}</p> : null}
       </div>
