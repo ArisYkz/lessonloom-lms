@@ -144,6 +144,13 @@ function CoursePage() {
                   {t("course.subscribe")}
                 </Button>
                 <p className="mt-2 text-center text-xs text-muted-foreground">{t("course.paymentsSoon")}</p>
+                {course.previewSeconds > 0 ? (
+                  <Button asChild variant="outline" className="mt-3 w-full">
+                    <Link to="/learn/$slug" params={{ slug }}>
+                      {t("preview.watch")} · {Math.round(course.previewSeconds / 60)} {t("preview.minutes")}
+                    </Link>
+                  </Button>
+                ) : null}
               </>
             )}
             <div className="mt-3 flex justify-center">

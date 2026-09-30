@@ -95,7 +95,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
     const { data: course } = await supabase
       .from("courses")
       .select(
-        "id, slug, title, short_description, description, thumbnail_url, level, language, price_model, price_kzt, estimated_minutes, category_id, categories(slug, name_en, name_ru, name_kk), organizations(id, name, slug, headline, logo_url, owner_id)",
+        "id, slug, title, short_description, description, thumbnail_url, level, language, price_model, price_kzt, preview_seconds, estimated_minutes, category_id, categories(slug, name_en, name_ru, name_kk), organizations(id, name, slug, headline, logo_url, owner_id)",
       )
       .eq("slug", data.slug)
       .eq("status", "published")
@@ -134,6 +134,7 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
       language: course.language,
       priceModel: course.price_model,
       priceKzt: course.price_kzt,
+      previewSeconds: course.preview_seconds,
       estimatedMinutes: course.estimated_minutes,
       category: course.categories as unknown as {
         slug: string;
