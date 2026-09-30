@@ -97,9 +97,9 @@ function CourseList({ orgName }: { orgName: string }) {
   async function newCourse() {
     setBusy(true);
     try {
-      const course = await create({ data: { title: "Untitled course" } });
+      const course = await create({ data: { title: t("teach.newCourse") } });
+      await navigate({ to: "/teach/$courseId", params: { courseId: course.id } });
       await queryClient.invalidateQueries({ queryKey: ["my-courses"] });
-      navigate({ to: "/teach/$courseId", params: { courseId: course.id } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("common.error"));
     } finally {
