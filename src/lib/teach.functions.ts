@@ -63,22 +63,6 @@ export const updateMyOrg = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-async function requireOrg(supabase: { from: (t: string) => never } | unknown, userId: string) {
-  const client = supabase as ReturnType<typeof createClientStub>;
-  const { data } = await client.from("organizations").select("id").eq("owner_id", userId).maybeSingle();
-  if (!data) throw new Error("Create a teacher account first");
-  return data.id as string;
-}
-// helper typing shim
-function createClientStub() {
-  return null as unknown as {
-    from: (t: string) => {
-      select: (s: string) => {
-        eq: (a: string, b: string) => { maybeSingle: () => Promise<{ data: { id: string } | null }> };
-      };
-    };
-  };
-}
 
 export const getMyCourses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
