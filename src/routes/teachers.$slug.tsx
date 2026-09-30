@@ -43,7 +43,7 @@ function TeacherPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">{data.name}</h1>
+      <h1 className="font-display text-5xl sm:text-6xl">{data.name}</h1>
       <p className="mt-2 text-lg text-muted-foreground">{data.headline}</p>
       {data.about ? <p className="mt-4 max-w-3xl whitespace-pre-wrap text-muted-foreground">{data.about}</p> : null}
 

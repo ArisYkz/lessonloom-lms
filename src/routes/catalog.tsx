@@ -64,7 +64,7 @@ function Catalog() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">{t("catalog.title")}</h1>
+      <h1 className="font-display text-5xl sm:text-6xl">{t("catalog.title")}</h1>
 
       <div className="mt-8 grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-4">
         <div className="md:col-span-2">

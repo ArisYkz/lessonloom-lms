@@ -46,7 +46,7 @@ function AdminPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">{t("admin.title")}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("admin.title")}</h1>
       <Tabs defaultValue="review" className="mt-8">
         <TabsList>
           <TabsTrigger value="review">{t("admin.review")}</TabsTrigger>

@@ -26,7 +26,7 @@ function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">{t("learn.myCourses")}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("learn.myCourses")}</h1>
 
       {isLoading ? (
         <p className="mt-8 text-muted-foreground">{t("common.loading")}</p>

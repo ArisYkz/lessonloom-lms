@@ -16,14 +16,14 @@ export function CourseCard({ course }: { course: CourseCardData }) {
     <Link
       to="/courses/$slug"
       params={{ slug: course.slug }}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card hover:-translate-y-0.5 hover:shadow-[var(--shadow-soft)]"
     >
-      <div className="aspect-video w-full overflow-hidden bg-accent">
+      <div className="aspect-[16/10] w-full overflow-hidden bg-accent">
         {course.thumbnailUrl ? (
           <img
             src={course.thumbnailUrl}
             alt={course.title}
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="flex size-full items-center justify-center text-accent-foreground">
@@ -31,9 +31,9 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-3 p-6">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="secondary" className="font-normal uppercase">
+          <Badge variant="secondary" className="font-medium uppercase tracking-wider text-[10px]">
             {course.language}
           </Badge>
           <span>{t(`level.${course.level}` as keyof Dict)}</span>
@@ -44,11 +44,11 @@ export function CourseCard({ course }: { course: CourseCardData }) {
             </span>
           ) : null}
         </div>
-        <h3 className="font-semibold leading-snug text-foreground">{course.title}</h3>
+        <h3 className="text-lg font-semibold leading-snug tracking-tight text-foreground">{course.title}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">{course.shortDescription}</p>
-        <div className="mt-auto flex items-center justify-between pt-3">
+        <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
           <span className="text-sm text-muted-foreground">{course.teacherName}</span>
-          <span className="text-sm font-semibold text-primary">
+          <span className="text-sm font-medium text-foreground">
             {formatPrice(course.priceModel, course.priceKzt, t)}
           </span>
         </div>

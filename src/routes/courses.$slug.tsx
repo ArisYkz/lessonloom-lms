@@ -95,7 +95,7 @@ function CoursePage() {
               </Badge>
               <span>{t(`level.${course.level}` as keyof Dict)}</span>
             </div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{course.title}</h1>
+            <h1 className="mt-5 font-display text-5xl sm:text-6xl">{course.title}</h1>
             <p className="mt-3 text-lg text-muted-foreground">{course.shortDescription}</p>
             <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
