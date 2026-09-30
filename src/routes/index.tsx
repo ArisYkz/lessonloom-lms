@@ -48,7 +48,7 @@ function Home() {
             <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
               <Sparkles className="size-3.5" /> Қазақстан · Россия · English
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
+            <h1 className="mt-6 font-display text-5xl text-foreground sm:text-7xl">
               {t("home.heroTitle")}
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">{t("home.heroSub")}</p>
@@ -71,7 +71,7 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="text-2xl font-semibold tracking-tight">{t("home.featured")}</h2>
+        <h2 className="font-display text-4xl sm:text-5xl">{t("home.featured")}</h2>
         {data.courses.length === 0 ? (
           <p className="mt-4 text-muted-foreground">{t("home.empty")}</p>
         ) : (
@@ -84,7 +84,7 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16">
-        <h2 className="text-2xl font-semibold tracking-tight">{t("home.categories")}</h2>
+        <h2 className="font-display text-4xl sm:text-5xl">{t("home.categories")}</h2>
         <div className="mt-6 flex flex-wrap gap-3">
           {data.categories.map((c) => (
             <Link
@@ -101,7 +101,7 @@ function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pb-20">
         <div className="rounded-2xl border border-border bg-accent px-8 py-12 text-accent-foreground">
-          <h2 className="text-2xl font-semibold tracking-tight">{t("home.teacherTitle")}</h2>
+          <h2 className="font-display text-4xl sm:text-5xl">{t("home.teacherTitle")}</h2>
           <p className="mt-2 max-w-2xl text-accent-foreground/80">{t("home.teacherSub")}</p>
           <Button asChild className="mt-6">
             <Link to="/teach">{t("home.teacherCta")}</Link>

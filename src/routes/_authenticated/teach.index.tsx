@@ -60,7 +60,7 @@ function OrgSetup() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">{t("teach.setupTitle")}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("teach.setupTitle")}</h1>
       <p className="mt-2 text-muted-foreground">{t("teach.setupSub")}</p>
       <form onSubmit={submit} className="mt-8 space-y-5 rounded-xl border border-border bg-card p-6">
         <div>
@@ -112,7 +112,7 @@ function CourseList({ orgName }: { orgName: string }) {
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="flex flex-wrap items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("teach.title")}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.25rem]">{t("teach.title")}</h1>
           <p className="mt-1 text-muted-foreground">{orgName}</p>
         </div>
         <Button className="ml-auto" onClick={newCourse} disabled={busy}>
