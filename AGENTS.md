@@ -8,3 +8,11 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture rules
+
+- Courses belong to an `organization` (teacher account), never directly to a user — one teacher can own many courses and later add staff.
+- All course-access decisions go through the `has_course_access` SQL function, called from server functions; the frontend never decides access.
+- Course media lives in the private `course-media` bucket and is served only through short-lived signed URLs generated in `src/lib/media.server.ts`.
+- Server logic lives in `src/lib/*.functions.ts` (`createServerFn`), split by audience: catalog (public), learn (student), teach (teacher), admin.
+- UI strings come from `src/i18n/dictionary.ts` (kk/ru/en) via `useI18n().t` — no hardcoded user-facing text in components.
