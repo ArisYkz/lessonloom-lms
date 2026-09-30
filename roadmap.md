@@ -31,3 +31,13 @@ Approved plan: .lovable/plan/bilim-road-to-production-revised-with-your-roadmap-
 - [x] Real teacher-plan pricing — Start ₸4,990; Pro ₸12,990; Academy ₸29,990 monthly
 - [ ] 480/720/1080 quality — needs video service choice (Cloudflare Stream or Mux)
 - [ ] Full teacher+student test run
+
+## Production hardening (plan: .lovable/plan/bilim-production-hardening-and-full-workflow-test-2026-09-30.md)
+- [x] Profiles private (own + admin only); internal checks closed to signed-out visitors
+- [x] Password reset (link on sign-in + /reset-password)
+- [x] Spam limits: reports (10/h), discussion (5/min); danmaku already limited
+- [x] Security rescan: only intentional public data left (school storefronts, plan prices, categories)
+- [ ] Phase 2 full browser workflow test (teacher/admin/student/paid preview/permission attacks/plan limits/languages) + blank studio bug
+- [ ] Phase 3 mobile pass, automated tests for core rules, SEO basics
+- [ ] Phase 4 monitoring, test/live split, backup restore test, analytics
+- [ ] Phase 5 blocked on user: email domain, legal text, data residency, brand, video service, Freedom Pay
