@@ -180,6 +180,20 @@ export const updateCourse = createServerFn({ method: "POST" })
     ];
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const key of allowed) if (key in data.patch) patch[key] = data.patch[key];
+
+    // Keep the public URL readable: refresh the slug from the title until the
+    // course has been published (published URLs must stay stable).
+    if (typeof patch["title"] === "string" && patch["title"].trim()) {
+      const { data: current } = await context.supabase
+        .from("courses")
+        .select("status, published_at")
+        .eq("id", data.courseId)
+        .maybeSingle();
+      if (current && current.status !== "published" && !current.published_at) {
+        patch["slug"] = slugify(patch["title"] as string);
+      }
+    }
+
     const { error } = await context.supabase.from("courses").update(patch as never).eq("id", data.courseId);
     if (error) throw new Error(error.message);
     return { ok: true };
