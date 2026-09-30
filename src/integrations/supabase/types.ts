@@ -1194,6 +1194,10 @@ export type Database = {
           students: number
         }[]
       }
+      enroll_free_course: {
+        Args: { _course: string; _user: string }
+        Returns: string
+      }
       has_course_access: {
         Args: { _course: string; _user: string }
         Returns: boolean

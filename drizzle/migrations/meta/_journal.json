@@ -43,6 +43,13 @@
       "when": 1790757918174,
       "tag": "0005_add_teacher_student_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790757957623,
+      "tag": "0006_enforce_teacher_plan_student_limits",
+      "breakpoints": true
     }
   ]
 }
