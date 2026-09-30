@@ -1133,6 +1133,7 @@ export type Database = {
           code: string
           id: string
           max_courses: number | null
+          max_students: number | null
           name: string
           position: number
           price_kzt: number
@@ -1141,6 +1142,7 @@ export type Database = {
           code: string
           id?: string
           max_courses?: number | null
+          max_students?: number | null
           name: string
           position?: number
           price_kzt?: number
@@ -1149,6 +1151,7 @@ export type Database = {
           code?: string
           id?: string
           max_courses?: number | null
+          max_students?: number | null
           name?: string
           position?: number
           price_kzt?: number

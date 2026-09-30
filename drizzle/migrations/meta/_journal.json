@@ -36,6 +36,13 @@
       "when": 1790757126788,
       "tag": "0004_wave3_feed_roles_preview_danmaku",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790757918174,
+      "tag": "0005_add_teacher_student_limits",
+      "breakpoints": true
     }
   ]
 }
