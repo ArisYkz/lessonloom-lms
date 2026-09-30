@@ -162,7 +162,7 @@ export const getCourseForEdit = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: lessons } = await supabaseAdmin
       .from("lessons")
-      .select("id, section_id, title, type, position, duration_minutes, is_preview, body, media_path")
+      .select("id, section_id, title, type, position, duration_minutes, is_preview, danmaku_enabled, body, media_path")
       .eq("course_id", course.id)
       .order("position");
 
@@ -201,6 +201,7 @@ export const updateCourse = createServerFn({ method: "POST" })
       "price_model",
       "price_kzt",
       "estimated_minutes",
+      "preview_seconds",
     ];
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const key of allowed) if (key in data.patch) patch[key] = data.patch[key];
@@ -291,6 +292,7 @@ export const saveLesson = createServerFn({ method: "POST" })
       durationMinutes?: number;
       position?: number;
       isPreview?: boolean;
+      danmakuEnabled?: boolean;
     }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -303,6 +305,7 @@ export const saveLesson = createServerFn({ method: "POST" })
     if (data.durationMinutes !== undefined) patch["duration_minutes"] = data.durationMinutes;
     if (data.position !== undefined) patch["position"] = data.position;
     if (data.isPreview !== undefined) patch["is_preview"] = data.isPreview;
+    if (data.danmakuEnabled !== undefined) patch["danmaku_enabled"] = data.danmakuEnabled;
 
     if (data.id) {
       const { error } = await context.supabase.from("lessons").update(patch as never).eq("id", data.id);

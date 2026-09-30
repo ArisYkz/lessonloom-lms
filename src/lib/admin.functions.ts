@@ -122,3 +122,43 @@ export const deleteCategory = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const listTeacherPlans = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: orgs }, { data: subs }, { data: plans }] = await Promise.all([
+      supabaseAdmin.from("organizations").select("id, name, slug, owner_id").order("created_at", { ascending: false }),
+      supabaseAdmin.from("org_subscriptions").select("organization_id, plan_code, status"),
+      supabaseAdmin.from("teacher_plans").select("code, name, price_kzt, max_courses").order("position"),
+    ]);
+    return {
+      plans: plans ?? [],
+      orgs: (orgs ?? []).map((o) => {
+        const s = (subs ?? []).find((x) => x.organization_id === o.id);
+        return { id: o.id, name: o.name, slug: o.slug, planCode: s && s.status === "ACTIVE" ? s.plan_code : "starter" };
+      }),
+    };
+  });
+
+export const setTeacherPlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { organizationId: string; planCode: string }) => input)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("org_subscriptions").upsert(
+      { organization_id: data.organizationId, plan_code: data.planCode, status: "ACTIVE", provider: "manual", updated_at: new Date().toISOString() },
+      { onConflict: "organization_id" },
+    );
+    if (error) throw new Error(error.message);
+    await supabaseAdmin.from("audit_log").insert({
+      actor_id: context.userId,
+      action: "teacher_plan.set",
+      target_type: "organization",
+      target_id: data.organizationId,
+      detail: { plan: data.planCode },
+    });
+    return { ok: true };
+  });
