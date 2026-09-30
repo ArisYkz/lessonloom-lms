@@ -50,6 +50,13 @@
       "when": 1790757957623,
       "tag": "0006_enforce_teacher_plan_student_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790770216614,
+      "tag": "0007_harden_profiles_and_function_access",
+      "breakpoints": true
     }
   ]
 }

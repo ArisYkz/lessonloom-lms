@@ -134,6 +134,22 @@ function AuthPage() {
       >
         {mode === "signin" ? t("auth.noAccount") : t("auth.haveAccount")}
       </button>
+      {mode === "signin" ? (
+        <button
+          type="button"
+          className="mt-3 text-sm text-muted-foreground underline-offset-4 hover:underline"
+          onClick={async () => {
+            if (!email) return void toast.error(t("auth.enterEmailFirst"));
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/reset-password`,
+            });
+            if (error) return void toast.error(error.message);
+            toast.success(t("auth.resetSent"));
+          }}
+        >
+          {t("auth.forgot")}
+        </button>
+      ) : null}
     </div>
   );
 }
