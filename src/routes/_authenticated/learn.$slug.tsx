@@ -137,9 +137,15 @@ function Player() {
             /> : null}
 
             <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
-              <Button variant={isDone ? "secondary" : "default"} onClick={toggle}>
-                <Check className="size-4" /> {isDone ? t("learn.completed") : t("learn.complete")}
-              </Button>
+              {lesson.hasAccess ? (
+                <Button variant={isDone ? "secondary" : "default"} onClick={toggle}>
+                  <Check className="size-4" /> {isDone ? t("learn.completed") : t("learn.complete")}
+                </Button>
+              ) : (
+                <Button asChild>
+                  <Link to="/courses/$slug" params={{ slug }}>{t("preview.subscribe")}</Link>
+                </Button>
+              )}
               <div className="ml-auto flex gap-2">
                 <Button
                   variant="outline"
