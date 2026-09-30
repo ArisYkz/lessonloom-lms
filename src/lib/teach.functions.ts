@@ -344,16 +344,35 @@ export const getCourseStudents = createServerFn({ method: "GET" })
       .from("lesson_progress")
       .select("user_id")
       .eq("course_id", data.courseId);
+    const { data: subs } = await context.supabase
+      .from("homework_submissions")
+      .select("user_id, status")
+      .eq("course_id", data.courseId);
+    const { data: attempts } = await context.supabase
+      .from("quiz_attempts")
+      .select("user_id, quiz_id, score, total, passed")
+      .eq("course_id", data.courseId);
 
     const total = (lessons ?? []).length;
     return {
       title: course.title,
       students: (enrollments ?? []).map((e) => {
         const done = (progress ?? []).filter((p) => p.user_id === e.user_id).length;
+        const mySubs = (subs ?? []).filter((s) => s.user_id === e.user_id);
+        const myAttempts = (attempts ?? []).filter((a) => a.user_id === e.user_id);
+        const best = new Map<string, number>();
+        for (const a of myAttempts) {
+          const pct = a.total ? Math.round((a.score / a.total) * 100) : 0;
+          best.set(a.quiz_id, Math.max(best.get(a.quiz_id) ?? 0, pct));
+        }
+        const bests = [...best.values()];
         return {
           name: (e.profiles as unknown as { full_name: string } | null)?.full_name || "—",
           joined: e.created_at,
           percent: total === 0 ? 0 : Math.round((done / total) * 100),
+          homeworkPending: mySubs.filter((s) => s.status === "submitted").length,
+          homeworkReviewed: mySubs.filter((s) => s.status === "reviewed").length,
+          quizAverage: bests.length ? Math.round(bests.reduce((a, b) => a + b, 0) / bests.length) : null,
         };
       }),
     };

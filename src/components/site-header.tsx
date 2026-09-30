@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n/provider";
 import { LOCALES } from "@/i18n/dictionary";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification-bell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,6 +92,7 @@ export function SiteHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {user ? <NotificationBell /> : null}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
