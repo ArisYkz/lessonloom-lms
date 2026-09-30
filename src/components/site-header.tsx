@@ -36,7 +36,7 @@ export function SiteHeader() {
       <Link
         to="/catalog"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        activeProps={{ className: "text-sm font-medium text-foreground" }}
+        activeProps={{ className: "text-sm font-medium text-primary" }}
         onClick={() => setOpen(false)}
       >
         {t("nav.catalog")}
@@ -44,7 +44,7 @@ export function SiteHeader() {
       <Link
         to="/teach"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        activeProps={{ className: "text-sm font-medium text-foreground" }}
+        activeProps={{ className: "text-sm font-medium text-primary" }}
         onClick={() => setOpen(false)}
       >
         {t("nav.teach")}
@@ -53,7 +53,7 @@ export function SiteHeader() {
         <Link
           to="/dashboard"
           className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          activeProps={{ className: "text-sm font-medium text-foreground" }}
+          activeProps={{ className: "text-sm font-medium text-primary" }}
           onClick={() => setOpen(false)}
         >
           {t("nav.dashboard")}
@@ -63,8 +63,8 @@ export function SiteHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-[72px] max-w-6xl items-center gap-8 px-6">
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <GraduationCap className="size-5" />
