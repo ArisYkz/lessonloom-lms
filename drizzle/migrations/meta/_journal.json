@@ -92,6 +92,13 @@
       "when": 1791979200000,
       "tag": "0012_constraints_and_enrollment_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791984000000,
+      "tag": "0013_classrooms",
+      "breakpoints": true
     }
   ]
 }
