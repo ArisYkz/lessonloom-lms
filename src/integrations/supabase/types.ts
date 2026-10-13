@@ -65,6 +65,63 @@ export type Database = {
         };
         Relationships: [];
       };
+      classroom_memberships: {
+        Row: {
+          classroom_id: string;
+          ended_at: string | null;
+          id: string;
+          joined_at: string;
+          status: string;
+          user_id: string;
+        };
+        Insert: {
+          classroom_id: string;
+          ended_at?: string | null;
+          id?: string;
+          joined_at?: string;
+          status?: string;
+          user_id: string;
+        };
+        Update: {
+          classroom_id?: string;
+          ended_at?: string | null;
+          id?: string;
+          joined_at?: string;
+          status?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      classrooms: {
+        Row: {
+          course_id: string;
+          created_at: string;
+          id: string;
+          join_code: string;
+          name: string;
+          organization_id: string;
+          status: string;
+        };
+        Insert: {
+          course_id: string;
+          created_at?: string;
+          id?: string;
+          join_code: string;
+          name: string;
+          organization_id: string;
+          status?: string;
+        };
+        Update: {
+          course_id?: string;
+          created_at?: string;
+          id?: string;
+          join_code?: string;
+          name?: string;
+          organization_id?: string;
+          status?: string;
+        };
+        Relationships: [];
+      };
       courses: {
         Row: {
           category_id: string | null;
@@ -1188,10 +1245,12 @@ export type Database = {
           students: number;
         }[];
       };
+      create_classroom: { Args: { _course: string; _name: string }; Returns: string };
       enroll_free_course: {
         Args: { _course: string; _user: string };
         Returns: string;
       };
+      get_classroom_join_code: { Args: { _classroom: string }; Returns: string };
       has_course_access: {
         Args: { _course: string; _user: string };
         Returns: boolean;
@@ -1203,7 +1262,18 @@ export type Database = {
         };
         Returns: boolean;
       };
+      join_classroom: { Args: { _code: string }; Returns: string };
+      leave_classroom: { Args: { _classroom: string }; Returns: undefined };
       owns_org: { Args: { _org: string }; Returns: boolean };
+      remove_classroom_member: {
+        Args: { _classroom: string; _user: string };
+        Returns: undefined;
+      };
+      rotate_classroom_join_code: { Args: { _classroom: string }; Returns: string };
+      set_classroom_status: {
+        Args: { _classroom: string; _status: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       app_role: "student" | "teacher" | "admin";

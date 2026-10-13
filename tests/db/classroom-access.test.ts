@@ -171,3 +171,48 @@ describe("class members count toward the plan student limit", () => {
     expect(r!.r).toBe("plan_student_limit");
   });
 });
+
+describe("class access requires a published course", () => {
+  const DRAFT_COURSE = "00000000-0000-0000-0000-0000000000c4";
+  const DRAFT_STUDENT = "00000000-0000-0000-0000-0000000000b4";
+  let draftClassroom: string;
+
+  beforeAll(async () => {
+    await db.exec(`
+      insert into auth.users (id) values ('${DRAFT_STUDENT}');
+      insert into public.courses (id, organization_id, slug, title, price_model, status)
+        values ('${DRAFT_COURSE}', '${ORG}', 'draft', 'Draft', 'subscription', 'draft');
+    `);
+    const row = await asUser<{ id: string }>(
+      db,
+      OWNER,
+      "select public.create_classroom($1, $2) as id",
+      [DRAFT_COURSE, "Draft class"],
+    );
+    draftClassroom = row!.id;
+  });
+
+  it("denies members of a class whose course is still a draft", async () => {
+    await asUser(db, DRAFT_STUDENT, "select public.join_classroom($1) as id", [
+      await code(OWNER, draftClassroom),
+    ]);
+    const r = await asUser<{ ok: boolean }>(
+      db,
+      DRAFT_STUDENT,
+      "select public.has_course_access($1, $2) as ok",
+      [DRAFT_COURSE, DRAFT_STUDENT],
+    );
+    expect(r!.ok).toBe(false);
+  });
+
+  it("grants access once the course is published", async () => {
+    await db.exec(`update public.courses set status = 'published' where id = '${DRAFT_COURSE}'`);
+    const r = await asUser<{ ok: boolean }>(
+      db,
+      DRAFT_STUDENT,
+      "select public.has_course_access($1, $2) as ok",
+      [DRAFT_COURSE, DRAFT_STUDENT],
+    );
+    expect(r!.ok).toBe(true);
+  });
+});

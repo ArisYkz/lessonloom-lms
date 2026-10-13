@@ -481,3 +481,108 @@ export const getCourseStudents = createServerFn({ method: "POST" })
       }),
     };
   });
+
+export const listClassrooms = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { courseId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: classrooms, error } = await context.supabase
+      .from("classrooms")
+      .select("id, name, status, created_at")
+      .eq("course_id", data.courseId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return classrooms ?? [];
+  });
+
+export const createClassroom = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { courseId: string; name: string }) => input)
+  .handler(async ({ data, context }) => {
+    const name = data.name.trim();
+    if (name.length < 1 || name.length > 120)
+      throw new Error("Class name must be 1-120 characters");
+    const { data: classroomId, error } = await context.supabase.rpc("create_classroom", {
+      _course: data.courseId,
+      _name: name,
+    });
+    if (error) throw new Error(error.message);
+    return { id: classroomId };
+  });
+
+export const getClassroomJoinCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: code, error } = await context.supabase.rpc("get_classroom_join_code", {
+      _classroom: data.classroomId,
+    });
+    if (error) throw new Error(error.message);
+    return { code };
+  });
+
+export const rotateClassroomJoinCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: code, error } = await context.supabase.rpc("rotate_classroom_join_code", {
+      _classroom: data.classroomId,
+    });
+    if (error) throw new Error(error.message);
+    return { code };
+  });
+
+export const setClassroomStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string; status: "active" | "archived" }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("set_classroom_status", {
+      _classroom: data.classroomId,
+      _status: data.status,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listClassroomMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string }) => input)
+  .handler(async ({ data, context }) => {
+    // Membership rows are RLS-scoped to the class owner; profile names are not readable by teachers.
+    const { data: memberships, error } = await context.supabase
+      .from("classroom_memberships")
+      .select("user_id, joined_at")
+      .eq("classroom_id", data.classroomId)
+      .eq("status", "active")
+      .order("joined_at", { ascending: false });
+    if (error) throw new Error(error.message);
+
+    const rows = memberships ?? [];
+    if (rows.length === 0) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name")
+      .in(
+        "id",
+        rows.map((m) => m.user_id),
+      );
+    const names = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
+    return rows.map((m) => ({
+      userId: m.user_id,
+      name: names.get(m.user_id) || "—",
+      joined: m.joined_at,
+    }));
+  });
+
+export const removeClassroomMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string; userId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("remove_classroom_member", {
+      _classroom: data.classroomId,
+      _user: data.userId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

@@ -63,6 +63,14 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+type CourseCard = {
+  id: string;
+  slug: string;
+  title: string;
+  thumbnail_url: string | null;
+  organizations: { name: string } | null;
+};
+
 export const getMyLearning = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -74,7 +82,36 @@ export const getMyLearning = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false });
 
     const rows = enrollments ?? [];
-    const courseIds = rows.map((r) => r.course_id);
+    const enrolled = new Set(rows.map((r) => r.course_id));
+
+    const { data: memberships } = await context.supabase
+      .from("classroom_memberships")
+      .select("classroom_id")
+      .eq("user_id", context.userId)
+      .eq("status", "active");
+    const classroomIds = (memberships ?? []).map((m) => m.classroom_id);
+    const { data: classrooms } = classroomIds.length
+      ? await context.supabase
+          .from("classrooms")
+          .select("course_id")
+          .in("id", classroomIds)
+          .eq("status", "active")
+      : { data: [] };
+    const classCourseIds = [...new Set((classrooms ?? []).map((c) => c.course_id))].filter(
+      (id) => !enrolled.has(id),
+    );
+    const { data: classCourses } = classCourseIds.length
+      ? await context.supabase
+          .from("courses")
+          .select("id, slug, title, thumbnail_url, organizations(name)")
+          .in("id", classCourseIds)
+      : { data: [] };
+
+    const cards = [
+      ...rows.map((r) => r.courses as unknown as CourseCard),
+      ...(classCourses ?? []).map((c) => c as unknown as CourseCard),
+    ];
+    const courseIds = cards.map((c) => c.id);
     if (courseIds.length === 0) return [];
 
     const { data: lessons } = await context.supabase
@@ -87,22 +124,11 @@ export const getMyLearning = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .in("course_id", courseIds);
 
-    const signed = await signMany(
-      rows.map(
-        (r) => (r.courses as unknown as { thumbnail_url: string | null } | null)?.thumbnail_url,
-      ),
-    );
+    const signed = await signMany(cards.map((c) => c.thumbnail_url));
 
-    return rows.map((r) => {
-      const c = r.courses as unknown as {
-        id: string;
-        slug: string;
-        title: string;
-        thumbnail_url: string | null;
-        organizations: { name: string } | null;
-      };
-      const total = (lessons ?? []).filter((l) => l.course_id === r.course_id).length;
-      const done = (progress ?? []).filter((p) => p.course_id === r.course_id).length;
+    return cards.map((c) => {
+      const total = (lessons ?? []).filter((l) => l.course_id === c.id).length;
+      const done = (progress ?? []).filter((p) => p.course_id === c.id).length;
       return {
         slug: c.slug,
         title: c.title,
@@ -125,6 +151,32 @@ export const enrollFree = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     if (result === "plan_student_limit") throw new Error("PLAN_STUDENT_LIMIT");
+    return { ok: true };
+  });
+
+export const joinClassroom = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { code: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: classroomId, error } = await context.supabase.rpc("join_classroom", {
+      _code: data.code,
+    });
+    if (error) {
+      throw new Error(
+        error.message.includes("Invalid join code") ? "INVALID_JOIN_CODE" : error.message,
+      );
+    }
+    return { classroomId };
+  });
+
+export const leaveClassroom = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("leave_classroom", {
+      _classroom: data.classroomId,
+    });
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
 

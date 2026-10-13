@@ -35,6 +35,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { LessonExtrasEditor } from "@/components/lesson-extras-editor";
 import { DanmakuModeration } from "@/components/danmaku-moderation";
+import { ClassroomPanel } from "@/components/classroom-panel";
 
 export const Route = createFileRoute("/_authenticated/teach/$courseId")({
   head: () => ({
@@ -106,6 +107,7 @@ function Builder() {
           <TabsTrigger value="pricing">{t("builder.pricing")}</TabsTrigger>
           <TabsTrigger value="publish">{t("builder.publish")}</TabsTrigger>
           <TabsTrigger value="students">{t("teach.students")}</TabsTrigger>
+          <TabsTrigger value="classes">{t("classroom.title")}</TabsTrigger>
           <TabsTrigger value="danmaku">{t("builder.tabs.danmaku")}</TabsTrigger>
         </TabsList>
 
@@ -127,6 +129,9 @@ function Builder() {
         </TabsContent>
         <TabsContent value="students">
           <StudentsTab courseId={courseId} />
+        </TabsContent>
+        <TabsContent value="classes">
+          <ClassroomPanel courseId={courseId} />
         </TabsContent>
         <TabsContent value="danmaku">
           <DanmakuModeration courseId={courseId} />
