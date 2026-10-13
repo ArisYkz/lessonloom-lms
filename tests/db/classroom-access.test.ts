@@ -139,6 +139,21 @@ describe("class membership grants course access", () => {
     ]);
     expect(await hasAccess(STUDENT)).toBe(true);
   });
+
+  it("leaving a class-granted course ends every class that grants it", async () => {
+    const second = await asUser<{ id: string }>(
+      db,
+      OWNER,
+      "select public.create_classroom($1, $2) as id",
+      [COURSE, "Evening"],
+    );
+    await asUser(db, STUDENT, "select public.join_classroom($1) as id", [
+      await code(OWNER, second!.id),
+    ]);
+    expect(await hasAccess(STUDENT)).toBe(true);
+    await asUser(db, STUDENT, "select public.leave_course_classes($1) as x", [COURSE]);
+    expect(await hasAccess(STUDENT)).toBe(false);
+  });
 });
 
 describe("class members count toward the plan student limit", () => {
@@ -181,7 +196,7 @@ describe("class access requires a published course", () => {
     await db.exec(`
       insert into auth.users (id) values ('${DRAFT_STUDENT}');
       insert into public.courses (id, organization_id, slug, title, price_model, status)
-        values ('${DRAFT_COURSE}', '${ORG}', 'draft', 'Draft', 'subscription', 'draft');
+        values ('${DRAFT_COURSE}', '${ORG}', 'draft', 'Draft', 'subscription', 'published');
     `);
     const row = await asUser<{ id: string }>(
       db,
@@ -190,6 +205,7 @@ describe("class access requires a published course", () => {
       [DRAFT_COURSE, "Draft class"],
     );
     draftClassroom = row!.id;
+    await db.exec(`update public.courses set status = 'draft' where id = '${DRAFT_COURSE}'`);
   });
 
   it("denies members of a class whose course is still a draft", async () => {

@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LessonLoom: Product Plan and Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #1c2420;
+    --muted: #6b736e;
+    --paper: #f6f3ec;
+    --card: #ffffff;
+    --line: #e5e0d4;
+    --accent: #2f5d50;
+    --accent-soft: #e3ede8;
+    --gold: #a7863f;
+    --danger: #9b4a3c;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.5; }
+  h1, h2, h3, .serif { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  h1 { font-size: 46px; line-height: 1.05; }
+  h2 { font-size: 30px; line-height: 1.15; }
+  h3 { font-size: 20px; line-height: 1.2; }
+  p { margin: 0 0 10px; }
+  a { color: var(--accent); }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+  /* Mockup switcher */
+  .switcher { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid var(--line); }
+  .switcher .wrap { display: flex; gap: 6px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; align-items: center; }
+  .switcher .label { font-size: 12px; color: var(--muted); margin-right: 6px; white-space: nowrap; }
+  .switcher button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; color: var(--ink); }
+  .switcher button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .switcher .group { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 6px; white-space: nowrap; }
+
+  .screen { display: none; padding: 36px 0 80px; }
+  .screen.on { display: block; }
+  .frame-note { font-size: 12px; color: var(--muted); border: 1px dashed #cfc8b7; border-radius: 8px; padding: 8px 12px; margin-bottom: 22px; display: inline-block; background: #fff; }
+
+  /* Top bars for mock app shells */
+  .appbar { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); display: flex; align-items: center; gap: 22px; padding: 12px 18px; margin-bottom: 26px; flex-wrap: wrap; }
+  .brand { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 700; color: var(--accent); margin-right: auto; }
+  .appbar nav { display: flex; gap: 18px; font-size: 14px; flex-wrap: wrap; }
+  .appbar nav span { color: var(--muted); }
+  .appbar nav span.on { color: var(--ink); font-weight: 600; border-bottom: 2px solid var(--accent); padding-bottom: 2px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 10px 18px; font: inherit; font-size: 14px; font-weight: 600; border: 1px solid transparent; cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { background: #fff; border-color: var(--line); color: var(--ink); }
+  .btn.sm { padding: 6px 12px; font-size: 13px; }
+  .btn.dark { background: var(--ink); color: #fff; }
+
+  .search { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 12px 18px; box-shadow: 0 6px 20px rgba(28,36,32,0.05); max-width: 680px; }
+  .search input { flex: 1; border: 0; outline: 0; font: inherit; font-size: 15px; background: transparent; }
+  .search .go { background: var(--accent); color: #fff; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 600; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 0; }
+  .chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 13px; font-size: 13px; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  .tabs { display: flex; gap: 26px; border-bottom: 1px solid var(--line); margin: 26px 0 22px; font-size: 15px; }
+  .tabs span { padding: 10px 0; color: var(--muted); }
+  .tabs span.on { color: var(--ink); font-weight: 600; border-bottom: 2px solid var(--accent); }
+
+  .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .grid.three { grid-template-columns: repeat(3, 1fr); }
+  .grid.two { grid-template-columns: repeat(2, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+  .card .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .card.pad { padding: 20px; }
+  .cover { aspect-ratio: 16 / 10; display: flex; align-items: flex-end; justify-content: space-between; padding: 12px; color: #fff; font-size: 12px; }
+  .cover .tag { background: rgba(255,255,255,0.22); backdrop-filter: blur(4px); border-radius: 999px; padding: 4px 10px; font-weight: 600; }
+  .cover.c1 { background: linear-gradient(135deg, #2f5d50, #7fa595); }
+  .cover.c2 { background: linear-gradient(135deg, #5b4a37, #c1a57a); }
+  .cover.c3 { background: linear-gradient(135deg, #2c3e57, #7d93b3); }
+  .cover.c4 { background: linear-gradient(135deg, #6a3d3a, #d19a8f); }
+  .cover.c5 { background: linear-gradient(135deg, #3d4a2c, #a9b77f); }
+  .cover.c6 { background: linear-gradient(135deg, #3b2f4f, #9d8cc0); }
+
+  .teacher { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .teacher strong { color: var(--ink); font-weight: 600; }
+  .av { width: 32px; height: 32px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; border: 2px solid #fff; }
+  .av.lg { width: 56px; height: 56px; font-size: 18px; border-width: 3px; }
+  .av.sm { width: 24px; height: 24px; font-size: 10px; }
+  .avs { display: flex; align-items: center; }
+  .avs .av { margin-left: -8px; }
+  .avs .av:first-child { margin-left: 0; }
+  .avs .more { margin-left: 6px; font-size: 12px; color: var(--muted); }
+  .bg1 { background: #2f5d50; } .bg2 { background: #8a5a2b; } .bg3 { background: #3c5a80; }
+  .bg4 { background: #7a3f5e; } .bg5 { background: #5f6b2e; } .bg6 { background: #4b4d8a; }
+
+  .price { font-weight: 600; }
+  .price.free { color: var(--accent); }
+  .meta { display: flex; gap: 14px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .progress { height: 6px; background: #ece8dd; border-radius: 999px; overflow: hidden; }
+  .progress i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; background: var(--accent-soft); color: var(--accent); }
+  .pill.gold { background: #f3ead8; color: #7a5f22; }
+  .pill.draft { background: #ece8dd; color: var(--muted); }
+  .pill.warn { background: #f4e2dd; color: var(--danger); }
+
+  .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; padding: 30px 0 10px; }
+  .hero p.lead { font-size: 18px; color: #3d4641; max-width: 520px; }
+  .hero .cta { display: flex; gap: 12px; margin: 22px 0; flex-wrap: wrap; }
+  .hero .mosaic { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .hero .mosaic > div { aspect-ratio: 4/5; border-radius: 18px; }
+
+  .section { margin-top: 56px; }
+  .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .section-head a { font-size: 14px; }
+
+  .teacher-card { text-align: center; align-items: center; padding: 22px 16px; gap: 6px; }
+  .teacher-card .meta { justify-content: center; }
+
+  .two-col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 26px; align-items: start; }
+  .sticky { position: sticky; top: 80px; }
+  .list { display: flex; flex-direction: column; }
+  .list > div { padding: 14px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+  .list > div:last-child { border-bottom: 0; }
+  .accordion { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; overflow: hidden; }
+  .accordion .sec { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; }
+  .accordion .sec:last-child { border-bottom: 0; }
+  .accordion .lesson { padding: 10px 18px 10px 34px; border-bottom: 1px solid #f0ece2; font-size: 14px; display: flex; justify-content: space-between; color: #3d4641; }
+  .accordion .lesson:last-child { border-bottom: 0; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 20px 0 26px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .stat .n { font-family: "Cormorant Garamond", serif; font-size: 34px; font-weight: 600; line-height: 1; }
+  .stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  .calendar { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); gap: 12px; flex-wrap: wrap; }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .day { border-left: 1px solid #efebe1; min-height: 420px; padding: 0 0 10px; }
+  .day:first-child { border-left: 0; }
+  .day .dh { padding: 10px 12px; font-size: 12px; color: var(--muted); border-bottom: 1px solid #efebe1; display: flex; justify-content: space-between; }
+  .day .dh b { color: var(--ink); font-size: 15px; font-weight: 600; }
+  .day.today .dh b { color: #fff; background: var(--accent); border-radius: 999px; padding: 0 8px; }
+  .event { margin: 8px 8px 0; padding: 8px 9px; border-radius: 9px; font-size: 12px; border-left: 3px solid; }
+  .event b { display: block; font-size: 12.5px; }
+  .event .t { color: var(--muted); }
+  .event .avs .av { width: 20px; height: 20px; font-size: 8px; border-width: 1.5px; }
+  .ev-a { background: #e6efeb; border-color: #2f5d50; }
+  .ev-b { background: #f3ead8; border-color: #a7863f; }
+  .ev-c { background: #e6ebf3; border-color: #3c5a80; }
+  .ev-d { background: #f3e5ec; border-color: #7a3f5e; }
+
+  .agenda .row { display: grid; grid-template-columns: 74px 1fr auto; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: center; }
+  .agenda .row:last-child { border-bottom: 0; }
+  .agenda .time { font-weight: 600; font-size: 14px; }
+  .agenda .time small { display: block; color: var(--muted); font-weight: 400; }
+
+  table.plain { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  table.plain th, table.plain td { text-align: left; padding: 11px 14px; border-bottom: 1px solid #efebe1; vertical-align: top; }
+  table.plain th { background: #faf8f3; font-weight: 600; font-size: 13px; color: #3d4641; }
+  table.plain tr:last-child td { border-bottom: 0; }
+  .wide { overflow-x: auto; }
+
+  .doc { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 34px; }
+  .doc h2 { margin-top: 34px; padding-top: 6px; border-top: 1px solid var(--line); }
+  .doc h2:first-child { margin-top: 0; border-top: 0; }
+  .doc ol, .doc ul { padding-left: 20px; margin: 8px 0 14px; }
+  .doc li { margin-bottom: 6px; }
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 14px 0 6px; }
+  .flow .step { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #faf8f3; font-size: 14px; }
+  .flow .step b { display: block; font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--accent); }
+  .callout { border-left: 3px solid var(--gold); background: #fbf7ee; padding: 12px 16px; border-radius: 8px; margin: 14px 0; font-size: 14px; }
+  .callout.red { border-color: var(--danger); background: #fbf1ee; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .price-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+  .price-card.pro { border: 2px solid var(--accent); }
+  .price-card .amt { font-family: "Cormorant Garamond", serif; font-size: 44px; font-weight: 600; line-height: 1; margin: 10px 0 16px; }
+  .price-card ul { padding-left: 18px; font-size: 14px; margin: 0 0 18px; }
+  .price-card li { margin-bottom: 6px; }
+  .meter { height: 8px; background: #ece8dd; border-radius: 999px; overflow: hidden; margin: 8px 0 4px; }
+  .meter i { display: block; height: 100%; background: var(--gold); }
+
+  .join-box { max-width: 460px; margin: 0 auto; text-align: center; padding: 34px 28px; }
+  .join-box .av { margin: 0 auto 12px; }
+  .faces { display: flex; justify-content: center; margin: 14px 0 6px; }
+
+  .code { font-family: ui-monospace, Menlo, monospace; background: #f3f0e7; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 14px; letter-spacing: 0.08em; display: inline-block; }
+
+  @media (max-width: 900px) {
+    h1 { font-size: 36px; }
+    .hero, .two-col { grid-template-columns: 1fr; }
+    .grid.three, .grid.two, .pricing { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .week { grid-template-columns: repeat(7, minmax(120px, 1fr)); overflow-x: auto; }
+    .calendar { overflow-x: auto; }
+    .sticky { position: static; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    h1 { font-size: 30px; }
+    .hero .mosaic > div { aspect-ratio: 1/1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="switcher">
+  <div class="wrap">
+    <span class="label">Screens</span>
+    <button data-s="plan" class="on">Plan</button>
+    <span class="group">Public</span>
+    <button data-s="landing">Landing</button>
+    <button data-s="catalog">Catalog</button>
+    <button data-s="course">Course page</button>
+    <button data-s="teacher">Teacher profile</button>
+    <button data-s="join">Join by link</button>
+    <span class="group">Student</span>
+    <button data-s="dashboard">My learning</button>
+    <button data-s="calendar">Calendar</button>
+    <button data-s="classes">My classes</button>
+    <span class="group">Teacher</span>
+    <button data-s="tHome">Teacher home</button>
+    <button data-s="tCourse">Course: classes</button>
+    <button data-s="tClass">Class page</button>
+    <button data-s="tCalendar">Teacher calendar</button>
+    <button data-s="tPlan">Plan &amp; limits</button>
+  </div>
+</div>
+
+<!-- ===================================================== PLAN -->
+<section class="screen on" id="plan">
+  <div class="wrap">
+    <div class="doc">
+      <p class="eyebrow">Product plan · v1 draft · 2026-10-13</p>
+      <h1>LessonLoom: who it is for, what each page does, how people move through it</h1>
+      <p class="muted" style="font-size:16px;max-width:720px;margin-top:12px">This is a plan, not a finished design. Every screen below maps to a route that exists in the codebase today, or to a route marked <b>new</b>. Section 6 lists the decisions I need from you.</p>
+
+      <h2>1. Who it is for</h2>
+      <p><b>Primary: individual teachers.</b> The data model already treats one teacher account as one organization (<code>organizations</code>, one owner, staff can be added later). A tutor who creates courses, invites students by a link, and pays for a plan is the core customer. Teachers are also the supply side: without them the catalog is empty.</p>
+      <p><b>Volume: students.</b> Many people browse, enroll, and join classes, usually from a phone. They need discovery, a clear join path, and a calendar they will actually open.</p>
+      <p><b>Internal: admins.</b> Existing <code>/admin</code>. Not part of the design.</p>
+      <p class="callout">Design decision: design the <i>student</i> experience for first impressions and the <i>teacher</i> experience for daily work. Both are equally important, but the teacher console is where the product earns money, so it must feel calm and fast rather than decorative.</p>
+
+      <h2>2. Pages and routes</h2>
+      <div class="wide"><table class="plain">
+        <thead><tr><th>Page</th><th>Who</th><th>Route</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Landing</td><td>Visitor</td><td><code>/</code> (exists)</td><td>Explain value to both teachers and students; two entry buttons.</td></tr>
+          <tr><td>Catalog</td><td>Visitor, student</td><td><code>/catalog</code> (exists, redesign)</td><td>Search bar, filters, course cards with teacher photo, and tabs for Courses / Teachers / Classes.</td></tr>
+          <tr><td>Course page</td><td>Visitor, student</td><td><code>/courses/:slug</code> (exists)</td><td>Preview, curriculum, teacher card, enroll or pay, and a "have a class code?" field.</td></tr>
+          <tr><td>Teacher profile</td><td>Visitor, student</td><td><code>/teachers/:slug</code> (exists)</td><td>Who the teacher is, their courses, and their <i>listed</i> classes (see decision 6.3).</td></tr>
+          <tr><td>Join by link</td><td>Invited student</td><td><code>/join/:code</code> <b>new</b></td><td>The page a teacher's link opens: teacher, class, course, classmates, one button.</td></tr>
+          <tr><td>My learning</td><td>Student</td><td><code>/dashboard</code> (exists, merge)</td><td>Continue button, this week's sessions, courses, and classes. Replaces <code>/home</code>.</td></tr>
+          <tr><td>Calendar</td><td>Student</td><td><code>/calendar</code> <b>new</b></td><td>Week view of sessions across joined classes: time, course, and who is attending.</td></tr>
+          <tr><td>My classes</td><td>Student</td><td><code>/classes</code> <b>new</b></td><td>Search and list of joined classes with classmate avatars and next session.</td></tr>
+          <tr><td>Learn player</td><td>Student</td><td><code>/learn/:slug</code> (exists)</td><td>Lesson, progress, homework, quiz. Not redesigned in this round.</td></tr>
+          <tr><td>Teacher home</td><td>Teacher</td><td><code>/teach</code> (exists, redesign)</td><td>Courses, plan usage, what needs attention (homework to review, new joins).</td></tr>
+          <tr><td>Course editor</td><td>Teacher</td><td><code>/teach/:courseId</code> (exists)</td><td>Tabs: Content, Students, <b>Classes</b>, Homework, Settings.</td></tr>
+          <tr><td>Class page</td><td>Teacher</td><td><code>/teach/classes/:classId</code> <b>new</b></td><td>Members with photos, join link, rotate code, sessions, archive.</td></tr>
+          <tr><td>Teacher calendar</td><td>Teacher</td><td><code>/teach/calendar</code> <b>new</b></td><td>Every session across the teacher's classes, filterable by class.</td></tr>
+          <tr><td>Inbox</td><td>Teacher</td><td><code>/teach/inbox</code> (exists)</td><td>Homework and questions waiting for a reply.</td></tr>
+          <tr><td>Plan &amp; limits</td><td>Teacher</td><td><code>/teach/plan</code> <b>new</b></td><td>Current plan, students used against the limit, upgrade.</td></tr>
+          <tr><td>Auth, reset password</td><td>Everyone</td><td><code>/auth</code>, <code>/reset-password</code> (exist)</td><td>Keep as is; restyle to match.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small muted" style="margin-top:10px">That is 16 screens. 9 exist and need a redesign; 7 are new. The lesson player and auth are not part of the first design round.</p>
+
+      <h2>3. Workflows</h2>
+      <h3>Teacher: from zero to a running class</h3>
+      <div class="flow">
+        <div class="step"><b>1</b>Sign up, set name, photo, headline on the profile.</div>
+        <div class="step"><b>2</b>Create a course (draft). Add sections and lessons.</div>
+        <div class="step"><b>3</b>Publish the course. Students can now find it.</div>
+        <div class="step"><b>4</b>Create a class on that course. Copy the join link.</div>
+        <div class="step"><b>5</b>Add sessions to the class calendar (new feature).</div>
+        <div class="step"><b>6</b>Students join. Review homework in the inbox.</div>
+      </div>
+      <h3 style="margin-top:20px">Student: from link to lesson</h3>
+      <div class="flow">
+        <div class="step"><b>A</b>Gets a link <code>/join/CODE</code> from the teacher, or searches the catalog.</div>
+        <div class="step"><b>B</b>Sees the teacher, class, course, and classmates. Signs in or signs up.</div>
+        <div class="step"><b>C</b>Joins the class. The course appears on My learning.</div>
+        <div class="step"><b>D</b>Opens the calendar to see when sessions happen and who is coming.</div>
+        <div class="step"><b>E</b>Learns, submits homework, earns progress.</div>
+        <div class="step"><b>F</b>Leaves the class if needed. Access ends with it.</div>
+      </div>
+      <h3 style="margin-top:20px">Student: browsing</h3>
+      <p>Landing or catalog → search or filter → open a course or teacher → read the curriculum → enroll (free) or pay → the course appears in My learning. Teachers appear as cards; each course card shows the teacher's photo so people can recognize a teacher they already like.</p>
+
+      <h2>4. Information the screens must show</h2>
+      <div class="wide"><table class="plain">
+        <thead><tr><th>Object</th><th>Shown on</th><th>Fields (from the existing data model)</th></tr></thead>
+        <tbody>
+          <tr><td>Course card</td><td>Catalog, teacher profile, dashboard</td><td>Cover (<code>thumbnail_url</code>), title, teacher photo + name (<code>organizations.logo_url</code>, <code>name</code>), price model, lesson count, progress when enrolled</td></tr>
+          <tr><td>Teacher card</td><td>Landing, catalog Teachers tab</td><td>Photo, name, headline, course count, student count (aggregate only)</td></tr>
+          <tr><td>Class card</td><td>My classes, teacher profile, catalog Classes tab</td><td>Name, course, teacher, status, member photos (<code>profiles.avatar_url</code>), next session</td></tr>
+          <tr><td>Session</td><td>Calendar, class page, dashboard "this week"</td><td><b>Not in the model yet.</b> Needs title, start time, duration, time zone, optional meeting link</td></tr>
+          <tr><td>Member</td><td>Class page, "who is coming"</td><td>Name, photo, joined date, progress. Teacher sees full list; students see photos only (decision 6.4)</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>5. What is missing from the data model</h2>
+      <div class="callout red"><b>Sessions (the calendar) do not exist yet.</b> A class today is a group with a join code, with no time attached. Your calendar idea needs a new table, for example <code>class_sessions</code> (classroom_id, title, starts_at, duration_min, time zone, meeting_url optional), with the same RLS as classroom members. This is a migration and tests, like the classroom work. It is the single biggest gap between the current app and the design.</div>
+      <p><b>Terminology:</b> in the app, "class" means a group with a join code (already built). "Session" means one scheduled meeting in a class (new). The calendar shows sessions; the classes page shows classes.</p>
+
+      <h2>6. Decisions (confirmed)</h2>
+      <ol>
+        <li><b>Primary user:</b> individual teachers. Students are designed for as well.</li>
+        <li><b>Mood:</b> warm paper background, deep teal accent, serif display headings, Inter for UI.</li>
+        <li><b>Searchable classes:</b> private by default. A teacher can tick "list publicly" to show a class in search and on their profile. Joining a listed class still asks the student to confirm.</li>
+        <li><b>Classmate photos:</b> visible to classmates. A profile setting lets a student hide their photo.</li>
+        <li><b>"Who is coming":</b> members of the class for v1. RSVPs come later as a separate table.</li>
+        <li><b>Calendar scope:</b> one calendar per student and one per teacher, covering all their classes. Time zone is stored per session and shown in the viewer's time zone.</li>
+        <li><b>Live meetings:</b> a meeting link only. We do not host video.</li>
+      </ol>
+
+      <h2>7. Build order</h2>
+      <ol>
+        <li><b>Design system:</b> tokens, buttons, cards, avatars, search bar, empty and loading states. Light and dark. Check Russian and Kazakh text length in every component.</li>
+        <li><b>Public:</b> landing, catalog with search and filters, course page, teacher profile.</li>
+        <li><b>Student:</b> merge home into My learning, My classes, join-by-link page.</li>
+        <li><b>Schedule (backend first):</b> <code>class_sessions</code> migration, RLS, tests. Then calendar for students and teachers.</li>
+        <li><b>Teacher console:</b> teacher home, class page, course Classes tab, plan &amp; limits.</li>
+        <li><b>Quality pass:</b> mobile at 390px, keyboard focus, aria-labels, no hardcoded strings, a browser golden-path run with screenshots.</li>
+      </ol>
+      <p class="small muted">Every new string goes through <code>src/i18n/dictionary.ts</code> in English, Russian, and Kazakh. Russian and Kazakh need a native review.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== LANDING -->
+<section class="screen" id="landing">
+  <div class="wrap">
+    <span class="frame-note">Public · <code>/</code> · visitor</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span class="on">Courses</span><span>Teachers</span><span>Classes</span><span>For teachers</span><span>Sign in</span></nav>
+      <a class="btn dark sm" href="#">Start teaching</a>
+    </div>
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Learn from the people you trust</p>
+        <h1>Teach what you know.<br/>Learn with a teacher you can see.</h1>
+        <p class="lead" style="margin-top:16px">Courses from independent teachers, small classes with a link, and a calendar that shows when everyone meets.</p>
+        <div class="search" style="margin-top:22px"><span class="muted">⌕</span><input placeholder="Search courses, teachers, or classes" /><span class="go">Search</span></div>
+        <div class="cta">
+          <a class="btn primary" href="#">Browse courses</a>
+          <a class="btn ghost" href="#">I have a class code</a>
+        </div>
+      </div>
+      <div class="mosaic">
+        <div class="cover c1" style="aspect-ratio:4/5;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:Cormorant Garamond,serif;font-size:22px">Algebra for<br/>exam week</div>
+        <div class="cover c2" style="aspect-ratio:4/5;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:Cormorant Garamond,serif;font-size:22px">Speaking<br/>with confidence</div>
+        <div class="cover c3" style="aspect-ratio:4/5;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:Cormorant Garamond,serif;font-size:22px">Python from<br/>zero</div>
+        <div class="cover c4" style="aspect-ratio:4/5;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:Cormorant Garamond,serif;font-size:22px">Drawing<br/>every week</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><p class="eyebrow">Teachers</p><h2>Meet the teachers</h2></div><a href="#">All teachers →</a></div>
+      <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card teacher-card"><div class="av lg bg1">AS</div><h3>Aigerim S.</h3><p class="small muted">Math, exam prep</p><div class="meta"><span>4 courses</span><span>2 classes</span></div></div>
+        <div class="card teacher-card"><div class="av lg bg2">DK</div><h3>Dmitri K.</h3><p class="small muted">Spoken English</p><div class="meta"><span>3 courses</span><span>1 class</span></div></div>
+        <div class="card teacher-card"><div class="av lg bg3">LT</div><h3>Laila T.</h3><p class="small muted">Programming for beginners</p><div class="meta"><span>2 courses</span><span>3 classes</span></div></div>
+        <div class="card teacher-card"><div class="av lg bg4">NR</div><h3>Nurlan R.</h3><p class="small muted">Art and drawing</p><div class="meta"><span>5 courses</span><span>1 class</span></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><p class="eyebrow">Popular now</p><h2>Courses this week</h2></div><a href="#">Browse all →</a></div>
+      <div class="grid">
+        <div class="card"><div class="cover c1"><span class="tag">Free</span><span class="tag">12 lessons</span></div><div class="body"><h3>Algebra for exam week</h3><div class="teacher"><div class="av sm bg1">AS</div><strong>Aigerim S.</strong></div></div></div>
+        <div class="card"><div class="cover c2"><span class="tag">Subscription</span><span class="tag">8 lessons</span></div><div class="body"><h3>Speaking with confidence</h3><div class="teacher"><div class="av sm bg2">DK</div><strong>Dmitri K.</strong></div></div></div>
+        <div class="card"><div class="cover c3"><span class="tag">Free</span><span class="tag">20 lessons</span></div><div class="body"><h3>Python from zero</h3><div class="teacher"><div class="av sm bg3">LT</div><strong>Laila T.</strong></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== CATALOG -->
+<section class="screen" id="catalog">
+  <div class="wrap">
+    <span class="frame-note">Public · <code>/catalog</code> · visitor or student</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span class="on">Catalog</span><span>My learning</span><span>Calendar</span><span>My classes</span></nav>
+      <div class="avs"><div class="av bg5">ME</div></div>
+    </div>
+    <h1>Find what you want to learn</h1>
+    <div class="search" style="margin-top:18px"><span class="muted">⌕</span><input value="algebra" /><span class="go">Search</span></div>
+    <div class="chips">
+      <span class="chip on">All</span><span class="chip">Math</span><span class="chip">Languages</span><span class="chip">Programming</span><span class="chip">Art</span>
+      <span class="chip">Free</span><span class="chip">Paid</span><span class="chip">Has classes</span>
+    </div>
+    <div class="tabs"><span class="on">Courses · 14</span><span>Teachers · 3</span><span>Classes · 2</span></div>
+    <div class="grid">
+      <div class="card"><div class="cover c1"><span class="tag">Free</span><span class="tag">12 lessons</span></div><div class="body"><h3>Algebra for exam week</h3><div class="teacher"><div class="av sm bg1">AS</div><span><strong>Aigerim S.</strong> · Math</span></div><div class="meta"><span>Has a class</span><span>Updated 3 days ago</span></div></div></div>
+      <div class="card"><div class="cover c3"><span class="tag">Subscription</span><span class="tag">24 lessons</span></div><div class="body"><h3>Linear algebra, the intuitive way</h3><div class="teacher"><div class="av sm bg3">LT</div><span><strong>Laila T.</strong> · Math</span></div><div class="meta"><span>Starts Oct 14 with a class</span></div></div></div>
+      <div class="card"><div class="cover c5"><span class="tag">Paid</span><span class="tag">9 lessons</span></div><div class="body"><h3>Algebra word problems</h3><div class="teacher"><div class="av sm bg5">MB</div><span><strong>Madina B.</strong> · Math</span></div><div class="meta"><span>No class yet</span></div></div></div>
+      <div class="card"><div class="cover c6"><span class="tag">Free</span><span class="tag">6 lessons</span></div><div class="body"><h3>Quadratics, step by step</h3><div class="teacher"><div class="av sm bg6">OK</div><span><strong>Olzhas K.</strong> · Math</span></div></div></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><p class="eyebrow">Classes you can join</p><h2>Open classes in math</h2></div></div>
+      <div class="grid two">
+        <div class="card pad"><div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><div><h3>Morning algebra A</h3><p class="small muted" style="margin:4px 0 0">Algebra for exam week · Aigerim S.</p></div><span class="pill">Open</span></div>
+          <div class="avs" style="margin-top:14px"><div class="av sm bg1">A</div><div class="av sm bg2">B</div><div class="av sm bg3">C</div><div class="av sm bg4">D</div><div class="av sm bg5">E</div><span class="more">+11 classmates</span></div>
+          <p class="small" style="margin:14px 0 0"><b>Next:</b> Monday 10:00 · 60 min</p>
+          <div style="margin-top:14px"><a class="btn primary sm" href="#">Join class</a></div></div>
+        <div class="card pad"><div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><div><h3>Evening exam prep</h3><p class="small muted" style="margin:4px 0 0">Algebra word problems · Madina B.</p></div><span class="pill gold">Limited seats</span></div>
+          <div class="avs" style="margin-top:14px"><div class="av sm bg5">M</div><div class="av sm bg6">K</div><div class="av sm bg2">R</div><span class="more">+4 classmates</span></div>
+          <p class="small" style="margin:14px 0 0"><b>Next:</b> Tuesday 18:30 · 90 min</p>
+          <div style="margin-top:14px"><a class="btn primary sm" href="#">Join class</a></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== COURSE -->
+<section class="screen" id="course">
+  <div class="wrap">
+    <span class="frame-note">Public · <code>/courses/:slug</code> · visitor or student</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>Catalog</span><span class="on">Algebra for exam week</span></nav>
+      <div class="avs"><div class="av bg5">ME</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="cover c1" style="border-radius:var(--radius);aspect-ratio:16/8;display:flex;align-items:flex-end;padding:22px;font-family:Cormorant Garamond,serif;font-size:34px"><span>Algebra for exam week</span></div>
+        <div class="teacher" style="margin:20px 0 6px"><div class="av lg bg1">AS</div><div><strong style="font-size:15px">Aigerim Sadykova</strong><br/><span class="small">Math teacher · Almaty · 4 courses</span></div></div>
+        <p class="muted" style="font-size:16px;max-width:640px">Twelve lessons that take you from the basic rules to exam-style problems, with homework reviewed by hand. Built for students with one term to go.</p>
+        <div class="tabs"><span class="on">Curriculum</span><span>About</span><span>Classes · 2</span></div>
+        <div class="accordion">
+          <div class="sec"><span>1. Functions and graphs</span><span class="muted small">4 lessons</span></div>
+          <div class="lesson"><span>Reading a graph</span><span class="muted">12 min</span></div>
+          <div class="lesson"><span>Linear functions</span><span class="muted">18 min</span></div>
+          <div class="lesson"><span>Quiz: functions</span><span class="muted">5 questions</span></div>
+          <div class="sec"><span>2. Equations</span><span class="muted small">5 lessons</span></div>
+          <div class="sec"><span>3. Exam practice</span><span class="muted small">3 lessons</span></div>
+        </div>
+      </div>
+      <div class="sticky">
+        <div class="card pad">
+          <div class="price free" style="font-size:22px">Free</div>
+          <p class="small muted" style="margin:4px 0 14px">Enroll once, keep access.</p>
+          <a class="btn primary" style="width:100%;justify-content:center" href="#">Enroll for free</a>
+          <div style="margin:18px 0 8px;font-size:14px"><b>Have a class code?</b></div>
+          <div class="search" style="max-width:none;padding:8px 8px 8px 16px"><input placeholder="Enter code" /><span class="go">Join</span></div>
+          <p class="small muted" style="margin-top:14px">Teachers can invite you with a link. Classes add sessions to your calendar.</p>
+          <div class="list" style="margin-top:14px">
+            <div style="padding:10px 0"><span class="small">Lessons</span><b class="small">12</b></div>
+            <div style="padding:10px 0"><span class="small">Homework reviewed by teacher</span><b class="small">Yes</b></div>
+            <div style="padding:10px 0"><span class="small">Live sessions in classes</span><b class="small">2 scheduled</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== TEACHER PROFILE -->
+<section class="screen" id="teacher">
+  <div class="wrap">
+    <span class="frame-note">Public · <code>/teachers/:slug</code> · visitor or student</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>Catalog</span><span>Teachers</span></nav>
+    </div>
+    <div class="card pad" style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
+      <div class="av bg1" style="width:96px;height:96px;font-size:30px;border-width:0">AS</div>
+      <div style="flex:1;min-width:240px">
+        <p class="eyebrow" style="margin-bottom:4px">Math teacher · Almaty</p>
+        <h1 style="font-size:40px">Aigerim Sadykova</h1>
+        <p class="muted" style="margin:8px 0 0;max-width:620px">I teach algebra and geometry for exam preparation. Every homework is read by me and returned with notes.</p>
+      </div>
+      <a class="btn primary" href="#">Follow teacher</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">4</div><div class="l">Courses</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">Open classes</div></div>
+      <div class="stat"><div class="n">120+</div><div class="l">Students taught</div></div>
+      <div class="stat"><div class="n">6 yrs</div><div class="l">Teaching</div></div>
+    </div>
+    <div class="tabs"><span class="on">Courses</span><span>Classes</span><span>About</span></div>
+    <div class="grid three">
+      <div class="card"><div class="cover c1"><span class="tag">Free</span><span class="tag">12 lessons</span></div><div class="body"><h3>Algebra for exam week</h3><div class="meta"><span>Has a class</span></div></div></div>
+      <div class="card"><div class="cover c2"><span class="tag">Paid</span><span class="tag">20 lessons</span></div><div class="body"><h3>Geometry without fear</h3><div class="meta"><span>Has a class</span></div></div></div>
+      <div class="card"><div class="cover c5"><span class="tag">Free</span><span class="tag">7 lessons</span></div><div class="body"><h3>Fractions and percentages</h3><div class="meta"><span>No class</span></div></div></div>
+    </div>
+    <p class="small muted" style="margin-top:14px">Stats are aggregates. Individual students are never listed on a public profile.</p>
+  </div>
+</section>
+
+<!-- ===================================================== JOIN -->
+<section class="screen" id="join">
+  <div class="wrap">
+    <span class="frame-note">Public · <code>/join/:code</code> <b>new</b> · the page a teacher's invite link opens</span>
+    <div class="card join-box">
+      <div class="av lg bg1" style="width:72px;height:72px;font-size:24px;border-width:0">AS</div>
+      <p class="eyebrow" style="margin-top:8px">Invited by Aigerim Sadykova</p>
+      <h1 style="font-size:36px;margin-top:6px">Morning algebra A</h1>
+      <p class="muted" style="margin:8px 0 0">Course: <b style="color:var(--ink)">Algebra for exam week</b></p>
+      <div class="faces">
+        <div class="avs"><div class="av bg1">A</div><div class="av bg2">B</div><div class="av bg3">C</div><div class="av bg4">D</div><div class="av bg5">E</div><span class="more">12 classmates</span></div>
+      </div>
+      <p class="small" style="margin:14px 0 4px"><b>Next session:</b> Monday, Oct 19 · 10:00 (your time zone)</p>
+      <p class="small muted">Classmates are shown by photo only.</p>
+      <div style="margin-top:20px;display:grid;gap:10px">
+        <a class="btn primary" style="justify-content:center" href="#">Join class and sign in</a>
+        <a class="btn ghost" style="justify-content:center" href="#">Create an account</a>
+      </div>
+      <p class="small muted" style="margin-top:16px">Leaving the class later removes access to its course.</p>
+    </div>
+    <div class="callout" style="max-width:460px;margin:22px auto 0">If the code has been rotated or the class is archived, this page says so and offers the teacher's other open classes.</div>
+  </div>
+</section>
+
+<!-- ===================================================== DASHBOARD -->
+<section class="screen" id="dashboard">
+  <div class="wrap">
+    <span class="frame-note">Student · <code>/dashboard</code> · replaces <code>/home</code></span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span class="on">My learning</span><span>Calendar</span><span>My classes</span><span>Catalog</span></nav>
+      <div class="avs"><div class="av bg4">NS</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <p class="eyebrow">Tuesday, Oct 13</p>
+        <h1>Good evening, Nurlan</h1>
+        <div class="card pad" style="margin-top:20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div class="cover c1" style="width:180px;aspect-ratio:16/10;border-radius:10px;flex-shrink:0"></div>
+          <div style="flex:1;min-width:220px">
+            <p class="small muted" style="margin:0">Continue · Algebra for exam week</p>
+            <h3 style="margin:4px 0 8px">Linear functions</h3>
+            <div class="progress"><i style="width:42%"></i></div>
+            <p class="small muted" style="margin:8px 0 0">5 of 12 lessons · 42%</p>
+          </div>
+          <a class="btn dark" href="#">Continue</a>
+        </div>
+
+        <div class="section" style="margin-top:34px">
+          <div class="section-head"><div><p class="eyebrow">This week</p><h2>Upcoming sessions</h2></div><a href="#">Open calendar →</a></div>
+          <div class="card pad agenda">
+            <div class="row"><div class="time">Thu<small>Oct 16</small></div><div><b>Q&amp;A on equations</b><div class="small muted">Morning algebra A · Aigerim S.</div></div><div class="avs"><div class="av sm bg1">A</div><div class="av sm bg2">B</div><div class="av sm bg3">C</div><span class="more">+9</span></div></div>
+            <div class="row"><div class="time">Mon<small>Oct 19</small></div><div><b>Exam practice, part 1</b><div class="small muted">Morning algebra A · Aigerim S.</div></div><div class="avs"><div class="av sm bg4">D</div><div class="av sm bg5">E</div><span class="more">+10</span></div></div>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:34px">
+          <div class="section-head"><div><p class="eyebrow">Your courses</p><h2>In progress</h2></div><a href="#">Find more →</a></div>
+          <div class="grid two">
+            <div class="card"><div class="cover c1"><span class="tag">Via class</span></div><div class="body"><h3>Algebra for exam week</h3><div class="teacher"><div class="av sm bg1">AS</div><strong>Aigerim S.</strong></div><div class="progress"><i style="width:42%"></i></div><div class="small muted">5/12 · 42%</div></div></div>
+            <div class="card"><div class="cover c3"><span class="tag">Enrolled</span></div><div class="body"><h3>Python from zero</h3><div class="teacher"><div class="av sm bg3">LT</div><strong>Laila T.</strong></div><div class="progress"><i style="width:10%"></i></div><div class="small muted">2/20 · 10%</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card pad sticky">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>My classes</h3><a class="small" href="#">All →</a></div>
+          <div class="list" style="margin-top:8px">
+            <div style="padding:14px 0"><div><b style="font-size:14px">Morning algebra A</b><div class="small muted">Next: Thu 10:00</div></div><div class="avs"><div class="av sm bg1">A</div><div class="av sm bg2">B</div><div class="av sm bg3">C</div></div></div>
+            <div style="padding:14px 0"><div><b style="font-size:14px">Evening exam prep</b><div class="small muted">Next: Tue 18:30</div></div><div class="avs"><div class="av sm bg5">M</div><div class="av sm bg6">K</div></div></div>
+          </div>
+          <div class="callout" style="margin-top:10px">Have a class code? <b>Enter it here</b> and your teacher's class and course appear on this page.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== STUDENT CALENDAR -->
+<section class="screen" id="calendar">
+  <div class="wrap">
+    <span class="frame-note">Student · <code>/calendar</code> <b>new</b> · needs the <code>class_sessions</code> table</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>My learning</span><span class="on">Calendar</span><span>My classes</span><span>Catalog</span></nav>
+      <div class="avs"><div class="av bg4">NS</div></div>
+    </div>
+    <div class="cal-head" style="background:#fff;border:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0;border-bottom:0">
+      <div><h2 style="font-size:26px">Week of Oct 12–18</h2><p class="small muted" style="margin:0">Times in Asia/Almaty (change in settings)</p></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="btn ghost sm">‹ Prev</span><span class="btn ghost sm">Today</span><span class="btn ghost sm">Next ›</span><span class="chip on">Week</span><span class="chip">Month</span><span class="chip">List</span></div>
+    </div>
+    <div class="calendar" style="border-radius:0 0 var(--radius) var(--radius)">
+      <div class="week">
+        <div class="day"><div class="dh">Mon <b>12</b></div>
+          <div class="event ev-a"><b>Algebra: functions</b><span class="t">10:00 · 60 min</span><div class="avs" style="margin-top:6px"><div class="av bg1">A</div><div class="av bg2">B</div><div class="av bg3">C</div><span class="more" style="font-size:11px">+9</span></div></div>
+        </div>
+        <div class="day today"><div class="dh">Tue <b>13</b></div>
+          <div class="event ev-b"><b>Evening exam prep</b><span class="t">18:30 · 90 min</span><div class="avs" style="margin-top:6px"><div class="av bg5">M</div><div class="av bg6">K</div><span class="more" style="font-size:11px">+4</span></div></div>
+        </div>
+        <div class="day"><div class="dh">Wed <b>14</b></div>
+          <div class="event ev-c"><b>Python: lists</b><span class="t">19:00 · 60 min</span><div class="avs" style="margin-top:6px"><div class="av bg3">L</div><div class="av bg4">S</div><span class="more" style="font-size:11px">+6</span></div></div>
+        </div>
+        <div class="day"><div class="dh">Thu <b>15</b></div>
+          <div class="event ev-a"><b>Q&amp;A on equations</b><span class="t">10:00 · 45 min</span><div class="avs" style="margin-top:6px"><div class="av bg1">A</div><div class="av bg2">B</div><div class="av bg3">C</div><span class="more" style="font-size:11px">+9</span></div></div>
+        </div>
+        <div class="day"><div class="dh">Fri <b>16</b></div></div>
+        <div class="day"><div class="dh">Sat <b>17</b></div>
+          <div class="event ev-d"><b>Speaking circle</b><span class="t">11:00 · 60 min</span><div class="avs" style="margin-top:6px"><div class="av bg4">D</div><div class="av bg2">E</div><span class="more" style="font-size:11px">+5</span></div></div>
+        </div>
+        <div class="day"><div class="dh">Sun <b>18</b></div></div>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top:30px">
+      <div class="section-head"><div><p class="eyebrow">Selected: Tuesday, Oct 13</p><h2>Evening exam prep</h2></div></div>
+      <div class="two-col">
+        <div class="card pad">
+          <p class="muted" style="margin:0">Algebra word problems · Madina B. · 18:30–20:00 · Almaty time</p>
+          <p style="margin-top:12px">Bring your notebook. We solve problems 1–8 from last week's set together.</p>
+          <a class="btn primary" href="#">Open meeting link</a>
+          <p class="small muted" style="margin-top:10px">Meeting link is shared by the teacher. LessonLoom does not host video.</p>
+        </div>
+        <div class="card pad">
+          <h3>Who is coming</h3>
+          <p class="small muted">Members of this class. Photos only.</p>
+          <div class="avs" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+            <div class="av bg5">M</div><div class="av bg6">K</div><div class="av bg2">R</div><div class="av bg3">T</div><div class="av bg1">Y</div><div class="av bg4">S</div><div class="av bg2">B</div><div class="av bg5">Z</div>
+          </div>
+          <p class="small muted" style="margin-top:12px">+4 more · You are going</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== MY CLASSES -->
+<section class="screen" id="classes">
+  <div class="wrap">
+    <span class="frame-note">Student · <code>/classes</code> <b>new</b></span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>My learning</span><span>Calendar</span><span class="on">My classes</span><span>Catalog</span></nav>
+      <div class="avs"><div class="av bg4">NS</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap">
+      <div><p class="eyebrow">Your classes</p><h1 style="font-size:40px">My classes</h1></div>
+      <div class="search" style="max-width:360px"><span class="muted">⌕</span><input placeholder="Search my classes" /></div>
+    </div>
+    <div class="card pad" style="margin-top:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+      <div><b>Have a code from your teacher?</b><div class="small muted">Paste it to join a class.</div></div>
+      <div class="search" style="max-width:340px;padding:8px 8px 8px 16px"><input placeholder="Class code" /><span class="go">Join</span></div>
+    </div>
+    <div class="grid two" style="margin-top:24px">
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;gap:12px"><div><h3>Morning algebra A</h3><p class="small muted" style="margin:4px 0 0">Algebra for exam week · Aigerim S.</p></div><span class="pill">Active</span></div>
+        <div class="avs" style="margin-top:14px"><div class="av sm bg1">A</div><div class="av sm bg2">B</div><div class="av sm bg3">C</div><div class="av sm bg4">D</div><div class="av sm bg5">E</div><span class="more">+8 classmates</span></div>
+        <div class="list" style="margin-top:14px"><div style="padding:10px 0"><span class="small">Next session</span><b class="small">Thu, Oct 16 · 10:00</b></div><div style="padding:10px 0"><span class="small">Sessions this month</span><b class="small">4</b></div></div>
+        <div style="display:flex;gap:8px;margin-top:10px"><a class="btn dark sm" href="#">Open course</a><a class="btn ghost sm" href="#">Calendar</a></div>
+      </div>
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;gap:12px"><div><h3>Evening exam prep</h3><p class="small muted" style="margin:4px 0 0">Algebra word problems · Madina B.</p></div><span class="pill gold">Limited seats</span></div>
+        <div class="avs" style="margin-top:14px"><div class="av sm bg5">M</div><div class="av sm bg6">K</div><div class="av sm bg2">R</div><span class="more">+4 classmates</span></div>
+        <div class="list" style="margin-top:14px"><div style="padding:10px 0"><span class="small">Next session</span><b class="small">Tue, Oct 13 · 18:30</b></div><div style="padding:10px 0"><span class="small">Sessions this month</span><b class="small">3</b></div></div>
+        <div style="display:flex;gap:8px;margin-top:10px"><a class="btn dark sm" href="#">Open course</a><a class="btn ghost sm" href="#">Calendar</a></div>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:18px">Leaving a class ends its access to the course. Classmates are shown with photos only.</p>
+  </div>
+</section>
+
+<!-- ===================================================== TEACHER HOME -->
+<section class="screen" id="tHome">
+  <div class="wrap">
+    <span class="frame-note">Teacher · <code>/teach</code> · redesign</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span class="on">Home</span><span>Courses</span><span>Calendar</span><span>Inbox <b style="color:var(--danger)">3</b></span><span>Plan</span></nav>
+      <div class="avs"><div class="av bg1">AS</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap">
+      <div><p class="eyebrow">Tuesday, Oct 13</p><h1 style="font-size:40px">Good evening, Aigerim</h1></div>
+      <div style="display:flex;gap:8px"><a class="btn ghost" href="#">Open calendar</a><a class="btn dark" href="#">+ New course</a></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">4</div><div class="l">Courses · 3 published, 1 draft</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">Classes running</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Homework to review</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">Sessions this week</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="section-head" style="margin-top:0"><div><p class="eyebrow">Your courses</p><h2>Courses</h2></div></div>
+        <div class="grid two">
+          <div class="card"><div class="cover c1"><span class="tag">Published</span><span class="tag">12 lessons</span></div><div class="body"><h3>Algebra for exam week</h3><div class="meta"><span>2 classes</span><span>13 students</span></div></div></div>
+          <div class="card"><div class="cover c2"><span class="tag">Published</span><span class="tag">20 lessons</span></div><div class="body"><h3>Geometry without fear</h3><div class="meta"><span>1 class</span><span>6 students</span></div></div></div>
+          <div class="card"><div class="cover c5"><span class="tag">Draft</span><span class="tag">7 lessons</span></div><div class="body"><h3>Fractions and percentages</h3><div class="meta"><span>Not published</span></div><a class="small" href="#">Continue editing →</a></div></div>
+          <div class="card" style="border-style:dashed;align-items:center;justify-content:center;text-align:center;min-height:200px"><div class="body" style="align-items:center;justify-content:center"><span class="muted">+ Start a new course</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="card pad">
+          <h3>Needs attention</h3>
+          <div class="list" style="margin-top:6px">
+            <div><div><b style="font-size:14px">3 homework submissions</b><div class="small muted">Oldest waiting 2 days</div></div><a class="btn ghost sm" href="#">Review</a></div>
+            <div><div><b style="font-size:14px">New join: Nurlan R.</b><div class="small muted">Morning algebra A · 10 min ago</div></div><a class="btn ghost sm" href="#">View</a></div>
+            <div><div><b style="font-size:14px">Session tomorrow</b><div class="small muted">Q&amp;A on equations · 10:00</div></div><a class="btn ghost sm" href="#">Details</a></div>
+          </div>
+        </div>
+        <div class="card pad" style="margin-top:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>Plan</h3><span class="pill">Pro</span></div>
+          <p class="small" style="margin:8px 0 0"><b>14 students</b> across your classes. Pro has no student limit.</p>
+          <a class="btn ghost sm" style="margin-top:12px" href="#">Manage plan</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== COURSE: CLASSES TAB -->
+<section class="screen" id="tCourse">
+  <div class="wrap">
+    <span class="frame-note">Teacher · <code>/teach/:courseId</code> · Classes tab</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>Home</span><span>Courses</span><span>Calendar</span></nav>
+      <div class="avs"><div class="av bg1">AS</div></div>
+    </div>
+    <p class="eyebrow" style="margin-bottom:4px">Algebra for exam week · Published</p>
+    <h1 style="font-size:40px">Course</h1>
+    <div class="tabs"><span>Content</span><span>Students</span><span class="on">Classes</span><span>Homework</span><span>Settings</span></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <p class="muted" style="margin:0">Classes group students on this course. Each class has its own join link and calendar.</p>
+      <a class="btn dark sm" href="#">+ New class</a>
+    </div>
+    <div class="grid two">
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;gap:12px"><div><h3>Morning algebra A</h3><p class="small muted" style="margin:4px 0 0">Created Oct 1 · Active</p></div><span class="pill">Active</span></div>
+        <div class="avs" style="margin-top:14px"><div class="av sm bg1">A</div><div class="av sm bg2">B</div><div class="av sm bg3">C</div><div class="av sm bg4">D</div><span class="more">+8 students</span></div>
+        <div style="margin-top:16px;display:grid;gap:8px">
+          <div class="small muted">Join link</div>
+          <div class="code">lessonloom.app/join/7KQ2M9ZP4XRT</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn dark sm" href="#">Copy link</a><a class="btn ghost sm" href="#">Rotate code</a><a class="btn ghost sm" href="#">Open class</a></div>
+        </div>
+      </div>
+      <div class="card pad">
+        <div style="display:flex;justify-content:space-between;gap:12px"><div><h3>Evening exam prep</h3><p class="small muted" style="margin:4px 0 0">Created Oct 6 · Active · Listed publicly</p></div><span class="pill">Active</span></div>
+        <div class="avs" style="margin-top:14px"><div class="av sm bg5">M</div><div class="av sm bg6">K</div><div class="av sm bg2">R</div><span class="more">+1 student</span></div>
+        <div style="margin-top:16px;display:grid;gap:8px">
+          <div class="small muted">Join link</div>
+          <div class="code">lessonloom.app/join/PX83NAQ7LDWB</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn dark sm" href="#">Copy link</a><a class="btn ghost sm" href="#">Rotate code</a><a class="btn ghost sm" href="#">Open class</a></div>
+        </div>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:16px">Archiving a class removes its students' access to this course. Rotating a code makes the old link stop working; existing members keep access.</p>
+  </div>
+</section>
+
+<!-- ===================================================== CLASS PAGE -->
+<section class="screen" id="tClass">
+  <div class="wrap">
+    <span class="frame-note">Teacher · <code>/teach/classes/:classId</code> <b>new</b></span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>Home</span><span>Courses</span><span>Calendar</span></nav>
+      <div class="avs"><div class="av bg1">AS</div></div>
+    </div>
+    <p class="eyebrow" style="margin-bottom:4px">Algebra for exam week · Morning algebra A</p>
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap">
+      <h1 style="font-size:40px">Morning algebra A</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="#">Add session</a><a class="btn dark" href="#">Copy join link</a></div>
+    </div>
+    <div class="stats" style="margin-top:20px">
+      <div class="stat"><div class="n">12</div><div class="l">Members</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Sessions this month</div></div>
+      <div class="stat"><div class="n">68%</div><div class="l">Average course progress</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Homework to review</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="section-head" style="margin-top:0"><div><p class="eyebrow">Members</p><h2>Students</h2></div><span class="small muted">Newest first</span></div>
+        <div class="wide"><table class="plain">
+          <thead><tr><th>Student</th><th>Joined</th><th>Progress</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;gap:10px;align-items:center"><div class="av sm bg4">NS</div><b>Nurlan S.</b></div></td><td class="small muted">Oct 13</td><td style="width:200px"><div class="progress"><i style="width:12%"></i></div></td><td><a class="small" href="#">Remove</a></td></tr>
+            <tr><td><div style="display:flex;gap:10px;align-items:center"><div class="av sm bg1">AY</div><b>Ayan Y.</b></div></td><td class="small muted">Oct 10</td><td style="width:200px"><div class="progress"><i style="width:70%"></i></div></td><td><a class="small" href="#">Remove</a></td></tr>
+            <tr><td><div style="display:flex;gap:10px;align-items:center"><div class="av sm bg2">BA</div><b>Bakhyt A.</b></div></td><td class="small muted">Oct 4</td><td style="width:200px"><div class="progress"><i style="width:55%"></i></div></td><td><a class="small" href="#">Remove</a></td></tr>
+            <tr><td><div style="display:flex;gap:10px;align-items:center"><div class="av sm bg3">LM</div><b>Lyazzat M.</b></div></td><td class="small muted">Oct 1</td><td style="width:200px"><div class="progress"><i style="width:92%"></i></div></td><td><a class="small" href="#">Remove</a></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="card pad sticky">
+          <h3>Sessions</h3>
+          <div class="list" style="margin-top:6px">
+            <div><div><b style="font-size:14px">Q&amp;A on equations</b><div class="small muted">Thu, Oct 16 · 10:00 · 45 min</div></div><span class="pill">Next</span></div>
+            <div><div><b style="font-size:14px">Exam practice, part 1</b><div class="small muted">Mon, Oct 19 · 10:00 · 60 min</div></div></div>
+          </div>
+          <a class="btn ghost sm" style="margin-top:10px" href="#">Add session</a>
+          <div class="callout" style="margin-top:14px">Join link: <span class="code" style="font-size:12px">lessonloom.app/join/7KQ2M9ZP4XRT</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== TEACHER CALENDAR -->
+<section class="screen" id="tCalendar">
+  <div class="wrap">
+    <span class="frame-note">Teacher · <code>/teach/calendar</code> <b>new</b> · all classes, filter by class</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>Home</span><span>Courses</span><span class="on">Calendar</span><span>Inbox</span></nav>
+      <div class="avs"><div class="av bg1">AS</div></div>
+    </div>
+    <div class="chips" style="margin:0 0 14px"><span class="chip on">All classes</span><span class="chip"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2f5d50;margin-right:6px"></span>Morning algebra A</span><span class="chip"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#a7863f;margin-right:6px"></span>Evening exam prep</span></div>
+    <div class="calendar">
+      <div class="cal-head"><h2 style="font-size:26px">Week of Oct 12–18</h2><div style="display:flex;gap:8px"><span class="btn ghost sm">‹</span><span class="btn ghost sm">Today</span><span class="btn ghost sm">›</span><span class="chip on">Week</span><span class="chip">Month</span></div></div>
+      <div class="week">
+        <div class="day"><div class="dh">Mon <b>12</b></div><div class="event ev-a"><b>Algebra: functions</b><span class="t">10:00 · 12 going</span></div></div>
+        <div class="day today"><div class="dh">Tue <b>13</b></div><div class="event ev-b"><b>Evening exam prep</b><span class="t">18:30 · 5 going</span></div></div>
+        <div class="day"><div class="dh">Wed <b>14</b></div></div>
+        <div class="day"><div class="dh">Thu <b>15</b></div><div class="event ev-a"><b>Q&amp;A on equations</b><span class="t">10:00 · 12 going</span></div></div>
+        <div class="day"><div class="dh">Fri <b>16</b></div></div>
+        <div class="day"><div class="dh">Sat <b>17</b></div><div class="event ev-d"><b>Speaking circle</b><span class="t">11:00 · 7 going</span></div></div>
+        <div class="day"><div class="dh">Sun <b>18</b></div></div>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:14px">"Going" counts members of the class for v1. Clicking a session opens the class page with the list of members.</p>
+  </div>
+</section>
+
+<!-- ===================================================== PLAN & LIMITS -->
+<section class="screen" id="tPlan">
+  <div class="wrap">
+    <span class="frame-note">Teacher · <code>/teach/plan</code> <b>new</b> · plan model from migrations 0005–0006 and 0017</span>
+    <div class="appbar">
+      <div class="brand">LessonLoom</div>
+      <nav><span>Home</span><span>Courses</span><span>Calendar</span><span class="on">Plan</span></nav>
+      <div class="avs"><div class="av bg1">AS</div></div>
+    </div>
+    <h1 style="font-size:40px">Plan &amp; limits</h1>
+    <p class="muted" style="max-width:640px">Limits count students across all your courses and classes once. A student in two classes counts once.</p>
+    <div class="card pad" style="margin:20px 0 26px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><b>Students used</b><span class="small"><b>14</b> · Pro, no limit</span></div>
+      <p class="small muted" style="margin:6px 0 0">Free (Starter) allows 3 students. Going over that limit is blocked with a message that points to Pro.</p>
+    </div>
+    <div class="pricing">
+      <div class="price-card">
+        <p class="eyebrow">Free</p>
+        <h3>Starter</h3>
+        <div class="amt">Free</div>
+        <ul><li>Up to 3 students</li><li>Unlimited courses (placeholder: confirm)</li><li>Classes and join links</li><li>Calendar: 2 sessions a week (placeholder)</li></ul>
+        <a class="btn ghost" href="#">Switch to Free</a>
+      </div>
+      <div class="price-card pro">
+        <p class="eyebrow">Current</p>
+        <h3>Pro</h3>
+        <div class="amt">Price later</div>
+        <ul><li>Unlimited students</li><li>Unlimited sessions</li><li>Listed classes in search</li><li>Homework and quiz analytics</li></ul>
+        <a class="btn ghost" href="#">Manage (payment later)</a>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:14px">Prices and the calendar limits on Starter are placeholders for the design review. The payment rule stays as a separate decision.</p>
+  </div>
+</section>
+
+<script>
+  const buttons = document.querySelectorAll('.switcher button');
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+    buttons.forEach(b => b.classList.toggle('on', b.dataset.s === id));
+    window.scrollTo({ top: 0 });
+  }
+  buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.s)));
+  // Stop mockup links from navigating.
+  document.querySelectorAll('a[href="#"]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+</script>
+</body>
+</html>

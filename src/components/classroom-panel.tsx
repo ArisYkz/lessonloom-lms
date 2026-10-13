@@ -1,8 +1,18 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Archive, ArchiveRestore, Copy, Plus, RefreshCw, Trash2, Users } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  ArrowRight,
+  Copy,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Users,
+} from "lucide-react";
 import {
   createClassroom,
   getClassroomJoinCode,
@@ -10,6 +20,7 @@ import {
   listClassrooms,
   removeClassroomMember,
   rotateClassroomJoinCode,
+  setClassroomListed,
   setClassroomStatus,
 } from "@/lib/teach.functions";
 import { classroomErrorKey } from "@/lib/classroom-errors";
@@ -17,6 +28,7 @@ import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +41,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type ClassroomRow = { id: string; name: string; status: string };
+type ClassroomRow = { id: string; name: string; status: string; listed: boolean };
 
 export function ClassroomPanel({ courseId }: { courseId: string }) {
   const { t } = useI18n();
@@ -90,12 +102,19 @@ export function ClassroomPanel({ courseId }: { courseId: string }) {
   );
 }
 
-function ClassroomCard({ classroom, courseId }: { classroom: ClassroomRow; courseId: string }) {
+export function ClassroomCard({
+  classroom,
+  courseId,
+}: {
+  classroom: ClassroomRow;
+  courseId: string;
+}) {
   const { t, locale } = useI18n();
   const queryClient = useQueryClient();
   const fetchCode = useServerFn(getClassroomJoinCode);
   const rotate = useServerFn(rotateClassroomJoinCode);
   const setStatus = useServerFn(setClassroomStatus);
+  const setListed = useServerFn(setClassroomListed);
   const fetchMembers = useServerFn(listClassroomMembers);
   const removeMember = useServerFn(removeClassroomMember);
   const [busy, setBusy] = useState(false);
@@ -115,6 +134,7 @@ function ClassroomCard({ classroom, courseId }: { classroom: ClassroomRow; cours
     try {
       await action();
       queryClient.invalidateQueries({ queryKey: ["classrooms", courseId] });
+      queryClient.invalidateQueries({ queryKey: ["my-classrooms"] });
       queryClient.invalidateQueries({ queryKey: ["classroom-code", classroom.id] });
       queryClient.invalidateQueries({ queryKey: ["classroom-members", classroom.id] });
     } catch (err) {
@@ -141,6 +161,11 @@ function ClassroomCard({ classroom, courseId }: { classroom: ClassroomRow; cours
         <Badge variant={active ? "secondary" : "outline"}>
           {t(active ? "classroom.active" : "classroom.archived")}
         </Badge>
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/teach/classes/$classId" params={{ classId: classroom.id }}>
+            {t("classroom.open")} <ArrowRight className="size-4" />
+          </Link>
+        </Button>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">{t("classroom.joinCode")}</span>
           <code className="rounded bg-muted px-2 py-1 font-mono text-sm tracking-widest">
@@ -149,6 +174,23 @@ function ClassroomCard({ classroom, courseId }: { classroom: ClassroomRow; cours
           <Button variant="outline" size="sm" disabled={!codeData} onClick={copyCode}>
             <Copy className="size-4" /> {t("classroom.copy")}
           </Button>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-3">
+        <Switch
+          id={`listed-${classroom.id}`}
+          checked={classroom.listed}
+          disabled={busy}
+          onCheckedChange={(listed) =>
+            run(() => setListed({ data: { classroomId: classroom.id, listed } }))
+          }
+        />
+        <div>
+          <label htmlFor={`listed-${classroom.id}`} className="text-sm font-medium">
+            {t("classroom.listed")}
+          </label>
+          <p className="mt-1 text-xs text-muted-foreground">{t("classroom.listedHelp")}</p>
         </div>
       </div>
 

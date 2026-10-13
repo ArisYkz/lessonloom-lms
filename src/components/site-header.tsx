@@ -82,6 +82,14 @@ export function SiteHeader() {
       >
         {t("act.inbox")}
       </Link>
+      <Link
+        to="/teach/calendar"
+        className={linkCls}
+        activeProps={activeCls}
+        onClick={() => setOpen(false)}
+      >
+        {t("nav.calendar")}
+      </Link>
     </>
   ) : (
     <>
@@ -117,6 +125,16 @@ export function SiteHeader() {
           {t("nav.teach")}
         </Link>
       )}
+      {user ? (
+        <Link
+          to="/calendar"
+          className={linkCls}
+          activeProps={activeCls}
+          onClick={() => setOpen(false)}
+        >
+          {t("nav.calendar")}
+        </Link>
+      ) : null}
     </>
   );
 

@@ -65,6 +65,50 @@ export type Database = {
         };
         Relationships: [];
       };
+      class_sessions: {
+        Row: {
+          classroom_id: string;
+          created_at: string;
+          duration_minutes: number;
+          id: string;
+          meeting_url: string | null;
+          starts_at: string;
+          status: string;
+          time_zone: string;
+          title: string;
+        };
+        Insert: {
+          classroom_id: string;
+          created_at?: string;
+          duration_minutes: number;
+          id?: string;
+          meeting_url?: string | null;
+          starts_at: string;
+          status?: string;
+          time_zone: string;
+          title: string;
+        };
+        Update: {
+          classroom_id?: string;
+          created_at?: string;
+          duration_minutes?: number;
+          id?: string;
+          meeting_url?: string | null;
+          starts_at?: string;
+          status?: string;
+          time_zone?: string;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_classroom_id_fkey";
+            columns: ["classroom_id"];
+            isOneToOne: false;
+            referencedRelation: "classrooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       classroom_memberships: {
         Row: {
           classroom_id: string;
@@ -90,7 +134,15 @@ export type Database = {
           status?: string;
           user_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "classroom_memberships_classroom_id_fkey";
+            columns: ["classroom_id"];
+            isOneToOne: false;
+            referencedRelation: "classrooms";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       classrooms: {
         Row: {
@@ -98,6 +150,7 @@ export type Database = {
           created_at: string;
           id: string;
           join_code: string;
+          listed: boolean;
           name: string;
           organization_id: string;
           status: string;
@@ -107,6 +160,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           join_code: string;
+          listed?: boolean;
           name: string;
           organization_id: string;
           status?: string;
@@ -116,11 +170,27 @@ export type Database = {
           created_at?: string;
           id?: string;
           join_code?: string;
+          listed?: boolean;
           name?: string;
           organization_id?: string;
           status?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "classrooms_course_organization_fkey";
+            columns: ["course_id", "organization_id"];
+            isOneToOne: false;
+            referencedRelation: "courses";
+            referencedColumns: ["id", "organization_id"];
+          },
+          {
+            foreignKeyName: "classrooms_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       courses: {
         Row: {
@@ -255,6 +325,13 @@ export type Database = {
             referencedRelation: "lessons";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "danmaku_lesson_same_course_fkey";
+            columns: ["lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["id", "course_id"];
+          },
         ];
       };
       danmaku_blocks: {
@@ -339,6 +416,13 @@ export type Database = {
             referencedRelation: "discussion_threads";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "discussion_replies_thread_same_course_fkey";
+            columns: ["thread_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "discussion_threads";
+            referencedColumns: ["id", "course_id"];
+          },
         ];
       };
       discussion_threads: {
@@ -383,6 +467,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "lessons";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "discussion_threads_lesson_same_course_fkey";
+            columns: ["lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["id", "course_id"];
           },
         ];
       };
@@ -464,6 +555,13 @@ export type Database = {
             referencedRelation: "lessons";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "homework_lesson_same_course_fkey";
+            columns: ["lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["id", "course_id"];
+          },
         ];
       };
       homework_submissions: {
@@ -528,6 +626,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "homework_submissions_homework_same_lesson_fkey";
+            columns: ["homework_id", "lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "homework";
+            referencedColumns: ["id", "lesson_id", "course_id"];
+          },
+          {
             foreignKeyName: "homework_submissions_lesson_id_fkey";
             columns: ["lesson_id"];
             isOneToOne: false;
@@ -576,6 +681,13 @@ export type Database = {
             referencedRelation: "lessons";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "lesson_progress_lesson_same_course_fkey";
+            columns: ["lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["id", "course_id"];
+          },
         ];
       };
       lesson_resources: {
@@ -620,6 +732,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "lessons";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lesson_resources_lesson_same_course_fkey";
+            columns: ["lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["id", "course_id"];
           },
         ];
       };
@@ -683,6 +802,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "sections";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lessons_section_same_course_fkey";
+            columns: ["section_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "sections";
+            referencedColumns: ["id", "course_id"];
           },
         ];
       };
@@ -879,7 +1005,7 @@ export type Database = {
       };
       quiz_attempts: {
         Row: {
-          answers: Json;
+          answers: NonNullable<Json>;
           course_id: string;
           created_at: string;
           id: string;
@@ -891,7 +1017,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          answers?: Json;
+          answers?: NonNullable<Json>;
           course_id: string;
           created_at?: string;
           id?: string;
@@ -903,7 +1029,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
-          answers?: Json;
+          answers?: NonNullable<Json>;
           course_id?: string;
           created_at?: string;
           id?: string;
@@ -935,6 +1061,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "quizzes";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quiz_attempts_quiz_same_lesson_fkey";
+            columns: ["quiz_id", "lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "quizzes";
+            referencedColumns: ["id", "lesson_id", "course_id"];
           },
         ];
       };
@@ -978,6 +1111,13 @@ export type Database = {
             referencedRelation: "quiz_questions";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "quiz_options_question_same_course_fkey";
+            columns: ["question_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "quiz_questions";
+            referencedColumns: ["id", "course_id"];
+          },
         ];
       };
       quiz_questions: {
@@ -1020,6 +1160,13 @@ export type Database = {
             referencedRelation: "quizzes";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "quiz_questions_quiz_same_course_fkey";
+            columns: ["quiz_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "quizzes";
+            referencedColumns: ["id", "course_id"];
+          },
         ];
       };
       quizzes: {
@@ -1061,6 +1208,13 @@ export type Database = {
             isOneToOne: true;
             referencedRelation: "lessons";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quizzes_lesson_same_course_fkey";
+            columns: ["lesson_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["id", "course_id"];
           },
         ];
       };
@@ -1236,6 +1390,7 @@ export type Database = {
     };
     Functions: {
       can_edit_course: { Args: { _course: string }; Returns: boolean };
+      cancel_class_session: { Args: { _session: string }; Returns: undefined };
       course_is_published: { Args: { _course: string }; Returns: boolean };
       course_stats: {
         Args: never;
@@ -1245,7 +1400,21 @@ export type Database = {
           students: number;
         }[];
       };
-      create_classroom: { Args: { _course: string; _name: string }; Returns: string };
+      create_class_session: {
+        Args: {
+          _classroom: string;
+          _duration_minutes: number;
+          _meeting_url: string;
+          _starts_at: string;
+          _time_zone: string;
+          _title: string;
+        };
+        Returns: string;
+      };
+      create_classroom: {
+        Args: { _course: string; _name: string };
+        Returns: string;
+      };
       enroll_free_course: {
         Args: { _course: string; _user: string };
         Returns: string;
@@ -1262,14 +1431,42 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_active_classroom_member: {
+        Args: { _classroom: string; _user: string };
+        Returns: boolean;
+      };
       join_classroom: { Args: { _code: string }; Returns: string };
       leave_classroom: { Args: { _classroom: string }; Returns: undefined };
+      leave_course_classes: { Args: { _course: string }; Returns: undefined };
+      list_public_classrooms: {
+        Args: { _limit?: number };
+        Returns: {
+          classroom_id: string;
+          classroom_name: string;
+          course_id: string;
+          course_title: string;
+        }[];
+      };
+      new_classroom_join_code: { Args: never; Returns: string };
+      org_learner_count: {
+        Args: { _exclude: string; _org: string };
+        Returns: number;
+      };
+      org_max_students: { Args: { _org: string }; Returns: number };
+      owns_classroom: { Args: { _classroom: string }; Returns: boolean };
       owns_org: { Args: { _org: string }; Returns: boolean };
       remove_classroom_member: {
         Args: { _classroom: string; _user: string };
         Returns: undefined;
       };
-      rotate_classroom_join_code: { Args: { _classroom: string }; Returns: string };
+      rotate_classroom_join_code: {
+        Args: { _classroom: string };
+        Returns: string;
+      };
+      set_classroom_listed: {
+        Args: { _classroom: string; _listed: boolean };
+        Returns: undefined;
+      };
       set_classroom_status: {
         Args: { _classroom: string; _status: string };
         Returns: undefined;

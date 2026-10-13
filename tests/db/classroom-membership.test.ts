@@ -59,6 +59,14 @@ describe("create_classroom", () => {
       asUser(db, STUDENT, "select public.create_classroom($1, $2) as id", [COURSE, "Mine"]),
     ).rejects.toThrow(/Forbidden/);
   });
+
+  it("refuses to create a classroom for a draft course", async () => {
+    await db.exec(`update public.courses set status = 'draft' where id = '${COURSE}'`);
+    await expect(
+      asUser(db, OWNER, "select public.create_classroom($1, $2) as id", [COURSE, "Draft"]),
+    ).rejects.toThrow(/must be published/);
+    await db.exec(`update public.courses set status = 'published' where id = '${COURSE}'`);
+  });
 });
 
 describe("join_classroom", () => {

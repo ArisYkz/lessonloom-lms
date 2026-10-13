@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -23,7 +24,9 @@ import { Route as TeachersSlugRouteImport } from './routes/teachers.$slug'
 import { Route as AuthenticatedLearnSlugRouteImport } from './routes/_authenticated/learn.$slug'
 import { Route as AuthenticatedTeachIndexRouteImport } from './routes/_authenticated/teach.index'
 import { Route as AuthenticatedTeachCourseIdRouteImport } from './routes/_authenticated/teach.$courseId'
+import { Route as AuthenticatedTeachCalendarRouteImport } from './routes/_authenticated/teach.calendar'
 import { Route as AuthenticatedTeachInboxRouteImport } from './routes/_authenticated/teach.inbox'
+import { Route as AuthenticatedTeachClassesClassIdRouteImport } from './routes/_authenticated/teach.classes.$classId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +55,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -95,11 +103,23 @@ const AuthenticatedTeachCourseIdRoute =
     path: '/teach/$courseId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTeachCalendarRoute =
+  AuthenticatedTeachCalendarRouteImport.update({
+    id: '/teach/calendar',
+    path: '/teach/calendar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTeachInboxRoute = AuthenticatedTeachInboxRouteImport.update({
   id: '/teach/inbox',
   path: '/teach/inbox',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTeachClassesClassIdRoute =
+  AuthenticatedTeachClassesClassIdRouteImport.update({
+    id: '/teach/classes/$classId',
+    path: '/teach/classes/$classId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -107,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/catalog': typeof CatalogRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/calendar': typeof AuthenticatedCalendarRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -114,8 +135,10 @@ export interface FileRoutesByFullPath {
   '/teachers/$slug': typeof TeachersSlugRoute
   '/learn/$slug': typeof AuthenticatedLearnSlugRoute
   '/teach/$courseId': typeof AuthenticatedTeachCourseIdRoute
+  '/teach/calendar': typeof AuthenticatedTeachCalendarRoute
   '/teach/inbox': typeof AuthenticatedTeachInboxRoute
   '/teach/': typeof AuthenticatedTeachIndexRoute
+  '/teach/classes/$classId': typeof AuthenticatedTeachClassesClassIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,6 +146,7 @@ export interface FileRoutesByTo {
   '/catalog': typeof CatalogRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/calendar': typeof AuthenticatedCalendarRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -130,8 +154,10 @@ export interface FileRoutesByTo {
   '/teachers/$slug': typeof TeachersSlugRoute
   '/learn/$slug': typeof AuthenticatedLearnSlugRoute
   '/teach/$courseId': typeof AuthenticatedTeachCourseIdRoute
+  '/teach/calendar': typeof AuthenticatedTeachCalendarRoute
   '/teach/inbox': typeof AuthenticatedTeachInboxRoute
   '/teach': typeof AuthenticatedTeachIndexRoute
+  '/teach/classes/$classId': typeof AuthenticatedTeachClassesClassIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,6 +167,7 @@ export interface FileRoutesById {
   '/catalog': typeof CatalogRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -148,8 +175,10 @@ export interface FileRoutesById {
   '/teachers/$slug': typeof TeachersSlugRoute
   '/_authenticated/learn/$slug': typeof AuthenticatedLearnSlugRoute
   '/_authenticated/teach/$courseId': typeof AuthenticatedTeachCourseIdRoute
+  '/_authenticated/teach/calendar': typeof AuthenticatedTeachCalendarRoute
   '/_authenticated/teach/inbox': typeof AuthenticatedTeachInboxRoute
   '/_authenticated/teach/': typeof AuthenticatedTeachIndexRoute
+  '/_authenticated/teach/classes/$classId': typeof AuthenticatedTeachClassesClassIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,6 +188,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/reset-password'
     | '/admin'
+    | '/calendar'
     | '/dashboard'
     | '/home'
     | '/profile'
@@ -166,8 +196,10 @@ export interface FileRouteTypes {
     | '/teachers/$slug'
     | '/learn/$slug'
     | '/teach/$courseId'
+    | '/teach/calendar'
     | '/teach/inbox'
     | '/teach/'
+    | '/teach/classes/$classId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,6 +207,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/reset-password'
     | '/admin'
+    | '/calendar'
     | '/dashboard'
     | '/home'
     | '/profile'
@@ -182,8 +215,10 @@ export interface FileRouteTypes {
     | '/teachers/$slug'
     | '/learn/$slug'
     | '/teach/$courseId'
+    | '/teach/calendar'
     | '/teach/inbox'
     | '/teach'
+    | '/teach/classes/$classId'
   id:
     | '__root__'
     | '/'
@@ -192,6 +227,7 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/_authenticated/calendar'
     | '/_authenticated/dashboard'
     | '/_authenticated/home'
     | '/_authenticated/profile'
@@ -199,8 +235,10 @@ export interface FileRouteTypes {
     | '/teachers/$slug'
     | '/_authenticated/learn/$slug'
     | '/_authenticated/teach/$courseId'
+    | '/_authenticated/teach/calendar'
     | '/_authenticated/teach/inbox'
     | '/_authenticated/teach/'
+    | '/_authenticated/teach/classes/$classId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -255,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/calendar': {
+      id: '/_authenticated/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AuthenticatedCalendarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -313,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeachCourseIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/teach/calendar': {
+      id: '/_authenticated/teach/calendar'
+      path: '/teach/calendar'
+      fullPath: '/teach/calendar'
+      preLoaderRoute: typeof AuthenticatedTeachCalendarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/teach/inbox': {
       id: '/_authenticated/teach/inbox'
       path: '/teach/inbox'
@@ -320,29 +372,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeachInboxRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/teach/classes/$classId': {
+      id: '/_authenticated/teach/classes/$classId'
+      path: '/teach/classes/$classId'
+      fullPath: '/teach/classes/$classId'
+      preLoaderRoute: typeof AuthenticatedTeachClassesClassIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedLearnSlugRoute: typeof AuthenticatedLearnSlugRoute
   AuthenticatedTeachCourseIdRoute: typeof AuthenticatedTeachCourseIdRoute
+  AuthenticatedTeachCalendarRoute: typeof AuthenticatedTeachCalendarRoute
   AuthenticatedTeachInboxRoute: typeof AuthenticatedTeachInboxRoute
   AuthenticatedTeachIndexRoute: typeof AuthenticatedTeachIndexRoute
+  AuthenticatedTeachClassesClassIdRoute: typeof AuthenticatedTeachClassesClassIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedLearnSlugRoute: AuthenticatedLearnSlugRoute,
   AuthenticatedTeachCourseIdRoute: AuthenticatedTeachCourseIdRoute,
+  AuthenticatedTeachCalendarRoute: AuthenticatedTeachCalendarRoute,
   AuthenticatedTeachInboxRoute: AuthenticatedTeachInboxRoute,
   AuthenticatedTeachIndexRoute: AuthenticatedTeachIndexRoute,
+  AuthenticatedTeachClassesClassIdRoute: AuthenticatedTeachClassesClassIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

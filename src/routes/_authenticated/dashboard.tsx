@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
-import { getMyLearning, joinClassroom, leaveClassroom } from "@/lib/learn.functions";
+import { getMyLearning, joinClassroom, leaveClassCourse } from "@/lib/learn.functions";
 import { classroomErrorKey } from "@/lib/classroom-errors";
 import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -124,7 +124,7 @@ function Dashboard() {
                   </div>
                 </div>
               </Link>
-              {c.classroomId ? <LeaveClassButton classroomId={c.classroomId} /> : null}
+              {c.classroomId ? <LeaveClassButton courseId={c.courseId} /> : null}
             </div>
           ))}
         </div>
@@ -133,16 +133,16 @@ function Dashboard() {
   );
 }
 
-function LeaveClassButton({ classroomId }: { classroomId: string }) {
+function LeaveClassButton({ courseId }: { courseId: string }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
-  const leave = useServerFn(leaveClassroom);
+  const leave = useServerFn(leaveClassCourse);
   const [busy, setBusy] = useState(false);
 
   async function confirmLeave() {
     setBusy(true);
     try {
-      await leave({ data: { classroomId } });
+      await leave({ data: { courseId } });
       queryClient.invalidateQueries({ queryKey: ["my-learning"] });
       queryClient.invalidateQueries({ queryKey: ["enrollment"] });
     } catch (err) {

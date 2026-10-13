@@ -5,7 +5,6 @@ import { BookOpen, Clock, Lock, PlayCircle, FileText, Paperclip } from "lucide-r
 import { toast } from "sonner";
 import { getCourseBySlug } from "@/lib/catalog.functions";
 import { enrollFree, getEnrollmentState } from "@/lib/learn.functions";
-import { classroomErrorKey } from "@/lib/classroom-errors";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n/provider";
 import type { Dict } from "@/i18n/dictionary";
@@ -81,7 +80,8 @@ function CoursePage() {
       await queryClient.invalidateQueries({ queryKey: ["enrollment"] });
       navigate({ to: "/learn/$slug", params: { slug } });
     } catch (e) {
-      toast.error(t(classroomErrorKey(e)));
+      const limitReached = e instanceof Error && e.message === "PLAN_STUDENT_LIMIT";
+      toast.error(t(limitReached ? "classroom.PLAN_STUDENT_LIMIT" : "common.error"));
     }
   }
 

@@ -134,6 +134,7 @@ export const getMyLearning = createServerFn({ method: "POST" })
       const total = (lessons ?? []).filter((l) => l.course_id === c.id).length;
       const done = (progress ?? []).filter((p) => p.course_id === c.id).length;
       return {
+        courseId: c.id,
         slug: c.slug,
         title: c.title,
         teacherName: c.organizations?.name ?? "",
@@ -144,6 +145,27 @@ export const getMyLearning = createServerFn({ method: "POST" })
         percent: total === 0 ? 0 : Math.round((done / total) * 100),
       };
     });
+  });
+
+export const getMySessions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    // Sessions are RLS-scoped to active class members of active classes.
+    const { data, error } = await context.supabase
+      .from("class_sessions")
+      .select("id, title, starts_at, duration_minutes, time_zone, meeting_url, classrooms(name)")
+      .eq("status", "scheduled")
+      .order("starts_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((s) => ({
+      id: s.id,
+      title: s.title,
+      startsAt: s.starts_at,
+      durationMinutes: s.duration_minutes,
+      timeZone: s.time_zone,
+      meetingUrl: s.meeting_url,
+      classroomName: s.classrooms?.name ?? "",
+    }));
   });
 
 export const enrollFree = createServerFn({ method: "POST" })
@@ -174,12 +196,12 @@ export const joinClassroom = createServerFn({ method: "POST" })
     return { classroomId };
   });
 
-export const leaveClassroom = createServerFn({ method: "POST" })
+export const leaveClassCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { classroomId: string }) => input)
+  .inputValidator((input: { courseId: string }) => input)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("leave_classroom", {
-      _classroom: data.classroomId,
+    const { error } = await context.supabase.rpc("leave_course_classes", {
+      _course: data.courseId,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
