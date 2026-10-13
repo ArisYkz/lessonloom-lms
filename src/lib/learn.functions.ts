@@ -93,13 +93,17 @@ export const getMyLearning = createServerFn({ method: "POST" })
     const { data: classrooms } = classroomIds.length
       ? await context.supabase
           .from("classrooms")
-          .select("course_id")
+          .select("id, course_id")
           .in("id", classroomIds)
           .eq("status", "active")
       : { data: [] };
-    const classCourseIds = [...new Set((classrooms ?? []).map((c) => c.course_id))].filter(
-      (id) => !enrolled.has(id),
-    );
+    const classroomByCourse = new Map<string, string>();
+    for (const c of classrooms ?? []) {
+      if (!enrolled.has(c.course_id) && !classroomByCourse.has(c.course_id)) {
+        classroomByCourse.set(c.course_id, c.id);
+      }
+    }
+    const classCourseIds = [...classroomByCourse.keys()];
     const { data: classCourses } = classCourseIds.length
       ? await context.supabase
           .from("courses")
@@ -133,6 +137,7 @@ export const getMyLearning = createServerFn({ method: "POST" })
         slug: c.slug,
         title: c.title,
         teacherName: c.organizations?.name ?? "",
+        classroomId: classroomByCourse.get(c.id) ?? null,
         thumbnailUrl: c.thumbnail_url ? (signed.get(c.thumbnail_url) ?? null) : null,
         total,
         done,
