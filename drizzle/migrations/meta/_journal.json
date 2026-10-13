@@ -64,6 +64,13 @@
       "when": 1790771117292,
       "tag": "0008_enrollment_only_via_checked_function",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791868973126,
+      "tag": "0009_access_checks_only_for_caller",
+      "breakpoints": true
     }
   ]
 }
