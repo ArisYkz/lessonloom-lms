@@ -86,7 +86,7 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
 
   async function upload(file: File) {
     if (!user) return;
-    const path = `${user.id}/submissions/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
+    const path = `${user.id}/submissions/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
     const { error } = await supabase.storage.from("course-media").upload(path, file);
     if (error) throw new Error(error.message);
     setFiles((f) => [...f, { path, name: file.name }]);

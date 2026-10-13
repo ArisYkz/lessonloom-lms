@@ -28,7 +28,7 @@ function OrgProfile({ org }: { org: Org }) {
   const [busy, setBusy] = useState(false);
 
   async function upload(file: File) {
-    const path = `${user!.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
+    const path = `${user!.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
     const { error } = await supabase.storage.from("course-media").upload(path, file);
     if (error) throw new Error(error.message);
     return path;

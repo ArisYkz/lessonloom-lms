@@ -128,7 +128,7 @@ function useUpload() {
     if (!user) throw new Error("Not signed in");
     setUploading(true);
     try {
-      const path = `${user.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
+      const path = `${user.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
       const { error } = await supabase.storage.from("course-media").upload(path, file);
       if (error) throw new Error(error.message);
       return path;

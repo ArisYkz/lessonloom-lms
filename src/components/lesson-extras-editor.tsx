@@ -103,7 +103,7 @@ export function LessonExtrasEditor({ lessonId }: { lessonId: string }) {
             const f = e.target.files?.[0];
             e.target.value = "";
             if (!f || !user) return;
-            const path = `${user.id}/${crypto.randomUUID()}-${f.name.replace(/[^\w.\-]/g, "_")}`;
+            const path = `${user.id}/${crypto.randomUUID()}-${f.name.replace(/[^\w.-]/g, "_")}`;
             const { error } = await supabase.storage.from("course-media").upload(path, f);
             if (error) return void toast.error(error.message);
             await addRes({ data: { lessonId, title: f.name, path } });
