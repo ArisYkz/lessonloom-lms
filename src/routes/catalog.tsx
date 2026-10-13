@@ -6,10 +6,21 @@ import { useI18n } from "@/i18n/provider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CONTENT_LANGUAGES } from "@/i18n/dictionary";
 
-type Search = { q?: string | undefined; category?: string | undefined; language?: string | undefined; level?: string | undefined };
+type Search = {
+  q?: string | undefined;
+  category?: string | undefined;
+  language?: string | undefined;
+  level?: string | undefined;
+};
 
 const catalogQuery = (search: Search) =>
   queryOptions({
@@ -30,8 +41,10 @@ const catalogQuery = (search: Search) =>
 export const Route = createFileRoute("/catalog")({
   validateSearch: (search: Record<string, unknown>): Search => ({
     q: typeof search["q"] === "string" && search["q"] ? search["q"] : undefined,
-    category: typeof search["category"] === "string" && search["category"] ? search["category"] : undefined,
-    language: typeof search["language"] === "string" && search["language"] ? search["language"] : undefined,
+    category:
+      typeof search["category"] === "string" && search["category"] ? search["category"] : undefined,
+    language:
+      typeof search["language"] === "string" && search["language"] ? search["language"] : undefined,
     level: typeof search["level"] === "string" && search["level"] ? search["level"] : undefined,
   }),
   loaderDeps: ({ search }) => search,
@@ -120,7 +133,10 @@ function Catalog() {
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">{t("catalog.level")}</Label>
-            <Select value={search.level ?? ALL} onValueChange={(v) => set({ level: v === ALL ? undefined : v })}>
+            <Select
+              value={search.level ?? ALL}
+              onValueChange={(v) => set({ level: v === ALL ? undefined : v })}
+            >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue />
               </SelectTrigger>

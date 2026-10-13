@@ -7,7 +7,9 @@ export function Markdown({ children }: { children: string }) {
     <div className="prose-lesson">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        components={{ a: ({ node: _n, ...p }) => <a {...p} target="_blank" rel="noreferrer noopener" /> }}
+        components={{
+          a: ({ node: _n, ...p }) => <a {...p} target="_blank" rel="noreferrer noopener" />,
+        }}
       >
         {children}
       </ReactMarkdown>

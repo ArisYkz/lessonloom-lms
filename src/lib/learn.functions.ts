@@ -4,7 +4,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getMyRoles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
+    const { data } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
     return (data ?? []).map((r) => r.role as string);
   });
 
@@ -18,13 +21,25 @@ export const getMyProfile = createServerFn({ method: "POST" })
       .eq("id", context.userId)
       .maybeSingle();
     if (!data) return null;
-    const { data: org } = await context.supabase.from("organizations").select("id").eq("owner_id", context.userId).maybeSingle();
+    const { data: org } = await context.supabase
+      .from("organizations")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     return { ...data, hasOrg: !!org, avatarUrl: await signPath(data.avatar_url) };
   });
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { fullName: string; bio: string; preferredLocale: string; avatarPath?: string | null; defaultMode?: "student" | "teacher" }) => input)
+  .inputValidator(
+    (input: {
+      fullName: string;
+      bio: string;
+      preferredLocale: string;
+      avatarPath?: string | null;
+      defaultMode?: "student" | "teacher";
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = {
       full_name: data.fullName,
@@ -32,8 +47,12 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferred_locale: data.preferredLocale,
     };
     if (data.avatarPath !== undefined) patch["avatar_url"] = data.avatarPath;
-    if (data.defaultMode) patch["default_mode"] = data.defaultMode === "teacher" ? "teacher" : "student";
-    const { error } = await context.supabase.from("profiles").update(patch as never).eq("id", context.userId);
+    if (data.defaultMode)
+      patch["default_mode"] = data.defaultMode === "teacher" ? "teacher" : "student";
+    const { error } = await context.supabase
+      .from("profiles")
+      .update(patch as never)
+      .eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -63,7 +82,9 @@ export const getMyLearning = createServerFn({ method: "POST" })
       .in("course_id", courseIds);
 
     const signed = await signMany(
-      rows.map((r) => (r.courses as unknown as { thumbnail_url: string | null } | null)?.thumbnail_url),
+      rows.map(
+        (r) => (r.courses as unknown as { thumbnail_url: string | null } | null)?.thumbnail_url,
+      ),
     );
 
     return rows.map((r) => {
@@ -135,8 +156,12 @@ export const getPlayer = createServerFn({ method: "POST" })
       _user: context.userId,
     });
     const previewMode =
-      !access && course.status === "published" && course.price_model === "subscription" && course.preview_seconds > 0;
-    if (!access && !previewMode) return { title: course.title, access: false, preview: false, sections: [], progress: [] };
+      !access &&
+      course.status === "published" &&
+      course.price_model === "subscription" &&
+      course.preview_seconds > 0;
+    if (!access && !previewMode)
+      return { title: course.title, access: false, preview: false, sections: [], progress: [] };
 
     const { data: sections } = await supabaseAdmin
       .from("sections")
@@ -148,7 +173,9 @@ export const getPlayer = createServerFn({ method: "POST" })
       .select("id, section_id, title, type, position, duration_minutes, is_preview")
       .eq("course_id", course.id)
       .order("position");
-    const visibleLessons = previewMode ? (lessons ?? []).filter((l) => l.type === "video" || l.is_preview) : (lessons ?? []);
+    const visibleLessons = previewMode
+      ? (lessons ?? []).filter((l) => l.type === "video" || l.is_preview)
+      : (lessons ?? []);
     const { data: progress } = await context.supabase
       .from("lesson_progress")
       .select("lesson_id")
@@ -182,7 +209,9 @@ export const getLessonContent = createServerFn({ method: "POST" })
     const { signPath } = await import("./media.server");
     const { data: lesson } = await supabaseAdmin
       .from("lessons")
-      .select("id, course_id, title, type, body, media_path, duration_minutes, is_preview, danmaku_enabled, courses(status, price_model, preview_seconds)")
+      .select(
+        "id, course_id, title, type, body, media_path, duration_minutes, is_preview, danmaku_enabled, courses(status, price_model, preview_seconds)",
+      )
       .eq("id", data.lessonId)
       .maybeSingle();
     if (!lesson) throw new Error("Lesson not found");
@@ -191,13 +220,22 @@ export const getLessonContent = createServerFn({ method: "POST" })
       _course: lesson.course_id,
       _user: context.userId,
     });
-    const c = lesson.courses as unknown as { status: string; price_model: string; preview_seconds: number } | null;
+    const c = lesson.courses as unknown as {
+      status: string;
+      price_model: string;
+      preview_seconds: number;
+    } | null;
     let previewLimit: number | null = null;
     if (!access) {
       const published = c?.status === "published";
       if (published && lesson.is_preview) {
         previewLimit = null;
-      } else if (published && c?.price_model === "subscription" && lesson.type === "video" && c.preview_seconds > 0) {
+      } else if (
+        published &&
+        c?.price_model === "subscription" &&
+        lesson.type === "video" &&
+        c.preview_seconds > 0
+      ) {
         previewLimit = c.preview_seconds;
       } else {
         throw new Error("No access to this lesson");
@@ -226,12 +264,15 @@ export const setLessonComplete = createServerFn({ method: "POST" })
       const { unmetRequirements } = await import("./engine.server");
       const missing = await unmetRequirements(data.lessonId, context.userId);
       if (missing.length > 0) return { ok: false, missing };
-      const { error } = await context.supabase
-        .from("lesson_progress")
-        .upsert(
-          { user_id: context.userId, lesson_id: data.lessonId, course_id: data.courseId, completed: true },
-          { onConflict: "user_id,lesson_id" },
-        );
+      const { error } = await context.supabase.from("lesson_progress").upsert(
+        {
+          user_id: context.userId,
+          lesson_id: data.lessonId,
+          course_id: data.courseId,
+          completed: true,
+        },
+        { onConflict: "user_id,lesson_id" },
+      );
       if (error) throw new Error(error.message);
     } else {
       await context.supabase

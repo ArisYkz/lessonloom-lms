@@ -20,7 +20,10 @@ export const getLessonActivities = createServerFn({ method: "POST" })
       .select("id, title, media_path")
       .eq("lesson_id", lc.lessonId)
       .order("position");
-    const resUrls = await signMany((resources ?? []).map((r) => r.media_path), 60 * 60 * 4);
+    const resUrls = await signMany(
+      (resources ?? []).map((r) => r.media_path),
+      60 * 60 * 4,
+    );
 
     const { data: hw } = await supabaseAdmin
       .from("homework")
@@ -37,7 +40,13 @@ export const getLessonActivities = createServerFn({ method: "POST" })
         .maybeSingle();
       if (sub) {
         const files = await Promise.all(
-          sub.file_paths.map(async (p) => ({ name: p.split("/").pop()!.replace(/^[0-9a-f-]{36}-/, ""), url: await signPath(p, 3600) })),
+          sub.file_paths.map(async (p) => ({
+            name: p
+              .split("/")
+              .pop()!
+              .replace(/^[0-9a-f-]{36}-/, ""),
+            url: await signPath(p, 3600),
+          })),
         );
         submission = { ...sub, files };
       }
@@ -58,7 +67,10 @@ export const getLessonActivities = createServerFn({ method: "POST" })
       const { data: opts } = await supabaseAdmin
         .from("quiz_options")
         .select("id, question_id, text, position")
-        .in("question_id", (qs ?? []).map((q) => q.id).concat("00000000-0000-0000-0000-000000000000"))
+        .in(
+          "question_id",
+          (qs ?? []).map((q) => q.id).concat("00000000-0000-0000-0000-000000000000"),
+        )
         .order("position");
       const { data: attempts } = await supabaseAdmin
         .from("quiz_attempts")
@@ -74,15 +86,29 @@ export const getLessonActivities = createServerFn({ method: "POST" })
         questions: (qs ?? []).map((q) => ({
           id: q.id,
           question: q.question,
-          options: (opts ?? []).filter((o) => o.question_id === q.id).map((o) => ({ id: o.id, text: o.text })),
+          options: (opts ?? [])
+            .filter((o) => o.question_id === q.id)
+            .map((o) => ({ id: o.id, text: o.text })),
         })),
         lastAttempt: attempts?.[0] ?? null,
       };
     }
 
     let threads: {
-      id: string; body: string; author: string; mine: boolean; hidden: boolean; createdAt: string;
-      replies: { id: string; body: string; author: string; hidden: boolean; isTeacher: boolean; createdAt: string }[];
+      id: string;
+      body: string;
+      author: string;
+      mine: boolean;
+      hidden: boolean;
+      createdAt: string;
+      replies: {
+        id: string;
+        body: string;
+        author: string;
+        hidden: boolean;
+        isTeacher: boolean;
+        createdAt: string;
+      }[];
     }[] = [];
     if (lc.discussionEnabled) {
       let tq = supabaseAdmin
@@ -100,7 +126,10 @@ export const getLessonActivities = createServerFn({ method: "POST" })
         .order("created_at");
       if (!editor) rq = rq.eq("hidden", false);
       const { data: rs } = await rq;
-      const names = await namesFor([...(ts ?? []).map((x) => x.user_id), ...(rs ?? []).map((x) => x.user_id)]);
+      const names = await namesFor([
+        ...(ts ?? []).map((x) => x.user_id),
+        ...(rs ?? []).map((x) => x.user_id),
+      ]);
       threads = (ts ?? []).map((x) => ({
         id: x.id,
         body: x.body,
@@ -123,7 +152,11 @@ export const getLessonActivities = createServerFn({ method: "POST" })
 
     return {
       isEditor: editor,
-      resources: (resources ?? []).map((r) => ({ id: r.id, title: r.title, url: resUrls.get(r.media_path) ?? null })),
+      resources: (resources ?? []).map((r) => ({
+        id: r.id,
+        title: r.title,
+        url: resUrls.get(r.media_path) ?? null,
+      })),
       homework: hw ? { ...hw, submission } : null,
       quiz: quizOut,
       discussionEnabled: lc.discussionEnabled,
@@ -143,8 +176,13 @@ export const submitHomework = createServerFn({ method: "POST" })
     const { lessonCourse, assertAccess, notify, namesFor } = await import("./engine.server");
     const lc = await lessonCourse(data.lessonId);
     await assertAccess(context.supabase, lc.courseId, context.userId);
-    if (data.filePaths.some((p) => !p.startsWith(`${context.userId}/submissions/`))) throw new Error("Invalid file");
-    const { data: hw } = await supabaseAdmin.from("homework").select("id").eq("lesson_id", lc.lessonId).maybeSingle();
+    if (data.filePaths.some((p) => !p.startsWith(`${context.userId}/submissions/`)))
+      throw new Error("Invalid file");
+    const { data: hw } = await supabaseAdmin
+      .from("homework")
+      .select("id")
+      .eq("lesson_id", lc.lessonId)
+      .maybeSingle();
     if (!hw) throw new Error("No homework for this lesson");
     if (!data.body && data.filePaths.length === 0) throw new Error("Empty submission");
 
@@ -165,10 +203,17 @@ export const submitHomework = createServerFn({ method: "POST" })
       status: "submitted" as const,
       submitted_at: new Date().toISOString(),
     };
-    const { error } = await supabaseAdmin.from("homework_submissions").upsert(row, { onConflict: "homework_id,user_id" });
+    const { error } = await supabaseAdmin
+      .from("homework_submissions")
+      .upsert(row, { onConflict: "homework_id,user_id" });
     if (error) throw new Error(error.message);
     const names = await namesFor([context.userId]);
-    await notify(lc.ownerId, "homework_submitted", `${names.get(context.userId)} · ${lc.title}`, "/teach/inbox");
+    await notify(
+      lc.ownerId,
+      "homework_submitted",
+      `${names.get(context.userId)} · ${lc.title}`,
+      "/teach/inbox",
+    );
     return { ok: true };
   });
 
@@ -180,17 +225,33 @@ export const submitQuiz = createServerFn({ method: "POST" })
     const { lessonCourse, assertAccess } = await import("./engine.server");
     const lc = await lessonCourse(data.lessonId);
     await assertAccess(context.supabase, lc.courseId, context.userId);
-    const { data: quiz } = await supabaseAdmin.from("quizzes").select("id, passing_score").eq("lesson_id", lc.lessonId).maybeSingle();
+    const { data: quiz } = await supabaseAdmin
+      .from("quizzes")
+      .select("id, passing_score")
+      .eq("lesson_id", lc.lessonId)
+      .maybeSingle();
     if (!quiz) throw new Error("No quiz");
-    const { data: qs } = await supabaseAdmin.from("quiz_questions").select("id, explanation").eq("quiz_id", quiz.id);
+    const { data: qs } = await supabaseAdmin
+      .from("quiz_questions")
+      .select("id, explanation")
+      .eq("quiz_id", quiz.id);
     const { data: opts } = await supabaseAdmin
       .from("quiz_options")
       .select("id, question_id, is_correct")
-      .in("question_id", (qs ?? []).map((q) => q.id).concat("00000000-0000-0000-0000-000000000000"));
+      .in(
+        "question_id",
+        (qs ?? []).map((q) => q.id).concat("00000000-0000-0000-0000-000000000000"),
+      );
     const results = (qs ?? []).map((q) => {
       const correct = (opts ?? []).find((o) => o.question_id === q.id && o.is_correct)?.id ?? null;
       const chosen = data.answers[q.id] ?? null;
-      return { questionId: q.id, correctOptionId: correct, chosen, isCorrect: !!correct && chosen === correct, explanation: q.explanation };
+      return {
+        questionId: q.id,
+        correctOptionId: correct,
+        chosen,
+        isCorrect: !!correct && chosen === correct,
+        explanation: q.explanation,
+      };
     });
     const total = results.length;
     const score = results.filter((r) => r.isCorrect).length;
@@ -223,8 +284,16 @@ export const postDiscussion = createServerFn({ method: "POST" })
     if (!data.body) throw new Error("Empty message");
     const since = new Date(Date.now() - 60_000).toISOString();
     const [{ count: t1 }, { count: t2 }] = await Promise.all([
-      supabaseAdmin.from("discussion_threads").select("id", { count: "exact", head: true }).eq("user_id", context.userId).gte("created_at", since),
-      supabaseAdmin.from("discussion_replies").select("id", { count: "exact", head: true }).eq("user_id", context.userId).gte("created_at", since),
+      supabaseAdmin
+        .from("discussion_threads")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", context.userId)
+        .gte("created_at", since),
+      supabaseAdmin
+        .from("discussion_replies")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", context.userId)
+        .gte("created_at", since),
     ]);
     if ((t1 ?? 0) + (t2 ?? 0) >= 5) throw new Error("Too many messages. Please wait a minute.");
     const names = await namesFor([context.userId]);
@@ -237,15 +306,23 @@ export const postDiscussion = createServerFn({ method: "POST" })
         .eq("id", data.threadId)
         .maybeSingle();
       if (!thread || thread.lesson_id !== lc.lessonId) throw new Error("Thread not found");
-      await supabaseAdmin
-        .from("discussion_replies")
-        .insert({ thread_id: thread.id, course_id: lc.courseId, user_id: context.userId, body: data.body });
-      if (thread.user_id !== context.userId) await notify(thread.user_id, "discussion_reply", `${who} · ${lc.title}`, link);
+      await supabaseAdmin.from("discussion_replies").insert({
+        thread_id: thread.id,
+        course_id: lc.courseId,
+        user_id: context.userId,
+        body: data.body,
+      });
+      if (thread.user_id !== context.userId)
+        await notify(thread.user_id, "discussion_reply", `${who} · ${lc.title}`, link);
     } else {
-      await supabaseAdmin
-        .from("discussion_threads")
-        .insert({ lesson_id: lc.lessonId, course_id: lc.courseId, user_id: context.userId, body: data.body });
-      if (lc.ownerId !== context.userId) await notify(lc.ownerId, "discussion_question", `${who} · ${lc.title}`, link);
+      await supabaseAdmin.from("discussion_threads").insert({
+        lesson_id: lc.lessonId,
+        course_id: lc.courseId,
+        user_id: context.userId,
+        body: data.body,
+      });
+      if (lc.ownerId !== context.userId)
+        await notify(lc.ownerId, "discussion_question", `${who} · ${lc.title}`, link);
     }
     return { ok: true };
   });
@@ -257,7 +334,11 @@ export const moderateDiscussion = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { assertEditor } = await import("./engine.server");
     const table = data.kind === "thread" ? "discussion_threads" : "discussion_replies";
-    const { data: row } = await supabaseAdmin.from(table).select("course_id").eq("id", data.id).maybeSingle();
+    const { data: row } = await supabaseAdmin
+      .from(table)
+      .select("course_id")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!row) throw new Error("Not found");
     await assertEditor(context.supabase, row.course_id);
     await supabaseAdmin.from(table).update({ hidden: data.hidden }).eq("id", data.id);

@@ -21,7 +21,10 @@ export const listDanmaku = createServerFn({ method: "POST" })
 
 export const postDanmaku = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { lessonId: string; timeMs: number; text: string; color?: string; mode?: string }) => input)
+  .inputValidator(
+    (input: { lessonId: string; timeMs: number; text: string; color?: string; mode?: string }) =>
+      input,
+  )
   .handler(async ({ data, context }) => {
     const text = data.text.trim().replace(/\s+/g, " ");
     if (!text || text.length > 100) throw new Error("DANMAKU_LENGTH");
@@ -35,7 +38,8 @@ export const postDanmaku = createServerFn({ method: "POST" })
       .eq("id", data.lessonId)
       .maybeSingle();
     if (!lesson || !lesson.danmaku_enabled) throw new Error("DANMAKU_OFF");
-    const orgId = (lesson.courses as unknown as { organization_id: string } | null)?.organization_id;
+    const orgId = (lesson.courses as unknown as { organization_id: string } | null)
+      ?.organization_id;
 
     const { data: access } = await context.supabase.rpc("has_course_access", {
       _course: lesson.course_id,
@@ -48,7 +52,8 @@ export const postDanmaku = createServerFn({ method: "POST" })
       .select("course_id")
       .eq("organization_id", orgId!)
       .eq("user_id", context.userId);
-    if ((blocks ?? []).some((b) => b.course_id === null || b.course_id === lesson.course_id)) throw new Error("DANMAKU_BLOCKED");
+    if ((blocks ?? []).some((b) => b.course_id === null || b.course_id === lesson.course_id))
+      throw new Error("DANMAKU_BLOCKED");
 
     const { data: last } = await supabaseAdmin
       .from("danmaku")
@@ -57,7 +62,8 @@ export const postDanmaku = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (last && Date.now() - new Date(last.created_at).getTime() < 5000) throw new Error("DANMAKU_RATE");
+    if (last && Date.now() - new Date(last.created_at).getTime() < 5000)
+      throw new Error("DANMAKU_RATE");
 
     const color = COLORS.includes(data.color ?? "") ? data.color! : "#ffffff";
     const mode = ["scroll", "top", "bottom"].includes(data.mode ?? "") ? data.mode! : "scroll";
@@ -98,8 +104,13 @@ export const listCourseDanmaku = createServerFn({ method: "POST" })
     ]);
     const userIds = [...new Set((rows ?? []).map((r) => r.user_id))];
     const [{ data: profiles }, { data: blocks }] = await Promise.all([
-      userIds.length ? supabaseAdmin.from("profiles").select("id, full_name").in("id", userIds) : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
-      supabaseAdmin.from("danmaku_blocks").select("id, user_id, course_id").eq("organization_id", course!.organization_id),
+      userIds.length
+        ? supabaseAdmin.from("profiles").select("id, full_name").in("id", userIds)
+        : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
+      supabaseAdmin
+        .from("danmaku_blocks")
+        .select("id, user_id, course_id")
+        .eq("organization_id", course!.organization_id),
     ]);
     const names = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
     const titles = new Map((lessons ?? []).map((l) => [l.id, l.title]));
@@ -108,7 +119,9 @@ export const listCourseDanmaku = createServerFn({ method: "POST" })
         ...r,
         lessonTitle: titles.get(r.lesson_id) ?? "",
         userName: names.get(r.user_id) || "—",
-        blocked: (blocks ?? []).some((b) => b.user_id === r.user_id && (b.course_id === null || b.course_id === data.courseId)),
+        blocked: (blocks ?? []).some(
+          (b) => b.user_id === r.user_id && (b.course_id === null || b.course_id === data.courseId),
+        ),
       })),
       blocks: (blocks ?? []).map((b) => ({ ...b, userName: names.get(b.user_id) || "—" })),
     };
@@ -119,7 +132,11 @@ export const setDanmakuHidden = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; hidden: boolean }) => input)
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row } = await supabaseAdmin.from("danmaku").select("course_id").eq("id", data.id).maybeSingle();
+    const { data: row } = await supabaseAdmin
+      .from("danmaku")
+      .select("course_id")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!row) throw new Error("Not found");
     const { data: can } = await context.supabase.rpc("can_edit_course", { _course: row.course_id });
     if (!can) throw new Error("Forbidden");
@@ -132,7 +149,11 @@ export const deleteDanmaku = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row } = await supabaseAdmin.from("danmaku").select("course_id").eq("id", data.id).maybeSingle();
+    const { data: row } = await supabaseAdmin
+      .from("danmaku")
+      .select("course_id")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!row) throw new Error("Not found");
     const { data: can } = await context.supabase.rpc("can_edit_course", { _course: row.course_id });
     if (!can) throw new Error("Forbidden");
@@ -142,12 +163,18 @@ export const deleteDanmaku = createServerFn({ method: "POST" })
 
 export const blockDanmakuUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { courseId: string; userId: string; allCourses: boolean; block: boolean }) => input)
+  .inputValidator(
+    (input: { courseId: string; userId: string; allCourses: boolean; block: boolean }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { data: can } = await context.supabase.rpc("can_edit_course", { _course: data.courseId });
     if (!can) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: course } = await supabaseAdmin.from("courses").select("organization_id").eq("id", data.courseId).single();
+    const { data: course } = await supabaseAdmin
+      .from("courses")
+      .select("organization_id")
+      .eq("id", data.courseId)
+      .single();
     const orgId = course!.organization_id;
     if (data.block) {
       await supabaseAdmin.from("danmaku_blocks").insert({
@@ -155,9 +182,17 @@ export const blockDanmakuUser = createServerFn({ method: "POST" })
         course_id: data.allCourses ? null : data.courseId,
         user_id: data.userId,
       });
-      await supabaseAdmin.from("danmaku").update({ hidden: true }).eq("user_id", data.userId).eq("course_id", data.courseId);
+      await supabaseAdmin
+        .from("danmaku")
+        .update({ hidden: true })
+        .eq("user_id", data.userId)
+        .eq("course_id", data.courseId);
     } else {
-      await supabaseAdmin.from("danmaku_blocks").delete().eq("organization_id", orgId).eq("user_id", data.userId);
+      await supabaseAdmin
+        .from("danmaku_blocks")
+        .delete()
+        .eq("organization_id", orgId)
+        .eq("user_id", data.userId);
     }
     return { ok: true };
   });

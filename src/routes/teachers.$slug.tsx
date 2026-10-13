@@ -19,7 +19,9 @@ export const Route = createFileRoute("/teachers/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Teacher not found — Bilim" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [{ title: "Teacher not found — Bilim" }, { name: "robots", content: "noindex" }],
+      };
     }
     const desc = loaderData.headline ?? `Courses by ${loaderData.name} on Bilim.`;
     return {
@@ -47,7 +49,9 @@ function TeacherPage() {
   return (
     <div>
       <div className="h-44 w-full bg-secondary sm:h-64">
-        {data.coverUrl ? <img src={data.coverUrl} alt="" className="size-full object-cover" /> : null}
+        {data.coverUrl ? (
+          <img src={data.coverUrl} alt="" className="size-full object-cover" />
+        ) : null}
       </div>
       <div className="mx-auto max-w-6xl px-4">
         <div className="-mt-12 flex flex-wrap items-end gap-5">
@@ -58,11 +62,14 @@ function TeacherPage() {
             <h1 className="title-page">{data.name}</h1>
             {data.headline ? <p className="mt-1 text-muted-foreground">{data.headline}</p> : null}
             <p className="mt-1 text-sm text-muted-foreground">
-              {data.courses.length} {t("feed.courses")} · {data.students.toLocaleString("ru-RU")} {t("feed.students")}
+              {data.courses.length} {t("feed.courses")} · {data.students.toLocaleString("ru-RU")}{" "}
+              {t("feed.students")}
             </p>
           </div>
         </div>
-        {data.about ? <p className="mt-6 max-w-3xl whitespace-pre-wrap text-muted-foreground">{data.about}</p> : null}
+        {data.about ? (
+          <p className="mt-6 max-w-3xl whitespace-pre-wrap text-muted-foreground">{data.about}</p>
+        ) : null}
 
         <h2 className="title-section mt-12">{t("teach.courses")}</h2>
         {data.courses.length === 0 ? (

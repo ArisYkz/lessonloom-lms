@@ -23,7 +23,13 @@ import { cn } from "@/lib/utils";
 
 type Activities = Awaited<ReturnType<typeof getLessonActivities>>;
 
-export function LessonActivities({ lessonId, onChanged }: { lessonId: string; onChanged: () => void }) {
+export function LessonActivities({
+  lessonId,
+  onChanged,
+}: {
+  lessonId: string;
+  onChanged: () => void;
+}) {
   const fetchActivities = useServerFn(getLessonActivities);
   const { data, refetch } = useQuery({
     queryKey: ["activities", lessonId],
@@ -38,13 +44,25 @@ export function LessonActivities({ lessonId, onChanged }: { lessonId: string; on
     <div className="mt-8 space-y-6">
       {data.resources.length > 0 ? <Resources items={data.resources} /> : null}
       {data.homework ? <Homework lessonId={lessonId} hw={data.homework} onDone={reload} /> : null}
-      {data.quiz && data.quiz.questions.length > 0 ? <Quiz key={lessonId} lessonId={lessonId} quiz={data.quiz} onDone={reload} /> : null}
-      {data.discussionEnabled ? <Discussion lessonId={lessonId} data={data} onDone={reload} /> : null}
+      {data.quiz && data.quiz.questions.length > 0 ? (
+        <Quiz key={lessonId} lessonId={lessonId} quiz={data.quiz} onDone={reload} />
+      ) : null}
+      {data.discussionEnabled ? (
+        <Discussion lessonId={lessonId} data={data} onDone={reload} />
+      ) : null}
     </div>
   );
 }
 
-function Card({ title, badge, children }: { title: string; badge?: React.ReactNode; children: React.ReactNode }) {
+function Card({
+  title,
+  badge,
+  children,
+}: {
+  title: string;
+  badge?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-card p-6">
       <div className="mb-4 flex items-center gap-2">
@@ -63,7 +81,12 @@ function Resources({ items }: { items: Activities["resources"] }) {
       <ul className="space-y-2">
         {items.map((r) => (
           <li key={r.id}>
-            <a href={r.url ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+            <a
+              href={r.url ?? "#"}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+            >
               <Download className="size-4" /> {r.title}
             </a>
           </li>
@@ -73,7 +96,15 @@ function Resources({ items }: { items: Activities["resources"] }) {
   );
 }
 
-function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<Activities["homework"]>; onDone: () => void }) {
+function Homework({
+  lessonId,
+  hw,
+  onDone,
+}: {
+  lessonId: string;
+  hw: NonNullable<Activities["homework"]>;
+  onDone: () => void;
+}) {
   const { t } = useI18n();
   const { user } = useAuth();
   const submit = useServerFn(submitHomework);
@@ -82,7 +113,8 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
   const [body, setBody] = useState(sub?.body ?? "");
   const [files, setFiles] = useState<{ path: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
-  const status = (sub?.status ?? "not_started") as "not_started" | "submitted" | "needs_revision" | "reviewed";
+  const status = (sub?.status ?? "not_started") as
+    "not_started" | "submitted" | "needs_revision" | "reviewed";
 
   async function upload(file: File) {
     if (!user) return;
@@ -124,7 +156,13 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
         <div className="mt-5 space-y-4 border-t border-border pt-5">
           {sub.body ? <p className="whitespace-pre-wrap text-sm">{sub.body}</p> : null}
           {sub.files.map((f) => (
-            <a key={f.name} href={f.url ?? "#"} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <a
+              key={f.name}
+              href={f.url ?? "#"}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 text-sm text-primary hover:underline"
+            >
               <Paperclip className="size-4" /> {f.name}
             </a>
           ))}
@@ -137,7 +175,9 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
                   {hw.max_score ? ` / ${hw.max_score}` : ""}
                 </p>
               ) : null}
-              {sub.feedback ? <p className="mt-2 whitespace-pre-wrap text-sm">{sub.feedback}</p> : null}
+              {sub.feedback ? (
+                <p className="mt-2 whitespace-pre-wrap text-sm">{sub.feedback}</p>
+              ) : null}
             </div>
           ) : null}
           {status !== "reviewed" ? (
@@ -148,7 +188,14 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
         </div>
       ) : (
         <div className="mt-5 space-y-3">
-          {hw.allow_text ? <Textarea rows={6} placeholder={t("act.yourAnswer")} value={body} onChange={(e) => setBody(e.target.value)} /> : null}
+          {hw.allow_text ? (
+            <Textarea
+              rows={6}
+              placeholder={t("act.yourAnswer")}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+          ) : null}
           {hw.allow_file ? (
             <div className="space-y-2">
               <label className="text-sm text-muted-foreground">{t("act.attachFiles")}</label>
@@ -164,7 +211,11 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
               {files.map((f) => (
                 <div key={f.path} className="flex items-center gap-2 text-sm">
                   <Paperclip className="size-4" /> {f.name}
-                  <button type="button" onClick={() => setFiles((x) => x.filter((y) => y.path !== f.path))} aria-label="remove">
+                  <button
+                    type="button"
+                    onClick={() => setFiles((x) => x.filter((y) => y.path !== f.path))}
+                    aria-label="remove"
+                  >
                     <X className="size-4 text-muted-foreground" />
                   </button>
                 </div>
@@ -182,7 +233,15 @@ function Homework({ lessonId, hw, onDone }: { lessonId: string; hw: NonNullable<
 
 type QuizResult = Awaited<ReturnType<typeof submitQuiz>>;
 
-function Quiz({ lessonId, quiz, onDone }: { lessonId: string; quiz: NonNullable<Activities["quiz"]>; onDone: () => void }) {
+function Quiz({
+  lessonId,
+  quiz,
+  onDone,
+}: {
+  lessonId: string;
+  quiz: NonNullable<Activities["quiz"]>;
+  onDone: () => void;
+}) {
   const { t } = useI18n();
   const submit = useServerFn(submitQuiz);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -210,7 +269,8 @@ function Quiz({ lessonId, quiz, onDone }: { lessonId: string; quiz: NonNullable<
           {quiz.required ? <Badge variant="outline">{t("act.required")}</Badge> : null}
           {last && !result ? (
             <Badge variant={last.passed ? "default" : "secondary"} className="ml-auto">
-              {t("act.lastAttempt")}: {last.score}/{last.total} · {last.passed ? t("act.passed") : t("act.failed")}
+              {t("act.lastAttempt")}: {last.score}/{last.total} ·{" "}
+              {last.passed ? t("act.passed") : t("act.failed")}
             </Badge>
           ) : null}
         </>
@@ -241,16 +301,25 @@ function Quiz({ lessonId, quiz, onDone }: { lessonId: string; quiz: NonNullable<
                         result && chosen && !isCorrect && "border-destructive bg-destructive/10",
                       )}
                     >
-                      <span className={cn("size-4 shrink-0 rounded-full border border-border", chosen && "border-4 border-primary")} />
+                      <span
+                        className={cn(
+                          "size-4 shrink-0 rounded-full border border-border",
+                          chosen && "border-4 border-primary",
+                        )}
+                      />
                       {o.text}
                     </button>
                   );
                 })}
               </div>
               {r ? (
-                <p className={cn("mt-2 text-sm", r.isCorrect ? "text-primary" : "text-destructive")}>
+                <p
+                  className={cn("mt-2 text-sm", r.isCorrect ? "text-primary" : "text-destructive")}
+                >
                   {r.isCorrect ? t("act.correct") : t("act.incorrect")}
-                  {r.explanation ? <span className="text-muted-foreground"> — {r.explanation}</span> : null}
+                  {r.explanation ? (
+                    <span className="text-muted-foreground"> — {r.explanation}</span>
+                  ) : null}
                 </p>
               ) : null}
             </li>
@@ -275,7 +344,10 @@ function Quiz({ lessonId, quiz, onDone }: { lessonId: string; quiz: NonNullable<
             </Button>
           </>
         ) : (
-          <Button onClick={check} disabled={busy || Object.keys(answers).length < quiz.questions.length}>
+          <Button
+            onClick={check}
+            disabled={busy || Object.keys(answers).length < quiz.questions.length}
+          >
             {t("act.submitQuiz")}
           </Button>
         )}
@@ -284,7 +356,15 @@ function Quiz({ lessonId, quiz, onDone }: { lessonId: string; quiz: NonNullable<
   );
 }
 
-function Discussion({ lessonId, data, onDone }: { lessonId: string; data: Activities; onDone: () => void }) {
+function Discussion({
+  lessonId,
+  data,
+  onDone,
+}: {
+  lessonId: string;
+  data: Activities;
+  onDone: () => void;
+}) {
   const { t } = useI18n();
   const post = useServerFn(postDiscussion);
   const moderate = useServerFn(moderateDiscussion);
@@ -312,17 +392,35 @@ function Discussion({ lessonId, data, onDone }: { lessonId: string; data: Activi
     void qc.invalidateQueries({ queryKey: ["activities", lessonId] });
   }
 
-  const ModBtn = ({ kind, id, hidden }: { kind: "thread" | "reply"; id: string; hidden: boolean }) =>
+  const ModBtn = ({
+    kind,
+    id,
+    hidden,
+  }: {
+    kind: "thread" | "reply";
+    id: string;
+    hidden: boolean;
+  }) =>
     data.isEditor ? (
-      <button type="button" onClick={() => toggle(kind, id, !hidden)} className="ml-auto text-xs text-muted-foreground hover:text-foreground">
-        {hidden ? <Eye className="inline size-3" /> : <EyeOff className="inline size-3" />} {hidden ? t("act.unhide") : t("act.hide")}
+      <button
+        type="button"
+        onClick={() => toggle(kind, id, !hidden)}
+        className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+      >
+        {hidden ? <Eye className="inline size-3" /> : <EyeOff className="inline size-3" />}{" "}
+        {hidden ? t("act.unhide") : t("act.hide")}
       </button>
     ) : null;
 
   return (
     <Card title={t("act.discussion")}>
       <div className="space-y-2">
-        <Textarea rows={3} placeholder={t("act.askQuestion")} value={body} onChange={(e) => setBody(e.target.value)} />
+        <Textarea
+          rows={3}
+          placeholder={t("act.askQuestion")}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
         <Button size="sm" onClick={() => send()} disabled={!body.trim()}>
           {t("act.postQuestion")}
         </Button>
@@ -332,10 +430,15 @@ function Discussion({ lessonId, data, onDone }: { lessonId: string; data: Activi
       ) : (
         <ul className="mt-6 space-y-5">
           {data.threads.map((th) => (
-            <li key={th.id} className={cn("border-t border-border pt-5", th.hidden && "opacity-50")}>
+            <li
+              key={th.id}
+              className={cn("border-t border-border pt-5", th.hidden && "opacity-50")}
+            >
               <div className="flex items-center gap-2 text-sm">
                 <span className="font-medium">{th.author}</span>
-                <span className="text-muted-foreground">{new Date(th.createdAt).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">
+                  {new Date(th.createdAt).toLocaleDateString()}
+                </span>
                 {th.hidden ? <Badge variant="outline">{t("act.hidden")}</Badge> : null}
                 <ModBtn kind="thread" id={th.id} hidden={th.hidden} />
               </div>
@@ -369,7 +472,11 @@ function Discussion({ lessonId, data, onDone }: { lessonId: string; data: Activi
                   </div>
                 </div>
               ) : (
-                <button type="button" onClick={() => setReplyTo(th.id)} className="mt-2 pl-4 text-xs text-primary hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setReplyTo(th.id)}
+                  className="mt-2 pl-4 text-xs text-primary hover:underline"
+                >
                   {t("act.reply")}
                 </button>
               )}

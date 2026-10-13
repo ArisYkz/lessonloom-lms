@@ -22,22 +22,43 @@ export const getLessonExtras = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const lc = await editableLesson(context.supabase, data.lessonId);
     const [{ data: resources }, { data: hw }, { data: quiz }] = await Promise.all([
-      supabaseAdmin.from("lesson_resources").select("id, title, media_path").eq("lesson_id", lc.lessonId).order("position"),
-      supabaseAdmin.from("homework").select("instructions, allow_text, allow_file, required, max_score").eq("lesson_id", lc.lessonId).maybeSingle(),
-      supabaseAdmin.from("quizzes").select("id, passing_score, required").eq("lesson_id", lc.lessonId).maybeSingle(),
+      supabaseAdmin
+        .from("lesson_resources")
+        .select("id, title, media_path")
+        .eq("lesson_id", lc.lessonId)
+        .order("position"),
+      supabaseAdmin
+        .from("homework")
+        .select("instructions, allow_text, allow_file, required, max_score")
+        .eq("lesson_id", lc.lessonId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("quizzes")
+        .select("id, passing_score, required")
+        .eq("lesson_id", lc.lessonId)
+        .maybeSingle(),
     ]);
     let questions: QuizInput[] = [];
     if (quiz) {
-      const { data: qs } = await supabaseAdmin.from("quiz_questions").select("id, question, explanation").eq("quiz_id", quiz.id).order("position");
+      const { data: qs } = await supabaseAdmin
+        .from("quiz_questions")
+        .select("id, question, explanation")
+        .eq("quiz_id", quiz.id)
+        .order("position");
       const { data: opts } = await supabaseAdmin
         .from("quiz_options")
         .select("question_id, text, is_correct")
-        .in("question_id", (qs ?? []).map((q) => q.id).concat("00000000-0000-0000-0000-000000000000"))
+        .in(
+          "question_id",
+          (qs ?? []).map((q) => q.id).concat("00000000-0000-0000-0000-000000000000"),
+        )
         .order("position");
       questions = (qs ?? []).map((q) => ({
         question: q.question,
         explanation: q.explanation,
-        options: (opts ?? []).filter((o) => o.question_id === q.id).map((o) => ({ text: o.text, isCorrect: o.is_correct })),
+        options: (opts ?? [])
+          .filter((o) => o.question_id === q.id)
+          .map((o) => ({ text: o.text, isCorrect: o.is_correct })),
       }));
     }
     return {
@@ -54,7 +75,10 @@ export const setDiscussionEnabled = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const lc = await editableLesson(context.supabase, data.lessonId);
-    await supabaseAdmin.from("lessons").update({ discussion_enabled: data.enabled }).eq("id", lc.lessonId);
+    await supabaseAdmin
+      .from("lessons")
+      .update({ discussion_enabled: data.enabled })
+      .eq("id", lc.lessonId);
     return { ok: true };
   });
 
@@ -65,9 +89,12 @@ export const addResource = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const lc = await editableLesson(context.supabase, data.lessonId);
     if (!data.path.startsWith(`${context.userId}/`)) throw new Error("Invalid file");
-    await supabaseAdmin
-      .from("lesson_resources")
-      .insert({ lesson_id: lc.lessonId, course_id: lc.courseId, title: data.title.trim().slice(0, 200) || "File", media_path: data.path });
+    await supabaseAdmin.from("lesson_resources").insert({
+      lesson_id: lc.lessonId,
+      course_id: lc.courseId,
+      title: data.title.trim().slice(0, 200) || "File",
+      media_path: data.path,
+    });
     return { ok: true };
   });
 
@@ -77,7 +104,11 @@ export const deleteResource = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { assertEditor } = await import("./engine.server");
-    const { data: row } = await supabaseAdmin.from("lesson_resources").select("course_id").eq("id", data.id).maybeSingle();
+    const { data: row } = await supabaseAdmin
+      .from("lesson_resources")
+      .select("course_id")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!row) return { ok: true };
     await assertEditor(context.supabase, row.course_id);
     await supabaseAdmin.from("lesson_resources").delete().eq("id", data.id);
@@ -87,7 +118,15 @@ export const deleteResource = createServerFn({ method: "POST" })
 export const saveHomework = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: { lessonId: string; enabled: boolean; instructions: string; allowText: boolean; allowFile: boolean; required: boolean; maxScore: number | null }) => input,
+    (input: {
+      lessonId: string;
+      enabled: boolean;
+      instructions: string;
+      allowText: boolean;
+      allowFile: boolean;
+      required: boolean;
+      maxScore: number | null;
+    }) => input,
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -114,7 +153,15 @@ export const saveHomework = createServerFn({ method: "POST" })
 
 export const saveQuiz = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { lessonId: string; enabled: boolean; passingScore: number; required: boolean; questions: QuizInput[] }) => input)
+  .inputValidator(
+    (input: {
+      lessonId: string;
+      enabled: boolean;
+      passingScore: number;
+      required: boolean;
+      questions: QuizInput[];
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const lc = await editableLesson(context.supabase, data.lessonId);
@@ -123,15 +170,25 @@ export const saveQuiz = createServerFn({ method: "POST" })
       return { ok: true };
     }
     const questions = data.questions
-      .map((q) => ({ ...q, question: q.question.trim(), options: q.options.filter((o) => o.text.trim()) }))
+      .map((q) => ({
+        ...q,
+        question: q.question.trim(),
+        options: q.options.filter((o) => o.text.trim()),
+      }))
       .filter((q) => q.question && q.options.length >= 2);
     for (const q of questions) {
-      if (q.options.filter((o) => o.isCorrect).length !== 1) throw new Error(`"${q.question}": mark exactly one correct answer`);
+      if (q.options.filter((o) => o.isCorrect).length !== 1)
+        throw new Error(`"${q.question}": mark exactly one correct answer`);
     }
     const { data: quiz, error } = await supabaseAdmin
       .from("quizzes")
       .upsert(
-        { lesson_id: lc.lessonId, course_id: lc.courseId, passing_score: Math.min(100, Math.max(0, Math.round(data.passingScore))), required: data.required },
+        {
+          lesson_id: lc.lessonId,
+          course_id: lc.courseId,
+          passing_score: Math.min(100, Math.max(0, Math.round(data.passingScore))),
+          required: data.required,
+        },
         { onConflict: "lesson_id" },
       )
       .select("id")
@@ -141,12 +198,24 @@ export const saveQuiz = createServerFn({ method: "POST" })
     for (const [i, q] of questions.entries()) {
       const { data: qrow } = await supabaseAdmin
         .from("quiz_questions")
-        .insert({ quiz_id: quiz.id, course_id: lc.courseId, question: q.question, explanation: q.explanation.trim(), position: i })
+        .insert({
+          quiz_id: quiz.id,
+          course_id: lc.courseId,
+          question: q.question,
+          explanation: q.explanation.trim(),
+          position: i,
+        })
         .select("id")
         .single();
       if (!qrow) continue;
       await supabaseAdmin.from("quiz_options").insert(
-        q.options.map((o, j) => ({ question_id: qrow.id, course_id: lc.courseId, text: o.text.trim(), is_correct: o.isCorrect, position: j })),
+        q.options.map((o, j) => ({
+          question_id: qrow.id,
+          course_id: lc.courseId,
+          text: o.text.trim(),
+          is_correct: o.isCorrect,
+          position: j,
+        })),
       );
     }
     return { ok: true };
@@ -186,7 +255,9 @@ export const getSubmission = createServerFn({ method: "POST" })
     const { signPath } = await import("./media.server");
     const { data: s } = await supabaseAdmin
       .from("homework_submissions")
-      .select("id, user_id, course_id, body, file_paths, status, score, feedback, submitted_at, homework(instructions, max_score), lessons(title)")
+      .select(
+        "id, user_id, course_id, body, file_paths, status, score, feedback, submitted_at, homework(instructions, max_score), lessons(title)",
+      )
       .eq("id", data.id)
       .maybeSingle();
     if (!s) throw new Error("Not found");
@@ -205,14 +276,27 @@ export const getSubmission = createServerFn({ method: "POST" })
       feedback: s.feedback,
       submittedAt: s.submitted_at,
       files: await Promise.all(
-        s.file_paths.map(async (p) => ({ name: p.split("/").pop()!.replace(/^[0-9a-f-]{36}-/, ""), url: await signPath(p, 3600) })),
+        s.file_paths.map(async (p) => ({
+          name: p
+            .split("/")
+            .pop()!
+            .replace(/^[0-9a-f-]{36}-/, ""),
+          url: await signPath(p, 3600),
+        })),
       ),
     };
   });
 
 export const reviewSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; status: "needs_revision" | "reviewed"; feedback: string; score: number | null }) => input)
+  .inputValidator(
+    (input: {
+      id: string;
+      status: "needs_revision" | "reviewed";
+      feedback: string;
+      score: number | null;
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { assertEditor, notify } = await import("./engine.server");
@@ -235,6 +319,11 @@ export const reviewSubmission = createServerFn({ method: "POST" })
       .eq("id", data.id);
     const title = (s.lessons as unknown as { title: string } | null)?.title ?? "";
     const slug = (s.courses as unknown as { slug: string } | null)?.slug ?? "";
-    await notify(s.user_id, data.status === "reviewed" ? "homework_reviewed" : "homework_revision", title, `/learn/${slug}`);
+    await notify(
+      s.user_id,
+      data.status === "reviewed" ? "homework_reviewed" : "homework_revision",
+      title,
+      `/learn/${slug}`,
+    );
     return { ok: true };
   });

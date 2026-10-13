@@ -1,10 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type AuthedClient = { rpc: (fn: "has_role", args: { _user_id: string; _role: "admin" }) => Promise<{ data: unknown }> };
+type AuthedClient = {
+  rpc: (fn: "has_role", args: { _user_id: string; _role: "admin" }) => Promise<{ data: unknown }>;
+};
 
 async function assertAdmin(supabase: unknown, userId: string) {
-  const { data } = await (supabase as AuthedClient).rpc("has_role", { _user_id: userId, _role: "admin" });
+  const { data } = await (supabase as AuthedClient).rpc("has_role", {
+    _user_id: userId,
+    _role: "admin",
+  });
   if (!data) throw new Error("Forbidden");
 }
 
@@ -15,7 +20,9 @@ export const getReviewQueue = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
       .from("courses")
-      .select("id, slug, title, short_description, status, language, level, price_model, price_kzt, updated_at, organizations(name, slug)")
+      .select(
+        "id, slug, title, short_description, status, language, level, price_model, price_kzt, updated_at, organizations(name, slug)",
+      )
       .in("status", ["pending_review", "published", "rejected"])
       .order("updated_at", { ascending: false });
     return (data ?? []).map((c) => ({
@@ -26,14 +33,21 @@ export const getReviewQueue = createServerFn({ method: "POST" })
 
 export const reviewCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { courseId: string; decision: "approve" | "reject" | "unpublish"; reason?: string }) => input)
+  .inputValidator(
+    (input: { courseId: string; decision: "approve" | "reject" | "unpublish"; reason?: string }) =>
+      input,
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const patch =
       data.decision === "approve"
-        ? { status: "published" as const, published_at: new Date().toISOString(), rejection_reason: null }
+        ? {
+            status: "published" as const,
+            published_at: new Date().toISOString(),
+            rejection_reason: null,
+          }
         : data.decision === "reject"
           ? { status: "rejected" as const, rejection_reason: data.reason ?? "" }
           : { status: "draft" as const };
@@ -75,17 +89,22 @@ export const listUsers = createServerFn({ method: "POST" })
 
 export const setUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; role: "student" | "teacher" | "admin"; grant: boolean }) => input)
+  .inputValidator(
+    (input: { userId: string; role: "student" | "teacher" | "admin"; grant: boolean }) => input,
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.grant) {
-      await supabaseAdmin.from("user_roles").upsert(
-        { user_id: data.userId, role: data.role },
-        { onConflict: "user_id,role" },
-      );
+      await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: data.userId, role: data.role }, { onConflict: "user_id,role" });
     } else {
-      await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", data.role);
+      await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId)
+        .eq("role", data.role);
     }
     return { ok: true };
   });
@@ -96,16 +115,26 @@ export const setUserSuspended = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("profiles").update({ suspended: data.suspended }).eq("id", data.userId);
+    await supabaseAdmin
+      .from("profiles")
+      .update({ suspended: data.suspended })
+      .eq("id", data.userId);
     return { ok: true };
   });
 
 export const saveCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id?: string; slug: string; nameEn: string; nameRu: string; nameKk: string }) => input)
+  .inputValidator(
+    (input: { id?: string; slug: string; nameEn: string; nameRu: string; nameKk: string }) => input,
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const row = { slug: data.slug, name_en: data.nameEn, name_ru: data.nameRu, name_kk: data.nameKk };
+    const row = {
+      slug: data.slug,
+      name_en: data.nameEn,
+      name_ru: data.nameRu,
+      name_kk: data.nameKk,
+    };
     const { error } = data.id
       ? await context.supabase.from("categories").update(row).eq("id", data.id)
       : await context.supabase.from("categories").insert(row);
@@ -129,15 +158,26 @@ export const listTeacherPlans = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: orgs }, { data: subs }, { data: plans }] = await Promise.all([
-      supabaseAdmin.from("organizations").select("id, name, slug, owner_id").order("created_at", { ascending: false }),
+      supabaseAdmin
+        .from("organizations")
+        .select("id, name, slug, owner_id")
+        .order("created_at", { ascending: false }),
       supabaseAdmin.from("org_subscriptions").select("organization_id, plan_code, status"),
-      supabaseAdmin.from("teacher_plans").select("code, name, price_kzt, max_courses, max_students").order("position"),
+      supabaseAdmin
+        .from("teacher_plans")
+        .select("code, name, price_kzt, max_courses, max_students")
+        .order("position"),
     ]);
     return {
       plans: plans ?? [],
       orgs: (orgs ?? []).map((o) => {
         const s = (subs ?? []).find((x) => x.organization_id === o.id);
-        return { id: o.id, name: o.name, slug: o.slug, planCode: s && s.status === "ACTIVE" ? s.plan_code : "starter" };
+        return {
+          id: o.id,
+          name: o.name,
+          slug: o.slug,
+          planCode: s && s.status === "ACTIVE" ? s.plan_code : "starter",
+        };
       }),
     };
   });
@@ -149,7 +189,13 @@ export const setTeacherPlan = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("org_subscriptions").upsert(
-      { organization_id: data.organizationId, plan_code: data.planCode, status: "ACTIVE", provider: "manual", updated_at: new Date().toISOString() },
+      {
+        organization_id: data.organizationId,
+        plan_code: data.planCode,
+        status: "ACTIVE",
+        provider: "manual",
+        updated_at: new Date().toISOString(),
+      },
       { onConflict: "organization_id" },
     );
     if (error) throw new Error(error.message);

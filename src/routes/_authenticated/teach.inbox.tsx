@@ -75,13 +75,18 @@ function Inbox() {
                 key={r.id}
                 type="button"
                 onClick={() => setSelected(r.id)}
-                className={cn("block w-full p-4 text-left transition-colors hover:bg-accent", selected === r.id && "bg-accent")}
+                className={cn(
+                  "block w-full p-4 text-left transition-colors hover:bg-accent",
+                  selected === r.id && "bg-accent",
+                )}
               >
                 <p className="font-medium">{r.student}</p>
                 <p className="truncate text-sm text-muted-foreground">
                   {r.course} · {r.lesson}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">{new Date(r.submittedAt).toLocaleString()}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {new Date(r.submittedAt).toLocaleString()}
+                </p>
               </button>
             ))
           )}
@@ -97,7 +102,10 @@ function Review({ id, onDone }: { id: string; onDone: () => void }) {
   const qc = useQueryClient();
   const fetchSub = useServerFn(getSubmission);
   const review = useServerFn(reviewSubmission);
-  const { data } = useQuery({ queryKey: ["submission", id], queryFn: () => fetchSub({ data: { id } }) });
+  const { data } = useQuery({
+    queryKey: ["submission", id],
+    queryFn: () => fetchSub({ data: { id } }),
+  });
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState("");
   const [busy, setBusy] = useState(false);
@@ -136,7 +144,9 @@ function Review({ id, onDone }: { id: string; onDone: () => void }) {
       <p className="text-sm text-muted-foreground">{data.lesson}</p>
       {data.instructions ? (
         <details className="mt-4 text-sm">
-          <summary className="cursor-pointer text-muted-foreground">{t("act.instructions")}</summary>
+          <summary className="cursor-pointer text-muted-foreground">
+            {t("act.instructions")}
+          </summary>
           <div className="mt-2">
             <Markdown>{data.instructions}</Markdown>
           </div>
@@ -145,17 +155,34 @@ function Review({ id, onDone }: { id: string; onDone: () => void }) {
       <div className="mt-5 space-y-3 border-t border-border pt-5">
         {data.body ? <p className="whitespace-pre-wrap text-sm">{data.body}</p> : null}
         {data.files.map((f) => (
-          <a key={f.name} href={f.url ?? "#"} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+          <a
+            key={f.name}
+            href={f.url ?? "#"}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-sm text-primary hover:underline"
+          >
             <Paperclip className="size-4" /> {f.name}
           </a>
         ))}
       </div>
       <div className="mt-6 space-y-3 border-t border-border pt-5">
-        <Textarea rows={5} placeholder={t("act.feedback")} value={feedback} onChange={(e) => setFeedback(e.target.value)} />
+        <Textarea
+          rows={5}
+          placeholder={t("act.feedback")}
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+        />
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             {t("act.score")}
-            <Input type="number" min={0} className="w-24" value={score} onChange={(e) => setScore(e.target.value)} />
+            <Input
+              type="number"
+              min={0}
+              className="w-24"
+              value={score}
+              onChange={(e) => setScore(e.target.value)}
+            />
             {data.maxScore ? `/ ${data.maxScore}` : null}
           </label>
           <div className="ml-auto flex gap-2">

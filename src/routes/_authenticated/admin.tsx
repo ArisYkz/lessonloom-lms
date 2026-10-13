@@ -39,9 +39,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { t } = useI18n();
   const fetchRoles = useServerFn(getMyRoles);
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: () => fetchRoles() });
+  const { data: roles, isLoading } = useQuery({
+    queryKey: ["my-roles"],
+    queryFn: () => fetchRoles(),
+  });
 
-  if (isLoading) return <p className="p-12 text-center text-muted-foreground">{t("common.loading")}</p>;
+  if (isLoading)
+    return <p className="p-12 text-center text-muted-foreground">{t("common.loading")}</p>;
   if (!roles?.includes("admin")) {
     return <p className="p-20 text-center text-muted-foreground">{t("admin.notAdmin")}</p>;
   }
@@ -82,7 +86,10 @@ function ReportsTab() {
   const queryClient = useQueryClient();
   const fetchReports = useServerFn(listReports);
   const update = useServerFn(updateReport);
-  const { data, isLoading } = useQuery({ queryKey: ["admin-reports"], queryFn: () => fetchReports() });
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-reports"],
+    queryFn: () => fetchReports(),
+  });
   const [notes, setNotes] = useState<Record<string, string>>({});
 
   async function act(id: string, status: "UNDER_REVIEW" | "RESOLVED" | "DISMISSED") {
@@ -96,7 +103,8 @@ function ReportsTab() {
   }
 
   if (isLoading) return <p className="mt-6 text-muted-foreground">{t("common.loading")}</p>;
-  if (!data || data.length === 0) return <p className="mt-6 text-muted-foreground">{t("admin.reports.empty")}</p>;
+  if (!data || data.length === 0)
+    return <p className="mt-6 text-muted-foreground">{t("admin.reports.empty")}</p>;
 
   return (
     <div className="mt-6 space-y-4">
@@ -111,7 +119,9 @@ function ReportsTab() {
             </span>
           </div>
           <p className="mt-2 text-sm font-medium">{r.reason}</p>
-          {r.description ? <p className="mt-1 text-sm text-muted-foreground">{r.description}</p> : null}
+          {r.description ? (
+            <p className="mt-1 text-sm text-muted-foreground">{r.description}</p>
+          ) : null}
           <p className="mt-1 text-xs text-muted-foreground">
             {t("admin.reports.reporter")}: {r.reporterName || "—"}
           </p>
@@ -260,7 +270,9 @@ function UsersTab() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => run(() => setRole({ data: { userId: u.id, role: "teacher", grant: true } }))}
+              onClick={() =>
+                run(() => setRole({ data: { userId: u.id, role: "teacher", grant: true } }))
+              }
             >
               {t("admin.makeTeacher")}
             </Button>
@@ -269,7 +281,9 @@ function UsersTab() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => run(() => setRole({ data: { userId: u.id, role: "admin", grant: true } }))}
+              onClick={() =>
+                run(() => setRole({ data: { userId: u.id, role: "admin", grant: true } }))
+              }
             >
               {t("admin.makeAdmin")}
             </Button>
@@ -277,7 +291,9 @@ function UsersTab() {
           <Button
             size="sm"
             variant={u.suspended ? "secondary" : "destructive"}
-            onClick={() => run(() => setSuspended({ data: { userId: u.id, suspended: !u.suspended } }))}
+            onClick={() =>
+              run(() => setSuspended({ data: { userId: u.id, suspended: !u.suspended } }))
+            }
           >
             {u.suspended ? t("admin.unsuspend") : t("admin.suspend")}
           </Button>
@@ -309,7 +325,10 @@ function CategoriesTab() {
 
   return (
     <div className="mt-6 space-y-6">
-      <form onSubmit={add} className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-5">
+      <form
+        onSubmit={add}
+        className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-5"
+      >
         <Input
           placeholder={t("admin.slug")}
           value={form.slug}

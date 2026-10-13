@@ -20,7 +20,6 @@ import { I18nProvider } from "@/i18n/provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -53,9 +52,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="title-panel text-foreground">
-          This page didn't load
-        </h1>
+        <h1 className="title-panel text-foreground">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -166,12 +163,11 @@ function RootComponent() {
       <I18nProvider>
         <AuthProvider>
           <ModeProvider>
-          <AppFrame />
-          <Toaster richColors position="top-center" />
+            <AppFrame />
+            <Toaster richColors position="top-center" />
           </ModeProvider>
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>
   );
 }
-

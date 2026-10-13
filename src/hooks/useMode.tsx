@@ -2,7 +2,10 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 
 export type Mode = "student" | "teacher";
 const KEY = "bilim.mode";
-const Ctx = createContext<{ mode: Mode; setMode: (m: Mode) => void }>({ mode: "student", setMode: () => {} });
+const Ctx = createContext<{ mode: Mode; setMode: (m: Mode) => void }>({
+  mode: "student",
+  setMode: () => {},
+});
 
 export function ModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<Mode>("student");

@@ -6,7 +6,12 @@ import { listNotifications, markNotificationsRead } from "@/lib/activity.functio
 import { useI18n } from "@/i18n/provider";
 import type { Dict } from "@/i18n/dictionary";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 export function NotificationBell() {
@@ -15,13 +20,18 @@ export function NotificationBell() {
   const qc = useQueryClient();
   const fetchList = useServerFn(listNotifications);
   const markRead = useServerFn(markNotificationsRead);
-  const { data } = useQuery({ queryKey: ["notifications"], queryFn: () => fetchList(), refetchInterval: 60_000 });
+  const { data } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => fetchList(),
+    refetchInterval: 60_000,
+  });
   const unread = (data ?? []).filter((n) => !n.read_at).length;
 
   return (
     <DropdownMenu
       onOpenChange={(open) => {
-        if (!open && unread > 0) void markRead().then(() => qc.invalidateQueries({ queryKey: ["notifications"] }));
+        if (!open && unread > 0)
+          void markRead().then(() => qc.invalidateQueries({ queryKey: ["notifications"] }));
       }}
     >
       <DropdownMenuTrigger asChild>
@@ -44,7 +54,9 @@ export function NotificationBell() {
               className="flex flex-col items-start gap-0.5 py-2"
               onClick={() => n.link && navigate({ to: n.link })}
             >
-              <span className={cn("text-sm", !n.read_at && "font-semibold")}>{t(`notif.${n.kind}` as keyof Dict) ?? n.kind}</span>
+              <span className={cn("text-sm", !n.read_at && "font-semibold")}>
+                {t(`notif.${n.kind}` as keyof Dict) ?? n.kind}
+              </span>
               <span className="text-xs text-muted-foreground">{n.title}</span>
             </DropdownMenuItem>
           ))

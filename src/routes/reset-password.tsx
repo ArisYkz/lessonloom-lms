@@ -39,10 +39,21 @@ function ResetPassword() {
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
       <h1 className="title-page">{t("auth.newPasswordTitle")}</h1>
-      <form onSubmit={submit} className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6">
+      <form
+        onSubmit={submit}
+        className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6"
+      >
         <div>
           <Label htmlFor="pw">{t("auth.password")}</Label>
-          <Input id="pw" type="password" minLength={6} required className="mt-1" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Input
+            id="pw"
+            type="password"
+            minLength={6}
+            required
+            className="mt-1"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <Button type="submit" className="w-full" disabled={busy}>
           {t("auth.savePassword")}

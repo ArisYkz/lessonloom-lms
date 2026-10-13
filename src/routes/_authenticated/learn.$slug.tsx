@@ -41,7 +41,10 @@ function Player() {
   });
 
   const flat = useMemo(
-    () => (player?.sections ?? []).flatMap((s) => s.lessons.map((l) => ({ ...l, sectionTitle: s.title }))),
+    () =>
+      (player?.sections ?? []).flatMap((s) =>
+        s.lessons.map((l) => ({ ...l, sectionTitle: s.title })),
+      ),
     [player],
   );
 
@@ -55,8 +58,10 @@ function Player() {
     enabled: !!lessonId,
   });
 
-  if (isLoading) return <p className="p-12 text-center text-muted-foreground">{t("common.loading")}</p>;
-  if (!player) return <p className="p-12 text-center text-muted-foreground">{t("course.notFound")}</p>;
+  if (isLoading)
+    return <p className="p-12 text-center text-muted-foreground">{t("common.loading")}</p>;
+  if (!player)
+    return <p className="p-12 text-center text-muted-foreground">{t("course.notFound")}</p>;
   if (!player.access) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
@@ -79,9 +84,15 @@ function Player() {
   async function toggle() {
     if (!lessonId || !player) return;
     try {
-      const res = await complete({ data: { lessonId, courseId: player.courseId!, completed: !isDone } });
+      const res = await complete({
+        data: { lessonId, courseId: player.courseId!, completed: !isDone },
+      });
       if (res.missing.length > 0) {
-        toast.error(res.missing.map((m) => t(m === "homework" ? "act.missingHomework" : "act.missingQuiz")).join(" "));
+        toast.error(
+          res.missing
+            .map((m) => t(m === "homework" ? "act.missingHomework" : "act.missingQuiz"))
+            .join(" "),
+        );
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ["player", slug] });
@@ -132,10 +143,12 @@ function Player() {
               </div>
             ) : null}
 
-            {lesson.hasAccess ? <LessonActivities
-              lessonId={lesson.id}
-              onChanged={() => void queryClient.invalidateQueries({ queryKey: ["player", slug] })}
-            /> : null}
+            {lesson.hasAccess ? (
+              <LessonActivities
+                lessonId={lesson.id}
+                onChanged={() => void queryClient.invalidateQueries({ queryKey: ["player", slug] })}
+              />
+            ) : null}
 
             <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
               {lesson.hasAccess ? (
@@ -144,7 +157,9 @@ function Player() {
                 </Button>
               ) : (
                 <Button asChild>
-                  <Link to="/courses/$slug" params={{ slug }}>{t("preview.subscribe")}</Link>
+                  <Link to="/courses/$slug" params={{ slug }}>
+                    {t("preview.subscribe")}
+                  </Link>
                 </Button>
               )}
               <div className="ml-auto flex gap-2">
@@ -174,7 +189,9 @@ function Player() {
 
       <aside className="h-fit rounded-xl border border-border bg-card p-4 lg:sticky lg:top-20">
         {percent === 100 ? (
-          <p className="mb-3 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary">{t("act.courseComplete")}</p>
+          <p className="mb-3 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
+            {t("act.courseComplete")}
+          </p>
         ) : null}
         <Progress value={percent} />
         <p className="mt-2 text-xs text-muted-foreground">
@@ -183,7 +200,9 @@ function Player() {
         <div className="mt-4 space-y-4">
           {player.sections.map((s) => (
             <div key={s.id}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{s.title}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {s.title}
+              </p>
               <ul className="mt-2 space-y-1">
                 {s.lessons.map((l) => (
                   <li key={l.id}>

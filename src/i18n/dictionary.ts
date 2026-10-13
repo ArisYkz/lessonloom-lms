@@ -13,7 +13,7 @@ export const CONTENT_LANGUAGES: { code: string; labelKey: keyof Dict }[] = [
 ];
 
 const en = {
-  "brand": "Bilim",
+  brand: "Bilim",
   "nav.catalog": "Catalog",
   "nav.teach": "Teach",
   "nav.dashboard": "My learning",
@@ -28,13 +28,15 @@ const en = {
   "lang.en": "English",
 
   "home.heroTitle": "Learn from Kazakhstan's teachers",
-  "home.heroSub": "Courses built by real teachers. Start free, learn at your own pace, track every lesson you finish.",
+  "home.heroSub":
+    "Courses built by real teachers. Start free, learn at your own pace, track every lesson you finish.",
   "home.browse": "Browse courses",
   "home.becomeTeacher": "Teach on Bilim",
   "home.featured": "Featured courses",
   "home.categories": "Categories",
   "home.teacherTitle": "Share what you know",
-  "home.teacherSub": "Create a teacher account, build your curriculum, and publish once our team reviews it.",
+  "home.teacherSub":
+    "Create a teacher account, build your curriculum, and publish once our team reviews it.",
   "home.teacherCta": "Start teaching",
   "home.empty": "No published courses yet.",
 
@@ -138,7 +140,8 @@ const en = {
   "builder.publishNote": "An administrator reviews every course before it goes live.",
   "builder.unpublish": "Unpublish",
   "builder.noLessons": "No lessons yet.",
-  "builder.paymentsNote": "Card payments are not live yet. Subscription courses stay visible but students can't pay until a payment provider is connected.",
+  "builder.paymentsNote":
+    "Card payments are not live yet. Subscription courses stay visible but students can't pay until a payment provider is connected.",
 
   "status.draft": "Draft",
   "status.pending_review": "In review",
@@ -313,7 +316,8 @@ const en = {
   "plan.courses": "Course limit",
   "plan.students": "Student limit",
   "plan.unlimited": "Unlimited",
-  "plan.limitReached": "You've reached your plan's course limit. Upgrade to Pro to create more courses.",
+  "plan.limitReached":
+    "You've reached your plan's course limit. Upgrade to Pro to create more courses.",
   "plan.upgradeSoon": "Online payment for Pro is coming soon. Contact support to upgrade.",
   "plan.perMonth": "/ month",
   "admin.tabs.plans": "Teacher plans",
@@ -324,7 +328,8 @@ const en = {
   "preview.subscribe": "View subscription",
   "preview.watch": "Watch free preview",
   "builder.previewMinutes": "Free preview length (minutes)",
-  "builder.previewHelp": "Non-subscribers can watch this many minutes of each video. 0 turns it off.",
+  "builder.previewHelp":
+    "Non-subscribers can watch this many minutes of each video. 0 turns it off.",
   "builder.danmaku": "Allow flying comments",
   "builder.tabs.danmaku": "Comments",
   "dm.placeholder": "Send a flying comment…",
@@ -369,13 +374,15 @@ const ru: Dict = {
   "lang.en": "Английский",
 
   "home.heroTitle": "Учитесь у преподавателей Казахстана",
-  "home.heroSub": "Курсы от настоящих преподавателей. Начните бесплатно, учитесь в своём темпе и отслеживайте прогресс.",
+  "home.heroSub":
+    "Курсы от настоящих преподавателей. Начните бесплатно, учитесь в своём темпе и отслеживайте прогресс.",
   "home.browse": "Смотреть курсы",
   "home.becomeTeacher": "Преподавать на Bilim",
   "home.featured": "Популярные курсы",
   "home.categories": "Категории",
   "home.teacherTitle": "Делитесь знаниями",
-  "home.teacherSub": "Создайте аккаунт преподавателя, соберите программу и опубликуйте курс после проверки.",
+  "home.teacherSub":
+    "Создайте аккаунт преподавателя, соберите программу и опубликуйте курс после проверки.",
   "home.teacherCta": "Начать преподавать",
   "home.empty": "Пока нет опубликованных курсов.",
 
@@ -479,7 +486,8 @@ const ru: Dict = {
   "builder.publishNote": "Каждый курс проверяет администратор перед публикацией.",
   "builder.unpublish": "Снять с публикации",
   "builder.noLessons": "Уроков пока нет.",
-  "builder.paymentsNote": "Оплата картой пока недоступна. Курсы с подпиской видны, но студенты не смогут оплатить до подключения платёжного провайдера.",
+  "builder.paymentsNote":
+    "Оплата картой пока недоступна. Курсы с подпиской видны, но студенты не смогут оплатить до подключения платёжного провайдера.",
 
   "status.draft": "Черновик",
   "status.pending_review": "На проверке",
@@ -654,7 +662,8 @@ const ru: Dict = {
   "plan.courses": "Лимит курсов",
   "plan.students": "Лимит учеников",
   "plan.unlimited": "Без ограничений",
-  "plan.limitReached": "Достигнут лимит курсов на вашем тарифе. Перейдите на Pro, чтобы создавать больше.",
+  "plan.limitReached":
+    "Достигнут лимит курсов на вашем тарифе. Перейдите на Pro, чтобы создавать больше.",
   "plan.upgradeSoon": "Онлайн-оплата Pro скоро появится. Для перехода напишите в поддержку.",
   "plan.perMonth": "/ мес",
   "admin.tabs.plans": "Тарифы преподавателей",
@@ -665,7 +674,8 @@ const ru: Dict = {
   "preview.subscribe": "Оформить подписку",
   "preview.watch": "Смотреть бесплатно",
   "builder.previewMinutes": "Длина бесплатного просмотра (мин)",
-  "builder.previewHelp": "Без подписки можно посмотреть столько минут каждого видео. 0 — выключить.",
+  "builder.previewHelp":
+    "Без подписки можно посмотреть столько минут каждого видео. 0 — выключить.",
   "builder.danmaku": "Разрешить бегущие комментарии",
   "builder.tabs.danmaku": "Комментарии",
   "dm.placeholder": "Отправить бегущий комментарий…",
@@ -714,7 +724,8 @@ const kk: Dict = {
   "home.featured": "Таңдаулы курстар",
   "home.categories": "Санаттар",
   "home.teacherTitle": "Біліміңізбен бөлісіңіз",
-  "home.teacherSub": "Ұстаз аккаунтын жасаңыз, бағдарлама құрыңыз және тексеруден кейін жариялаңыз.",
+  "home.teacherSub":
+    "Ұстаз аккаунтын жасаңыз, бағдарлама құрыңыз және тексеруден кейін жариялаңыз.",
   "home.teacherCta": "Сабақ беруді бастау",
   "home.empty": "Әзірге жарияланған курстар жоқ.",
 
@@ -818,7 +829,8 @@ const kk: Dict = {
   "builder.publishNote": "Әр курсты жариялау алдында әкімші тексереді.",
   "builder.unpublish": "Жариялаудан алу",
   "builder.noLessons": "Сабақтар жоқ.",
-  "builder.paymentsNote": "Картамен төлеу әзірге қосылмаған. Жазылым курстары көрінеді, бірақ төлем жүйесі қосылғанша студенттер төлей алмайды.",
+  "builder.paymentsNote":
+    "Картамен төлеу әзірге қосылмаған. Жазылым курстары көрінеді, бірақ төлем жүйесі қосылғанша студенттер төлей алмайды.",
 
   "status.draft": "Жоба",
   "status.pending_review": "Тексеруде",

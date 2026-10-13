@@ -10,7 +10,12 @@ import { useI18n } from "@/i18n/provider";
 import type { Dict } from "@/i18n/dictionary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { ReportButton } from "@/components/report-button";
 
 const courseQuery = (slug: string) =>
@@ -27,7 +32,9 @@ export const Route = createFileRoute("/courses/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Course not found — Bilim" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [{ title: "Course not found — Bilim" }, { name: "robots", content: "noindex" }],
+      };
     }
     return {
       meta: [
@@ -40,7 +47,9 @@ export const Route = createFileRoute("/courses/$slug")({
   },
   component: CoursePage,
   errorComponent: ({ error }) => <div className="p-10 text-center text-sm">{error.message}</div>,
-  notFoundComponent: () => <div className="p-20 text-center text-muted-foreground">Course not found</div>,
+  notFoundComponent: () => (
+    <div className="p-20 text-center text-muted-foreground">Course not found</div>
+  ),
 });
 
 function CoursePage() {
@@ -108,7 +117,11 @@ function CoursePage() {
                 </span>
               ) : null}
               {course.teacher ? (
-                <Link to="/teachers/$slug" params={{ slug: course.teacher.slug }} className="hover:text-foreground">
+                <Link
+                  to="/teachers/$slug"
+                  params={{ slug: course.teacher.slug }}
+                  className="hover:text-foreground"
+                >
                   {t("course.teacher")}: {course.teacher.name}
                 </Link>
               ) : null}
@@ -118,7 +131,11 @@ function CoursePage() {
           <aside className="rounded-xl border border-border bg-background p-5">
             <div className="aspect-video overflow-hidden rounded-lg bg-accent">
               {course.thumbnailUrl ? (
-                <img src={course.thumbnailUrl} alt={course.title} className="size-full object-cover" />
+                <img
+                  src={course.thumbnailUrl}
+                  alt={course.title}
+                  className="size-full object-cover"
+                />
               ) : (
                 <div className="flex size-full items-center justify-center">
                   <BookOpen className="size-8 text-accent-foreground" />
@@ -126,7 +143,9 @@ function CoursePage() {
               )}
             </div>
             <p className="mt-4 text-2xl font-semibold">
-              {isFree ? t("price.free") : `${course.priceKzt.toLocaleString("ru-RU")} ₸ ${t("price.perMonth")}`}
+              {isFree
+                ? t("price.free")
+                : `${course.priceKzt.toLocaleString("ru-RU")} ₸ ${t("price.perMonth")}`}
             </p>
             {state?.access ? (
               <Button asChild className="mt-4 w-full" size="lg">
@@ -143,11 +162,14 @@ function CoursePage() {
                 <Button className="mt-4 w-full" size="lg" disabled>
                   {t("course.subscribe")}
                 </Button>
-                <p className="mt-2 text-center text-xs text-muted-foreground">{t("course.paymentsSoon")}</p>
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  {t("course.paymentsSoon")}
+                </p>
                 {course.previewSeconds > 0 ? (
                   <Button asChild variant="outline" className="mt-3 w-full">
                     <Link to="/learn/$slug" params={{ slug }}>
-                      {t("preview.watch")} · {Math.round(course.previewSeconds / 60)} {t("preview.minutes")}
+                      {t("preview.watch")} · {Math.round(course.previewSeconds / 60)}{" "}
+                      {t("preview.minutes")}
                     </Link>
                   </Button>
                 ) : null}
@@ -178,7 +200,10 @@ function CoursePage() {
                 <AccordionContent>
                   <ul className="space-y-2">
                     {s.lessons.map((l) => (
-                      <li key={l.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <li
+                        key={l.id}
+                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
                         {l.type === "video" ? (
                           <PlayCircle className="size-4" />
                         ) : l.type === "file" ? (

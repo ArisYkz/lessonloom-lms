@@ -25,7 +25,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { LessonExtrasEditor } from "@/components/lesson-extras-editor";
 import { DanmakuModeration } from "@/components/danmaku-moderation";
@@ -66,13 +72,18 @@ function Builder() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["course-edit", courseId] });
 
-  if (isLoading) return <p className="p-12 text-center text-muted-foreground">{t("common.loading")}</p>;
-  if (!data) return <p className="p-12 text-center text-muted-foreground">{t("course.notFound")}</p>;
+  if (isLoading)
+    return <p className="p-12 text-center text-muted-foreground">{t("common.loading")}</p>;
+  if (!data)
+    return <p className="p-12 text-center text-muted-foreground">{t("course.notFound")}</p>;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <div className="flex flex-wrap items-center gap-3">
-        <Link to="/teach" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+        <Link
+          to="/teach"
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+        >
           ← {t("teach.title")}
         </Link>
         <Badge variant="secondary" className="ml-auto">
@@ -108,7 +119,11 @@ function Builder() {
           <PricingTab course={data.course} onSaved={refresh} />
         </TabsContent>
         <TabsContent value="publish">
-          <PublishTab course={data.course} lessonCount={data.sections.reduce((n, s) => n + s.lessons.length, 0)} onSaved={refresh} />
+          <PublishTab
+            course={data.course}
+            lessonCount={data.sections.reduce((n, s) => n + s.lessons.length, 0)}
+            onSaved={refresh}
+          />
         </TabsContent>
         <TabsContent value="students">
           <StudentsTab courseId={courseId} />
@@ -187,7 +202,11 @@ function BasicsTab({ course, onSaved }: { course: any; onSaved: () => void }) {
     <form onSubmit={submit} className="mt-6 space-y-5 rounded-xl border border-border bg-card p-6">
       <div>
         <Label>{t("builder.title")}</Label>
-        <Input className="mt-1" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <Input
+          className="mt-1"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
       </div>
       <div>
         <Label>{t("builder.short")}</Label>
@@ -209,7 +228,10 @@ function BasicsTab({ course, onSaved }: { course: any; onSaved: () => void }) {
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <Label>{t("builder.category")}</Label>
-          <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
+          <Select
+            value={form.category_id}
+            onValueChange={(v) => setForm({ ...form, category_id: v })}
+          >
             <SelectTrigger className="mt-1 w-full">
               <SelectValue placeholder="—" />
             </SelectTrigger>
@@ -278,7 +300,9 @@ function BasicsTab({ course, onSaved }: { course: any; onSaved: () => void }) {
                 }
               }}
             />
-            {uploading ? <span className="text-xs text-muted-foreground">{t("builder.uploading")}</span> : null}
+            {uploading ? (
+              <span className="text-xs text-muted-foreground">{t("builder.uploading")}</span>
+            ) : null}
           </div>
         </div>
       </div>
@@ -318,7 +342,11 @@ function CurriculumTab({
   return (
     <div className="mt-6 space-y-6">
       <form onSubmit={add} className="flex gap-2">
-        <Input placeholder={t("builder.sectionTitle")} value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+        <Input
+          placeholder={t("builder.sectionTitle")}
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+        />
         <Button type="submit">
           <Plus className="size-4" /> {t("builder.addSection")}
         </Button>
@@ -347,7 +375,13 @@ function CurriculumTab({
           </div>
           <div className="mt-4 space-y-3">
             {s.lessons.map((l) => (
-              <LessonEditor key={l.id} courseId={courseId} sectionId={s.id} lesson={l} onChanged={onChanged} />
+              <LessonEditor
+                key={l.id}
+                courseId={courseId}
+                sectionId={s.id}
+                lesson={l}
+                onChanged={onChanged}
+              />
             ))}
             <LessonEditor courseId={courseId} sectionId={s.id} onChanged={onChanged} />
           </div>
@@ -439,7 +473,15 @@ function LessonEditor({
         },
       });
       if (!lesson) {
-        setForm({ title: "", type: "video", body: "", mediaPath: "", durationMinutes: 0, isPreview: false, danmakuEnabled: true });
+        setForm({
+          title: "",
+          type: "video",
+          body: "",
+          mediaPath: "",
+          durationMinutes: 0,
+          isPreview: false,
+          danmakuEnabled: true,
+        });
         setOpen(false);
       }
       onChanged();
@@ -459,7 +501,10 @@ function LessonEditor({
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
         />
-        <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}>
+        <Select
+          value={form.type}
+          onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}
+        >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -513,12 +558,18 @@ function LessonEditor({
 
       <div className="flex flex-wrap items-center gap-4">
         <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Switch checked={form.isPreview} onCheckedChange={(v) => setForm({ ...form, isPreview: v })} />
+          <Switch
+            checked={form.isPreview}
+            onCheckedChange={(v) => setForm({ ...form, isPreview: v })}
+          />
           {t("course.preview")}
         </label>
         {form.type === "video" ? (
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Switch checked={form.danmakuEnabled} onCheckedChange={(v) => setForm({ ...form, danmakuEnabled: v })} />
+            <Switch
+              checked={form.danmakuEnabled}
+              onCheckedChange={(v) => setForm({ ...form, danmakuEnabled: v })}
+            />
             {t("builder.danmaku")}
           </label>
         ) : null}
@@ -554,7 +605,9 @@ function PricingTab({ course, onSaved }: { course: any; onSaved: () => void }) {
   const save = useServerFn(updateCourse);
   const [priceModel, setPriceModel] = useState<string>(course.price_model);
   const [priceKzt, setPriceKzt] = useState<number>(course.price_kzt);
-  const [previewMin, setPreviewMin] = useState<number>(Math.round((course.preview_seconds ?? 600) / 60));
+  const [previewMin, setPreviewMin] = useState<number>(
+    Math.round((course.preview_seconds ?? 600) / 60),
+  );
   const [busy, setBusy] = useState(false);
 
   async function submit() {
@@ -664,8 +717,12 @@ function PublishTab({
     <div className="mt-6 space-y-5 rounded-xl border border-border bg-card p-6">
       <p className="text-sm text-muted-foreground">{t("builder.publishNote")}</p>
       <ul className="space-y-1 text-sm">
-        <li>{course.title ? "✓" : "•"} {t("builder.title")}</li>
-        <li>{course.short_description ? "✓" : "•"} {t("builder.short")}</li>
+        <li>
+          {course.title ? "✓" : "•"} {t("builder.title")}
+        </li>
+        <li>
+          {course.short_description ? "✓" : "•"} {t("builder.short")}
+        </li>
         <li>
           {lessonCount > 0 ? "✓" : "•"} {lessonCount} {t("course.lessons")}
         </li>
@@ -673,11 +730,17 @@ function PublishTab({
 
       <div className="flex flex-wrap gap-3">
         {course.status === "published" ? (
-          <Button variant="outline" onClick={() => navigate({ to: "/courses/$slug", params: { slug: course.slug } })}>
+          <Button
+            variant="outline"
+            onClick={() => navigate({ to: "/courses/$slug", params: { slug: course.slug } })}
+          >
             {t("builder.preview")}
           </Button>
         ) : (
-          <Button disabled={!ready || busy || course.status === "pending_review"} onClick={() => submit("pending_review")}>
+          <Button
+            disabled={!ready || busy || course.status === "pending_review"}
+            onClick={() => submit("pending_review")}
+          >
             {course.status === "pending_review" ? t("builder.submitted") : t("builder.submit")}
           </Button>
         )}

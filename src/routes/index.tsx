@@ -64,8 +64,16 @@ function Home() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
-            <Stat icon={<BookOpen className="size-5" />} value={data.courses.length} label={t("home.featured")} />
-            <Stat icon={<Users className="size-5" />} value={data.categories.length} label={t("home.categories")} />
+            <Stat
+              icon={<BookOpen className="size-5" />}
+              value={data.courses.length}
+              label={t("home.featured")}
+            />
+            <Stat
+              icon={<Users className="size-5" />}
+              value={data.categories.length}
+              label={t("home.categories")}
+            />
           </div>
         </div>
       </section>

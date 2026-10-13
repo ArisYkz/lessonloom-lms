@@ -19,7 +19,10 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Bilim" },
-      { name: "description", content: "Sign in or create a Bilim account to start learning or teaching." },
+      {
+        name: "description",
+        content: "Sign in or create a Bilim account to start learning or teaching.",
+      },
       { property: "og:title", content: "Sign in — Bilim" },
       { property: "og:description", content: "Access your Bilim courses." },
     ],
@@ -85,15 +88,22 @@ function AuthPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
-      <h1 className="title-page">
-        {mode === "signin" ? t("auth.welcome") : t("auth.joinTitle")}
-      </h1>
+      <h1 className="title-page">{mode === "signin" ? t("auth.welcome") : t("auth.joinTitle")}</h1>
 
-      <form onSubmit={submit} className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6">
+      <form
+        onSubmit={submit}
+        className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6"
+      >
         {mode === "signup" ? (
           <div>
             <Label htmlFor="name">{t("auth.fullName")}</Label>
-            <Input id="name" className="mt-1" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <Input
+              id="name"
+              className="mt-1"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
           </div>
         ) : null}
         <div>

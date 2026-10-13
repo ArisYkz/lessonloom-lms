@@ -4,7 +4,10 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 type Rpc = { rpc: (fn: any, args: any) => PromiseLike<{ data: unknown }> };
 
 export async function assertAccess(supabase: unknown, courseId: string, userId: string) {
-  const { data } = await (supabase as Rpc).rpc("has_course_access", { _course: courseId, _user: userId });
+  const { data } = await (supabase as Rpc).rpc("has_course_access", {
+    _course: courseId,
+    _user: userId,
+  });
   if (!data) throw new Error("No access to this course");
 }
 
@@ -20,11 +23,17 @@ export async function assertEditor(supabase: unknown, courseId: string) {
 export async function lessonCourse(lessonId: string) {
   const { data } = await supabaseAdmin
     .from("lessons")
-    .select("id, course_id, title, discussion_enabled, courses(slug, title, organizations(owner_id))")
+    .select(
+      "id, course_id, title, discussion_enabled, courses(slug, title, organizations(owner_id))",
+    )
     .eq("id", lessonId)
     .maybeSingle();
   if (!data) throw new Error("Lesson not found");
-  const c = data.courses as unknown as { slug: string; title: string; organizations: { owner_id: string } | null };
+  const c = data.courses as unknown as {
+    slug: string;
+    title: string;
+    organizations: { owner_id: string } | null;
+  };
   return {
     lessonId: data.id,
     courseId: data.course_id,
@@ -51,7 +60,11 @@ export async function namesFor(ids: string[]) {
 /** Returns lesson ids whose required homework/quiz the user has not satisfied. */
 export async function unmetRequirements(lessonId: string, userId: string) {
   const missing: ("homework" | "quiz")[] = [];
-  const { data: hw } = await supabaseAdmin.from("homework").select("id, required").eq("lesson_id", lessonId).maybeSingle();
+  const { data: hw } = await supabaseAdmin
+    .from("homework")
+    .select("id, required")
+    .eq("lesson_id", lessonId)
+    .maybeSingle();
   if (hw?.required) {
     const { data: sub } = await supabaseAdmin
       .from("homework_submissions")
@@ -61,7 +74,11 @@ export async function unmetRequirements(lessonId: string, userId: string) {
       .maybeSingle();
     if (!sub || sub.status === "needs_revision") missing.push("homework");
   }
-  const { data: quiz } = await supabaseAdmin.from("quizzes").select("id, required").eq("lesson_id", lessonId).maybeSingle();
+  const { data: quiz } = await supabaseAdmin
+    .from("quizzes")
+    .select("id, required")
+    .eq("lesson_id", lessonId)
+    .maybeSingle();
   if (quiz?.required) {
     const { data: passed } = await supabaseAdmin
       .from("quiz_attempts")

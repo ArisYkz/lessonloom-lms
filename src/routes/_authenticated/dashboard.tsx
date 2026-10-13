@@ -22,7 +22,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const { t } = useI18n();
   const fetchLearning = useServerFn(getMyLearning);
-  const { data, isLoading } = useQuery({ queryKey: ["my-learning"], queryFn: () => fetchLearning() });
+  const { data, isLoading } = useQuery({
+    queryKey: ["my-learning"],
+    queryFn: () => fetchLearning(),
+  });
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">

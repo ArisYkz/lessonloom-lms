@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -63,14 +69,28 @@ function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <h1 className="title-page">{t("profile.title")}</h1>
-      <form onSubmit={submit} className="mt-8 space-y-5 rounded-xl border border-border bg-card p-6">
+      <form
+        onSubmit={submit}
+        className="mt-8 space-y-5 rounded-xl border border-border bg-card p-6"
+      >
         <div>
           <Label htmlFor="fullName">{t("profile.name")}</Label>
-          <Input id="fullName" className="mt-1" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          <Input
+            id="fullName"
+            className="mt-1"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="bio">{t("profile.bio")}</Label>
-          <Textarea id="bio" className="mt-1" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
+          <Textarea
+            id="bio"
+            className="mt-1"
+            rows={4}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+          />
         </div>
         <div>
           <Label>{t("profile.locale")}</Label>
@@ -90,7 +110,10 @@ function ProfilePage() {
         {data?.hasOrg ? (
           <div>
             <Label>{t("profile.defaultMode")}</Label>
-            <Select value={defaultMode} onValueChange={(v) => setDefaultMode(v as "student" | "teacher")}>
+            <Select
+              value={defaultMode}
+              onValueChange={(v) => setDefaultMode(v as "student" | "teacher")}
+            >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue />
               </SelectTrigger>

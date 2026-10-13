@@ -64,7 +64,15 @@ export const listCategories = createServerFn({ method: "GET" }).handler(async ()
 });
 
 export const listCourses = createServerFn({ method: "GET" })
-  .inputValidator((input: { search?: string; category?: string; language?: string; level?: string; limit?: number }) => input)
+  .inputValidator(
+    (input: {
+      search?: string;
+      category?: string;
+      language?: string;
+      level?: string;
+      limit?: number;
+    }) => input,
+  )
   .handler(async ({ data }) => {
     const { createPublicClient } = await import("./supabase-public.server");
     const supabase = createPublicClient();
@@ -143,7 +151,12 @@ export const getCourseBySlug = createServerFn({ method: "GET" })
         name_kk: string;
       } | null,
       teacher: org
-        ? { name: org.name, slug: org.slug, headline: org.headline, logoUrl: await signPath(org.logo_url) }
+        ? {
+            name: org.name,
+            slug: org.slug,
+            headline: org.headline,
+            logoUrl: await signPath(org.logo_url),
+          }
         : null,
       sections: (sections ?? []).map((s) => ({
         id: s.id,
@@ -178,7 +191,9 @@ export const getTeacherBySlug = createServerFn({ method: "GET" })
     const cards = await toCards((rows ?? []) as unknown as CourseRow[]);
     const { data: stats } = await supabase.rpc("course_stats");
     const ids = new Set(cards.map((c) => c.id));
-    const students = (stats ?? []).filter((s) => ids.has(s.course_id)).reduce((n, s) => n + Number(s.students), 0);
+    const students = (stats ?? [])
+      .filter((s) => ids.has(s.course_id))
+      .reduce((n, s) => n + Number(s.students), 0);
     return {
       name: org.name,
       slug: org.slug,
@@ -209,25 +224,45 @@ export const getHomeFeed = createServerFn({ method: "GET" }).handler(async () =>
     supabase.rpc("course_stats"),
     supabase.from("categories").select("slug, name_en, name_ru, name_kk").order("position"),
   ]);
-  const list = (rows ?? []) as unknown as (CourseRow & { organizations: { name: string; slug: string; logo_url: string | null } | null })[];
+  const list = (rows ?? []) as unknown as (CourseRow & {
+    organizations: { name: string; slug: string; logo_url: string | null } | null;
+  })[];
   const statMap = new Map((stats ?? []).map((s) => [s.course_id, s]));
   const base = await toCards(list);
   const logos = await signMany(list.map((r) => r.organizations?.logo_url));
   const cards: FeedCard[] = base.map((c, i) => {
     const logo = list[i]!.organizations?.logo_url;
-    return { ...c, students: Number(statMap.get(c.id)?.students ?? 0), teacherLogoUrl: logo ? (logos.get(logo) ?? null) : null };
+    return {
+      ...c,
+      students: Number(statMap.get(c.id)?.students ?? 0),
+      teacherLogoUrl: logo ? (logos.get(logo) ?? null) : null,
+    };
   });
   const recent = (id: string) => Number(statMap.get(id)?.recent ?? 0);
-  const trending = [...cards].sort((a, b) => recent(b.id) - recent(a.id) || b.students - a.students).slice(0, 12);
+  const trending = [...cards]
+    .sort((a, b) => recent(b.id) - recent(a.id) || b.students - a.students)
+    .slice(0, 12);
 
-  const teacherMap = new Map<string, { name: string; slug: string; logoUrl: string | null; students: number; courses: number }>();
+  const teacherMap = new Map<
+    string,
+    { name: string; slug: string; logoUrl: string | null; students: number; courses: number }
+  >();
   for (const c of cards) {
-    const t = teacherMap.get(c.teacherSlug) ?? { name: c.teacherName, slug: c.teacherSlug, logoUrl: c.teacherLogoUrl, students: 0, courses: 0 };
+    const t = teacherMap.get(c.teacherSlug) ?? {
+      name: c.teacherName,
+      slug: c.teacherSlug,
+      logoUrl: c.teacherLogoUrl,
+      students: 0,
+      courses: 0,
+    };
     t.students += c.students;
     t.courses += 1;
     teacherMap.set(c.teacherSlug, t);
   }
-  const teachers = [...teacherMap.values()].filter((t) => t.slug).sort((a, b) => b.students - a.students).slice(0, 12);
+  const teachers = [...teacherMap.values()]
+    .filter((t) => t.slug)
+    .sort((a, b) => b.students - a.students)
+    .slice(0, 12);
 
   return {
     trending,
@@ -235,7 +270,10 @@ export const getHomeFeed = createServerFn({ method: "GET" }).handler(async () =>
     free: cards.filter((c) => c.priceModel === "free").slice(0, 12),
     teachers,
     categories: (cats ?? [])
-      .map((cat) => ({ ...cat, courses: cards.filter((c) => c.categorySlug === cat.slug).slice(0, 12) }))
+      .map((cat) => ({
+        ...cat,
+        courses: cards.filter((c) => c.categorySlug === cat.slug).slice(0, 12),
+      }))
       .filter((cat) => cat.courses.length > 0),
   };
 });

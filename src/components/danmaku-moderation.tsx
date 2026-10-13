@@ -1,7 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { blockDanmakuUser, deleteDanmaku, listCourseDanmaku, setDanmakuHidden } from "@/lib/danmaku.functions";
+import {
+  blockDanmakuUser,
+  deleteDanmaku,
+  listCourseDanmaku,
+  setDanmakuHidden,
+} from "@/lib/danmaku.functions";
 import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +23,10 @@ export function DanmakuModeration({ courseId }: { courseId: string }) {
   const hide = useServerFn(setDanmakuHidden);
   const del = useServerFn(deleteDanmaku);
   const block = useServerFn(blockDanmakuUser);
-  const { data, isLoading } = useQuery({ queryKey: ["danmaku-mod", courseId], queryFn: () => fetchList({ data: { courseId } }) });
+  const { data, isLoading } = useQuery({
+    queryKey: ["danmaku-mod", courseId],
+    queryFn: () => fetchList({ data: { courseId } }),
+  });
 
   async function run(fn: () => Promise<unknown>) {
     try {
@@ -42,7 +50,18 @@ export function DanmakuModeration({ courseId }: { courseId: string }) {
             {blockedUsers.map((b) => (
               <li key={b.user_id} className="flex items-center gap-3 text-sm">
                 <span>{b.userName}</span>
-                <Button size="sm" variant="ghost" className="ml-auto" onClick={() => run(() => block({ data: { courseId, userId: b.user_id, allCourses: false, block: false } }))}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto"
+                  onClick={() =>
+                    run(() =>
+                      block({
+                        data: { courseId, userId: b.user_id, allCourses: false, block: false },
+                      }),
+                    )
+                  }
+                >
                   {t("dm.unblock")}
                 </Button>
               </li>
@@ -62,22 +81,58 @@ export function DanmakuModeration({ courseId }: { courseId: string }) {
                   <p className={c.hidden ? "text-muted-foreground line-through" : ""}>{c.text}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {c.userName} · {c.lessonTitle} · {fmt(c.time_ms)}
-                    {c.hidden ? <Badge variant="secondary" className="ml-2">{t("dm.hidden")}</Badge> : null}
-                    {c.blocked ? <Badge variant="destructive" className="ml-2">{t("dm.blocked")}</Badge> : null}
+                    {c.hidden ? (
+                      <Badge variant="secondary" className="ml-2">
+                        {t("dm.hidden")}
+                      </Badge>
+                    ) : null}
+                    {c.blocked ? (
+                      <Badge variant="destructive" className="ml-2">
+                        {t("dm.blocked")}
+                      </Badge>
+                    ) : null}
                   </p>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => run(() => hide({ data: { id: c.id, hidden: !c.hidden } }))}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => run(() => hide({ data: { id: c.id, hidden: !c.hidden } }))}
+                >
                   {c.hidden ? t("dm.unhide") : t("dm.hide")}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => run(() => del({ data: { id: c.id } }))}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => run(() => del({ data: { id: c.id } }))}
+                >
                   {t("dm.delete")}
                 </Button>
                 {!c.blocked ? (
                   <>
-                    <Button size="sm" variant="outline" onClick={() => run(() => block({ data: { courseId, userId: c.user_id, allCourses: false, block: true } }))}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        run(() =>
+                          block({
+                            data: { courseId, userId: c.user_id, allCourses: false, block: true },
+                          }),
+                        )
+                      }
+                    >
                       {t("dm.block")}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => run(() => block({ data: { courseId, userId: c.user_id, allCourses: true, block: true } }))}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        run(() =>
+                          block({
+                            data: { courseId, userId: c.user_id, allCourses: true, block: true },
+                          }),
+                        )
+                      }
+                    >
                       {t("dm.blockAll")}
                     </Button>
                   </>

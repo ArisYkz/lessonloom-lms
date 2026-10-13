@@ -52,13 +52,20 @@ export function DanmakuPlayer({
     setLocked(false);
     if (!enabled) return setItems([]);
     let active = true;
-    fetchList({ data: { lessonId } }).then((r) => active && setItems(r)).catch(() => {});
+    fetchList({ data: { lessonId } })
+      .then((r) => active && setItems(r))
+      .catch(() => {});
     const ch = supabase
       .channel(`dm-${lessonId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "danmaku", filter: `lesson_id=eq.${lessonId}` }, (p) => {
-        const row = p.new as Dm & { hidden: boolean };
-        if (!row.hidden) setItems((prev) => (prev.some((x) => x.id === row.id) ? prev : [...prev, row]));
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "danmaku", filter: `lesson_id=eq.${lessonId}` },
+        (p) => {
+          const row = p.new as Dm & { hidden: boolean };
+          if (!row.hidden)
+            setItems((prev) => (prev.some((x) => x.id === row.id) ? prev : [...prev, row]));
+        },
+      )
       .subscribe();
     return () => {
       active = false;
@@ -86,7 +93,10 @@ export function DanmakuPlayer({
     el.style.left = "100%";
     stage.appendChild(el);
     const dist = stage.clientWidth + el.clientWidth;
-    el.animate([{ transform: "translateX(0)" }, { transform: `translateX(-${dist}px)` }], { duration: 8000, easing: "linear" }).onfinish = () => el.remove();
+    el.animate([{ transform: "translateX(0)" }, { transform: `translateX(-${dist}px)` }], {
+      duration: 8000,
+      easing: "linear",
+    }).onfinish = () => el.remove();
   }
 
   function onTime() {
@@ -144,7 +154,11 @@ export function DanmakuPlayer({
           }}
           className="aspect-video w-full"
         />
-        <div ref={stageRef} className="pointer-events-none absolute inset-0 bottom-12" style={{ opacity: show ? opacity / 100 : 0 }} />
+        <div
+          ref={stageRef}
+          className="pointer-events-none absolute inset-0 bottom-12"
+          style={{ opacity: show ? opacity / 100 : 0 }}
+        />
         {previewLimit && !locked ? (
           <span className="absolute left-3 top-3 rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-foreground">
             {t("preview.badge")} · {Math.round(previewLimit / 60)} {t("preview.minutes")}
@@ -156,7 +170,9 @@ export function DanmakuPlayer({
             <p className="text-xl font-semibold">{t("preview.title")}</p>
             <p className="max-w-sm text-sm opacity-80">{t("preview.body")}</p>
             <Button asChild>
-              <Link to="/courses/$slug" params={{ slug: courseSlug }}>{t("preview.subscribe")}</Link>
+              <Link to="/courses/$slug" params={{ slug: courseSlug }}>
+                {t("preview.subscribe")}
+              </Link>
             </Button>
           </div>
         ) : null}
@@ -170,11 +186,23 @@ export function DanmakuPlayer({
           </label>
           <label className="flex w-36 items-center gap-2 text-xs text-muted-foreground">
             {t("dm.opacity")}
-            <Slider value={[opacity]} min={20} max={100} step={5} onValueChange={(v) => setOpacity(v[0] ?? 90)} />
+            <Slider
+              value={[opacity]}
+              min={20}
+              max={100}
+              step={5}
+              onValueChange={(v) => setOpacity(v[0] ?? 90)}
+            />
           </label>
           <label className="flex w-36 items-center gap-2 text-xs text-muted-foreground">
             {t("dm.density")}
-            <Slider value={[density]} min={10} max={100} step={10} onValueChange={(v) => setDensity(v[0] ?? 100)} />
+            <Slider
+              value={[density]}
+              min={10}
+              max={100}
+              step={10}
+              onValueChange={(v) => setDensity(v[0] ?? 100)}
+            />
           </label>
           {canPost ? (
             <form onSubmit={send} className="flex min-w-[260px] flex-1 items-center gap-2">
@@ -190,8 +218,16 @@ export function DanmakuPlayer({
                   />
                 ))}
               </div>
-              <Input value={text} maxLength={100} onChange={(e) => setText(e.target.value)} placeholder={t("dm.placeholder")} className="h-9" />
-              <Button type="submit" size="sm">{t("dm.send")}</Button>
+              <Input
+                value={text}
+                maxLength={100}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={t("dm.placeholder")}
+                className="h-9"
+              />
+              <Button type="submit" size="sm">
+                {t("dm.send")}
+              </Button>
             </form>
           ) : (
             <p className="text-xs text-muted-foreground">{t("dm.subscribeToPost")}</p>

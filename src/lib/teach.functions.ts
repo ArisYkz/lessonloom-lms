@@ -3,10 +3,48 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 function slugify(input: string) {
   const map: Record<string, string> = {
-    а: "a", ә: "a", б: "b", в: "v", г: "g", ғ: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
-    и: "i", й: "i", к: "k", қ: "q", л: "l", м: "m", н: "n", ң: "n", о: "o", ө: "o", п: "p",
-    р: "r", с: "s", т: "t", у: "u", ұ: "u", ү: "u", ф: "f", х: "h", һ: "h", ц: "c", ч: "ch",
-    ш: "sh", щ: "sch", ъ: "", ы: "y", і: "i", ь: "", э: "e", ю: "yu", я: "ya",
+    а: "a",
+    ә: "a",
+    б: "b",
+    в: "v",
+    г: "g",
+    ғ: "g",
+    д: "d",
+    е: "e",
+    ё: "e",
+    ж: "zh",
+    з: "z",
+    и: "i",
+    й: "i",
+    к: "k",
+    қ: "q",
+    л: "l",
+    м: "m",
+    н: "n",
+    ң: "n",
+    о: "o",
+    ө: "o",
+    п: "p",
+    р: "r",
+    с: "s",
+    т: "t",
+    у: "u",
+    ұ: "u",
+    ү: "u",
+    ф: "f",
+    х: "h",
+    һ: "h",
+    ц: "c",
+    ч: "ch",
+    ш: "sh",
+    щ: "sch",
+    ъ: "",
+    ы: "y",
+    і: "i",
+    ь: "",
+    э: "e",
+    ю: "yu",
+    я: "ya",
   };
   const base = input
     .toLowerCase()
@@ -33,8 +71,21 @@ export const getMyOrg = createServerFn({ method: "POST" })
       .eq("organization_id", data.id)
       .maybeSingle();
     const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
-    const { data: plan } = await context.supabase.from("teacher_plans").select("code, name, price_kzt, max_courses, max_students").eq("code", planCode).maybeSingle();
-    return { ...data, plan: plan ?? { code: "starter", name: "Start", price_kzt: 4990, max_courses: 3, max_students: 100 } };
+    const { data: plan } = await context.supabase
+      .from("teacher_plans")
+      .select("code, name, price_kzt, max_courses, max_students")
+      .eq("code", planCode)
+      .maybeSingle();
+    return {
+      ...data,
+      plan: plan ?? {
+        code: "starter",
+        name: "Start",
+        price_kzt: 4990,
+        max_courses: 3,
+        max_students: 100,
+      },
+    };
   });
 
 export const createMyOrg = createServerFn({ method: "POST" })
@@ -62,16 +113,30 @@ export const createMyOrg = createServerFn({ method: "POST" })
 
 export const updateMyOrg = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { name: string; headline: string; about: string; logoPath?: string | null; coverPath?: string | null }) => input)
+  .inputValidator(
+    (input: {
+      name: string;
+      headline: string;
+      about: string;
+      logoPath?: string | null;
+      coverPath?: string | null;
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = { name: data.name, headline: data.headline, about: data.about };
+    const patch: Record<string, unknown> = {
+      name: data.name,
+      headline: data.headline,
+      about: data.about,
+    };
     if (data.logoPath !== undefined) patch["logo_url"] = data.logoPath;
     if (data.coverPath !== undefined) patch["cover_url"] = data.coverPath;
-    const { error } = await context.supabase.from("organizations").update(patch as never).eq("owner_id", context.userId);
+    const { error } = await context.supabase
+      .from("organizations")
+      .update(patch as never)
+      .eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-
 
 export const getMyCourses = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -92,7 +157,10 @@ export const getMyCourses = createServerFn({ method: "POST" })
     const ids = (courses ?? []).map((c) => c.id);
     let counts: Record<string, number> = {};
     if (ids.length) {
-      const { data: enr } = await context.supabase.from("enrollments").select("course_id").in("course_id", ids);
+      const { data: enr } = await context.supabase
+        .from("enrollments")
+        .select("course_id")
+        .in("course_id", ids);
       counts = (enr ?? []).reduce<Record<string, number>>((acc, e) => {
         acc[e.course_id] = (acc[e.course_id] ?? 0) + 1;
         return acc;
@@ -123,7 +191,11 @@ export const createCourse = createServerFn({ method: "POST" })
       .eq("organization_id", orgId)
       .maybeSingle();
     const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
-    const { data: plan } = await context.supabase.from("teacher_plans").select("max_courses").eq("code", planCode).maybeSingle();
+    const { data: plan } = await context.supabase
+      .from("teacher_plans")
+      .select("max_courses")
+      .eq("code", planCode)
+      .maybeSingle();
     const max = plan ? plan.max_courses : 3;
     if (max !== null) {
       const { count } = await context.supabase
@@ -134,7 +206,11 @@ export const createCourse = createServerFn({ method: "POST" })
     }
     const { data: course, error } = await context.supabase
       .from("courses")
-      .insert({ organization_id: orgId, title: data.title.trim() || "Untitled course", slug: slugify(data.title) })
+      .insert({
+        organization_id: orgId,
+        title: data.title.trim() || "Untitled course",
+        slug: slugify(data.title),
+      })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -162,7 +238,9 @@ export const getCourseForEdit = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: lessons } = await supabaseAdmin
       .from("lessons")
-      .select("id, section_id, title, type, position, duration_minutes, is_preview, danmaku_enabled, body, media_path")
+      .select(
+        "id, section_id, title, type, position, duration_minutes, is_preview, danmaku_enabled, body, media_path",
+      )
       .eq("course_id", course.id)
       .order("position");
 
@@ -176,7 +254,10 @@ export const getCourseForEdit = createServerFn({ method: "POST" })
         position: s.position,
         lessons: (lessons ?? [])
           .filter((l) => l.section_id === s.id)
-          .map((l) => ({ ...l, mediaUrl: l.media_path ? (signed.get(l.media_path) ?? null) : null })),
+          .map((l) => ({
+            ...l,
+            mediaUrl: l.media_path ? (signed.get(l.media_path) ?? null) : null,
+          })),
       })),
     };
   });
@@ -184,10 +265,7 @@ export const getCourseForEdit = createServerFn({ method: "POST" })
 export const updateCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: {
-      courseId: string;
-      patch: Record<string, string | number | null>;
-    }) => input,
+    (input: { courseId: string; patch: Record<string, string | number | null> }) => input,
   )
   .handler(async ({ data, context }) => {
     const allowed = [
@@ -219,7 +297,10 @@ export const updateCourse = createServerFn({ method: "POST" })
       }
     }
 
-    const { error } = await context.supabase.from("courses").update(patch as never).eq("id", data.courseId);
+    const { error } = await context.supabase
+      .from("courses")
+      .update(patch as never)
+      .eq("id", data.courseId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -247,12 +328,17 @@ export const deleteCourse = createServerFn({ method: "POST" })
 
 export const saveSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id?: string; courseId: string; title: string; position?: number }) => input)
+  .inputValidator(
+    (input: { id?: string; courseId: string; title: string; position?: number }) => input,
+  )
   .handler(async ({ data, context }) => {
     if (data.id) {
       const patch: Record<string, unknown> = { title: data.title };
       if (data.position !== undefined) patch["position"] = data.position;
-      const { error } = await context.supabase.from("sections").update(patch as never).eq("id", data.id);
+      const { error } = await context.supabase
+        .from("sections")
+        .update(patch as never)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
@@ -308,7 +394,10 @@ export const saveLesson = createServerFn({ method: "POST" })
     if (data.danmakuEnabled !== undefined) patch["danmaku_enabled"] = data.danmakuEnabled;
 
     if (data.id) {
-      const { error } = await context.supabase.from("lessons").update(patch as never).eq("id", data.id);
+      const { error } = await context.supabase
+        .from("lessons")
+        .update(patch as never)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
@@ -341,7 +430,9 @@ export const deleteLesson = createServerFn({ method: "POST" })
 
 export const reorder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { table: "sections" | "lessons"; items: { id: string; position: number }[] }) => input)
+  .inputValidator(
+    (input: { table: "sections" | "lessons"; items: { id: string; position: number }[] }) => input,
+  )
   .handler(async ({ data, context }) => {
     for (const item of data.items) {
       await context.supabase.from(data.table).update({ position: item.position }).eq("id", item.id);
@@ -366,7 +457,10 @@ export const getCourseStudents = createServerFn({ method: "POST" })
       .eq("course_id", data.courseId)
       .order("created_at", { ascending: false });
 
-    const { data: lessons } = await context.supabase.from("lessons").select("id").eq("course_id", data.courseId);
+    const { data: lessons } = await context.supabase
+      .from("lessons")
+      .select("id")
+      .eq("course_id", data.courseId);
     const { data: progress } = await context.supabase
       .from("lesson_progress")
       .select("user_id")
@@ -399,7 +493,9 @@ export const getCourseStudents = createServerFn({ method: "POST" })
           percent: total === 0 ? 0 : Math.round((done / total) * 100),
           homeworkPending: mySubs.filter((s) => s.status === "submitted").length,
           homeworkReviewed: mySubs.filter((s) => s.status === "reviewed").length,
-          quizAverage: bests.length ? Math.round(bests.reduce((a, b) => a + b, 0) / bests.length) : null,
+          quizAverage: bests.length
+            ? Math.round(bests.reduce((a, b) => a + b, 0) / bests.length)
+            : null,
         };
       }),
     };

@@ -15,7 +15,10 @@ export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
     meta: [
       { title: "Home — Bilim" },
-      { name: "description", content: "Trending courses, popular teachers and your learning on Bilim." },
+      {
+        name: "description",
+        content: "Trending courses, popular teachers and your learning on Bilim.",
+      },
       { property: "og:title", content: "Home — Bilim" },
       { property: "og:description", content: "Trending courses and popular teachers on Bilim." },
       { property: "og:type", content: "website" },
@@ -59,20 +62,38 @@ function Home() {
       </h1>
 
       {inProgress.length > 0 ? (
-        <Row title={t("feed.continue")} link={<Link to="/dashboard" className="text-sm text-primary hover:underline">{t("feed.seeAll")}</Link>}>
+        <Row
+          title={t("feed.continue")}
+          link={
+            <Link to="/dashboard" className="text-sm text-primary hover:underline">
+              {t("feed.seeAll")}
+            </Link>
+          }
+        >
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {inProgress.map((c) => (
-              <Link key={c.slug} to="/learn/$slug" params={{ slug: c.slug }} className="group flex flex-col gap-2">
+              <Link
+                key={c.slug}
+                to="/learn/$slug"
+                params={{ slug: c.slug }}
+                className="group flex flex-col gap-2"
+              >
                 <div className="relative aspect-video overflow-hidden rounded-xl bg-accent">
                   {c.thumbnailUrl ? (
                     <img src={c.thumbnailUrl} alt={c.title} className="size-full object-cover" />
                   ) : (
-                    <div className="flex size-full items-center justify-center"><BookOpen className="size-7 text-accent-foreground" /></div>
+                    <div className="flex size-full items-center justify-center">
+                      <BookOpen className="size-7 text-accent-foreground" />
+                    </div>
                   )}
-                  <div className="absolute inset-x-0 bottom-0"><Progress value={c.percent} className="h-1 rounded-none" /></div>
+                  <div className="absolute inset-x-0 bottom-0">
+                    <Progress value={c.percent} className="h-1 rounded-none" />
+                  </div>
                 </div>
                 <p className="line-clamp-1 font-medium group-hover:underline">{c.title}</p>
-                <p className="text-xs text-muted-foreground">{c.percent}% · {c.teacherName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {c.percent}% · {c.teacherName}
+                </p>
               </Link>
             ))}
           </div>
@@ -82,11 +103,17 @@ function Home() {
       {feed.isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-3"><Skeleton className="aspect-video rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/2" /></div>
+            <div key={i} className="space-y-3">
+              <Skeleton className="aspect-video rounded-xl" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
           ))}
         </div>
       ) : !f || f.newest.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground">{t("feed.empty")}</p>
+        <p className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground">
+          {t("feed.empty")}
+        </p>
       ) : (
         <>
           <CardRow title={t("feed.trending")} items={f.trending} />
@@ -94,7 +121,12 @@ function Home() {
             <Row title={t("feed.teachers")}>
               <div className="flex gap-6 overflow-x-auto pb-2">
                 {f.teachers.map((tch) => (
-                  <Link key={tch.slug} to="/teachers/$slug" params={{ slug: tch.slug }} className="flex w-32 shrink-0 flex-col items-center gap-2 text-center">
+                  <Link
+                    key={tch.slug}
+                    to="/teachers/$slug"
+                    params={{ slug: tch.slug }}
+                    className="flex w-32 shrink-0 flex-col items-center gap-2 text-center"
+                  >
                     <Avatar name={tch.name} url={tch.logoUrl} size="size-24" />
                     <span className="line-clamp-2 text-sm font-medium">{tch.name}</span>
                     <span className="text-xs text-muted-foreground">
@@ -108,7 +140,11 @@ function Home() {
           <CardRow title={t("feed.new")} items={f.newest} />
           <CardRow title={t("feed.free")} items={f.free} />
           {f.categories.map((c) => (
-            <CardRow key={c.slug} title={locale === "kk" ? c.name_kk : locale === "en" ? c.name_en : c.name_ru} items={c.courses} />
+            <CardRow
+              key={c.slug}
+              title={locale === "kk" ? c.name_kk : locale === "en" ? c.name_en : c.name_ru}
+              items={c.courses}
+            />
           ))}
         </>
       )}
@@ -128,12 +164,20 @@ function Row({ title, link, children }: { title: string; link?: ReactNode; child
   );
 }
 
-function CardRow({ title, items }: { title: string; items: Parameters<typeof FeedCard>[0]["course"][] }) {
+function CardRow({
+  title,
+  items,
+}: {
+  title: string;
+  items: Parameters<typeof FeedCard>[0]["course"][];
+}) {
   if (items.length === 0) return null;
   return (
     <Row title={title}>
       <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-        {items.slice(0, 8).map((c) => <FeedCard key={c.id} course={c} />)}
+        {items.slice(0, 8).map((c) => (
+          <FeedCard key={c.id} course={c} />
+        ))}
       </div>
     </Row>
   );

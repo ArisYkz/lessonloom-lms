@@ -18,7 +18,13 @@ import {
 } from "@/components/ui/dialog";
 import { useNavigate } from "@tanstack/react-router";
 
-export function ReportButton({ targetType, targetId }: { targetType: "course" | "teacher" | "lesson"; targetId: string }) {
+export function ReportButton({
+  targetType,
+  targetId,
+}: {
+  targetType: "course" | "teacher" | "lesson";
+  targetId: string;
+}) {
   const { t } = useI18n();
   const { user } = useAuth();
   const navigate = useNavigate();

@@ -4,7 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Users } from "lucide-react";
-import { createCourse, createMyOrg, getMyCourses, getMyOrg, updateMyOrg } from "@/lib/teach.functions";
+import {
+  createCourse,
+  createMyOrg,
+  getMyCourses,
+  getMyOrg,
+  updateMyOrg,
+} from "@/lib/teach.functions";
 import { useI18n } from "@/i18n/provider";
 import type { Dict } from "@/i18n/dictionary";
 import { Button } from "@/components/ui/button";
@@ -61,22 +67,47 @@ function OrgProfile({ org }: { org: Org }) {
         </div>
         <div>
           <Label>{t("teach.about")}</Label>
-          <Textarea rows={3} className="mt-1" value={about} onChange={(e) => setAbout(e.target.value)} />
+          <Textarea
+            rows={3}
+            className="mt-1"
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+          />
         </div>
         <div className="flex flex-wrap gap-6">
           <label className="text-sm">
             <span className="mb-1 block text-muted-foreground">{t("teacher.logo")}</span>
-            <input type="file" accept="image/*" disabled={busy} onChange={async (e) => { const f = e.target.files?.[0]; if (f) await submit({ logoPath: await upload(f) }); }} />
+            <input
+              type="file"
+              accept="image/*"
+              disabled={busy}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (f) await submit({ logoPath: await upload(f) });
+              }}
+            />
           </label>
           <label className="text-sm">
             <span className="mb-1 block text-muted-foreground">{t("teacher.cover")}</span>
-            <input type="file" accept="image/*" disabled={busy} onChange={async (e) => { const f = e.target.files?.[0]; if (f) await submit({ coverPath: await upload(f) }); }} />
+            <input
+              type="file"
+              accept="image/*"
+              disabled={busy}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (f) await submit({ coverPath: await upload(f) });
+              }}
+            />
           </label>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => submit()} disabled={busy}>{t("builder.save")}</Button>
+          <Button onClick={() => submit()} disabled={busy}>
+            {t("builder.save")}
+          </Button>
           <Button variant="outline" asChild>
-            <Link to="/teachers/$slug" params={{ slug: org.slug }}>{org.name} ↗</Link>
+            <Link to="/teachers/$slug" params={{ slug: org.slug }}>
+              {org.name} ↗
+            </Link>
           </Button>
         </div>
       </div>
@@ -84,12 +115,15 @@ function OrgProfile({ org }: { org: Org }) {
         <p className="text-sm text-muted-foreground">{t("plan.title")}</p>
         <p className="title-panel mt-1">{plan.name}</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {`${plan.price_kzt.toLocaleString("ru-RU")} ₸ ${t("plan.perMonth")}`} · {t("plan.courses")}: {plan.max_courses ?? t("plan.unlimited")}
+          {`${plan.price_kzt.toLocaleString("ru-RU")} ₸ ${t("plan.perMonth")}`} ·{" "}
+          {t("plan.courses")}: {plan.max_courses ?? t("plan.unlimited")}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("plan.students")}: {plan.max_students?.toLocaleString("ru-RU") ?? t("plan.unlimited")}
         </p>
-        {plan.max_courses !== null ? <p className="mt-4 text-sm text-muted-foreground">{t("plan.upgradeSoon")}</p> : null}
+        {plan.max_courses !== null ? (
+          <p className="mt-4 text-sm text-muted-foreground">{t("plan.upgradeSoon")}</p>
+        ) : null}
       </div>
     </div>
   );
@@ -99,7 +133,10 @@ export const Route = createFileRoute("/_authenticated/teach/")({
   head: () => ({
     meta: [
       { title: "Teacher studio — Bilim" },
-      { name: "description", content: "Create courses, build your curriculum and track your students on Bilim." },
+      {
+        name: "description",
+        content: "Create courses, build your curriculum and track your students on Bilim.",
+      },
       { property: "og:title", content: "Teacher studio — Bilim" },
       { property: "og:description", content: "Create and manage your courses on Bilim." },
     ],
@@ -112,7 +149,10 @@ function TeachHome() {
   const fetchOrg = useServerFn(getMyOrg);
   const { data: org, isLoading } = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
 
-  if (isLoading) return <p className="mx-auto max-w-6xl px-4 py-12 text-muted-foreground">{t("common.loading")}</p>;
+  if (isLoading)
+    return (
+      <p className="mx-auto max-w-6xl px-4 py-12 text-muted-foreground">{t("common.loading")}</p>
+    );
   if (!org) return <OrgSetup />;
   return (
     <>
@@ -149,18 +189,38 @@ function OrgSetup() {
     <div className="mx-auto max-w-2xl px-4 py-12">
       <h1 className="title-page">{t("teach.setupTitle")}</h1>
       <p className="mt-2 text-muted-foreground">{t("teach.setupSub")}</p>
-      <form onSubmit={submit} className="mt-8 space-y-5 rounded-xl border border-border bg-card p-6">
+      <form
+        onSubmit={submit}
+        className="mt-8 space-y-5 rounded-xl border border-border bg-card p-6"
+      >
         <div>
           <Label htmlFor="orgName">{t("teach.orgName")}</Label>
-          <Input id="orgName" className="mt-1" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input
+            id="orgName"
+            className="mt-1"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
         <div>
           <Label htmlFor="headline">{t("teach.headline")}</Label>
-          <Input id="headline" className="mt-1" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+          <Input
+            id="headline"
+            className="mt-1"
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="about">{t("teach.about")}</Label>
-          <Textarea id="about" rows={4} className="mt-1" value={about} onChange={(e) => setAbout(e.target.value)} />
+          <Textarea
+            id="about"
+            rows={4}
+            className="mt-1"
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+          />
         </div>
         <Button type="submit" disabled={busy}>
           {t("teach.create")}
@@ -176,7 +236,10 @@ function CourseList({ orgName }: { orgName: string }) {
   const queryClient = useQueryClient();
   const fetchCourses = useServerFn(getMyCourses);
   const create = useServerFn(createCourse);
-  const { data: result, isLoading } = useQuery({ queryKey: ["my-courses"], queryFn: () => fetchCourses() });
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["my-courses"],
+    queryFn: () => fetchCourses(),
+  });
   const data = result?.courses;
   const totalStudents = result?.totalStudents ?? 0;
   const [busy, setBusy] = useState(false);
@@ -194,7 +257,6 @@ function CourseList({ orgName }: { orgName: string }) {
       setBusy(false);
     }
   }
-
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -214,7 +276,10 @@ function CourseList({ orgName }: { orgName: string }) {
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <StatBox label={t("teach.courses")} value={data?.length ?? 0} />
         <StatBox label={t("teach.totalStudents")} value={totalStudents} />
-        <StatBox label={t("teach.published")} value={(data ?? []).filter((c) => c.status === "published").length} />
+        <StatBox
+          label={t("teach.published")}
+          value={(data ?? []).filter((c) => c.status === "published").length}
+        />
       </div>
 
       {isLoading ? (
