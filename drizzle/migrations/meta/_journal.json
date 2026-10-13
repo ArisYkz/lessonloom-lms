@@ -71,6 +71,20 @@
       "when": 1791868973126,
       "tag": "0009_access_checks_only_for_caller",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791892800000,
+      "tag": "0010_enforce_course_plan_limit_in_db",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791892860000,
+      "tag": "0011_composite_course_keys",
+      "breakpoints": true
     }
   ]
 }

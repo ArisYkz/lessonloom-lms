@@ -185,25 +185,6 @@ export const createCourse = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!org) throw new Error("Create a teacher account first");
     const orgId = org.id;
-    const { data: sub } = await context.supabase
-      .from("org_subscriptions")
-      .select("plan_code, status")
-      .eq("organization_id", orgId)
-      .maybeSingle();
-    const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
-    const { data: plan } = await context.supabase
-      .from("teacher_plans")
-      .select("max_courses")
-      .eq("code", planCode)
-      .maybeSingle();
-    const max = plan ? plan.max_courses : 3;
-    if (max !== null) {
-      const { count } = await context.supabase
-        .from("courses")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", orgId);
-      if ((count ?? 0) >= max) throw new Error("PLAN_LIMIT");
-    }
     const { data: course, error } = await context.supabase
       .from("courses")
       .insert({
