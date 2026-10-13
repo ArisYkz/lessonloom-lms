@@ -138,6 +138,22 @@ export const updateMyOrg = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const getMyLearnerCount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: org } = await context.supabase
+      .from("organizations")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!org) return null;
+    const { data, error } = await context.supabase.rpc("owned_org_learner_count", {
+      _org: org.id,
+    });
+    if (error) throw new Error(error.message);
+    return { learners: Number(data ?? 0) };
+  });
+
 export const getMyCourses = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {

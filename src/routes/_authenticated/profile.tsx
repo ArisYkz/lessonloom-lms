@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ function ProfilePage() {
   const [bio, setBio] = useState("");
   const [locale, setLocalePref] = useState("ru");
   const [defaultMode, setDefaultMode] = useState<"student" | "teacher">("student");
+  const [showPhotos, setShowPhotos] = useState(true);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -49,15 +51,25 @@ function ProfilePage() {
     setBio(data.bio ?? "");
     setLocalePref(data.preferred_locale ?? "ru");
     setDefaultMode(data.default_mode === "teacher" ? "teacher" : "student");
+    setShowPhotos(data.show_photo_to_classmates);
   }, [data]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
-      await save({ data: { fullName, bio, preferredLocale: locale, defaultMode } });
+      await save({
+        data: {
+          fullName,
+          bio,
+          preferredLocale: locale,
+          defaultMode,
+          showPhotoToClassmates: showPhotos,
+        },
+      });
       setLocale(locale as "kk" | "ru" | "en");
       await queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      await queryClient.invalidateQueries({ queryKey: ["my-classes"] });
       toast.success(t("builder.saved"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("common.error"));
@@ -124,6 +136,13 @@ function ProfilePage() {
             </Select>
           </div>
         ) : null}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <Label htmlFor="showPhotos">{t("profile.showPhotos")}</Label>
+            <p className="mt-1 text-sm text-muted-foreground">{t("profile.showPhotosHelp")}</p>
+          </div>
+          <Switch id="showPhotos" checked={showPhotos} onCheckedChange={setShowPhotos} />
+        </div>
         <Button type="submit" disabled={busy}>
           {t("profile.save")}
         </Button>

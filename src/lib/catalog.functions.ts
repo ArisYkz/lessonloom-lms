@@ -54,6 +54,20 @@ async function toCards(rows: CourseRow[]): Promise<CourseCard[]> {
   }));
 }
 
+export const listPublicClasses = createServerFn({ method: "GET" }).handler(async () => {
+  const { createPublicClient } = await import("./supabase-public.server");
+  const { data, error } = await createPublicClient().rpc("list_public_classrooms", {
+    _limit: 50,
+  });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({
+    classroomId: r.classroom_id,
+    classroomName: r.classroom_name,
+    courseSlug: r.course_slug,
+    courseTitle: r.course_title,
+  }));
+});
+
 export const listCategories = createServerFn({ method: "GET" }).handler(async () => {
   const { createPublicClient } = await import("./supabase-public.server");
   const { data } = await createPublicClient()

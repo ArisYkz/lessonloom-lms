@@ -18,7 +18,9 @@ export const getMyProfile = createServerFn({ method: "POST" })
     const { signPath } = await import("./media.server");
     const { data } = await context.supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, bio, preferred_locale, default_mode")
+      .select(
+        "id, full_name, avatar_url, bio, preferred_locale, default_mode, show_photo_to_classmates",
+      )
       .eq("id", context.userId)
       .maybeSingle();
     if (!data) return null;
@@ -39,6 +41,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferredLocale: string;
       avatarPath?: string | null;
       defaultMode?: "student" | "teacher";
+      showPhotoToClassmates?: boolean;
     }) => {
       if (!LOCALES.some((l) => l.code === input.preferredLocale)) {
         throw new Error("Unsupported locale");
@@ -53,6 +56,8 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferred_locale: data.preferredLocale,
     };
     if (data.avatarPath !== undefined) patch["avatar_url"] = data.avatarPath;
+    if (data.showPhotoToClassmates !== undefined)
+      patch["show_photo_to_classmates"] = data.showPhotoToClassmates;
     if (data.defaultMode)
       patch["default_mode"] = data.defaultMode === "teacher" ? "teacher" : "student";
     const { error } = await context.supabase
@@ -149,22 +154,54 @@ export const getMyLearning = createServerFn({ method: "POST" })
 
 export const getMySessions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: { from?: string } | undefined) => input ?? {})
+  .handler(async ({ data, context }) => {
     // Sessions are RLS-scoped to active class members of active classes.
-    const { data, error } = await context.supabase
+    let query = context.supabase
       .from("class_sessions")
-      .select("id, title, starts_at, duration_minutes, time_zone, meeting_url, classrooms(name)")
+      .select(
+        "id, title, starts_at, duration_minutes, time_zone, meeting_url, classroom_id, classrooms(name)",
+      )
       .eq("status", "scheduled")
       .order("starts_at", { ascending: true });
+    if (data.from) query = query.gte("starts_at", data.from);
+    const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
-    return (data ?? []).map((s) => ({
+    return (rows ?? []).map((s) => ({
       id: s.id,
       title: s.title,
       startsAt: s.starts_at,
       durationMinutes: s.duration_minutes,
       timeZone: s.time_zone,
       meetingUrl: s.meeting_url,
+      classroomId: s.classroom_id,
       classroomName: s.classrooms?.name ?? "",
+    }));
+  });
+
+type ClassMemberRow = { avatarPath: string | null };
+
+export const getMyClasses = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("list_my_classes");
+    if (error) throw new Error(error.message);
+    const rows = data ?? [];
+    const membersOf = (members: unknown) => members as ClassMemberRow[];
+    const { signMany } = await import("./media.server");
+    const signed = await signMany(
+      rows.flatMap((r) => membersOf(r.members).map((m) => m.avatarPath)),
+    );
+    return rows.map((r) => ({
+      classroomId: r.classroom_id,
+      classroomName: r.classroom_name,
+      courseId: r.course_id,
+      courseSlug: r.course_slug,
+      courseTitle: r.course_title,
+      teacherName: r.teacher_name,
+      members: membersOf(r.members).map((m) => ({
+        avatarUrl: m.avatarPath ? (signed.get(m.avatarPath) ?? null) : null,
+      })),
     }));
   });
 

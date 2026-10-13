@@ -60,7 +60,7 @@ describe("class listing is opt-in", () => {
       "select * from public.list_public_classrooms() limit 1",
     );
     expect(Object.keys(row!).sort()).toEqual(
-      ["classroom_id", "classroom_name", "course_id", "course_title"].sort(),
+      ["classroom_id", "classroom_name", "course_id", "course_slug", "course_title"].sort(),
     );
     expect(row!.course_title).toBe("Listed course");
     expect(row!.classroom_name).toBe("Evening");

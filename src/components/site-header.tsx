@@ -90,6 +90,14 @@ export function SiteHeader() {
       >
         {t("nav.calendar")}
       </Link>
+      <Link
+        to="/teach/plan"
+        className={linkCls}
+        activeProps={activeCls}
+        onClick={() => setOpen(false)}
+      >
+        {t("nav.plan")}
+      </Link>
     </>
   ) : (
     <>
@@ -125,6 +133,16 @@ export function SiteHeader() {
           {t("nav.teach")}
         </Link>
       )}
+      {user ? (
+        <Link
+          to="/classes"
+          className={linkCls}
+          activeProps={activeCls}
+          onClick={() => setOpen(false)}
+        >
+          {t("nav.classes")}
+        </Link>
+      ) : null}
       {user ? (
         <Link
           to="/calendar"

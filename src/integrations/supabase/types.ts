@@ -979,6 +979,7 @@ export type Database = {
           full_name: string;
           id: string;
           preferred_locale: string;
+          show_photo_to_classmates: boolean;
           suspended: boolean;
         };
         Insert: {
@@ -989,6 +990,7 @@ export type Database = {
           full_name?: string;
           id: string;
           preferred_locale?: string;
+          show_photo_to_classmates?: boolean;
           suspended?: boolean;
         };
         Update: {
@@ -999,6 +1001,7 @@ export type Database = {
           full_name?: string;
           id?: string;
           preferred_locale?: string;
+          show_photo_to_classmates?: boolean;
           suspended?: boolean;
         };
         Relationships: [];
@@ -1438,15 +1441,30 @@ export type Database = {
       join_classroom: { Args: { _code: string }; Returns: string };
       leave_classroom: { Args: { _classroom: string }; Returns: undefined };
       leave_course_classes: { Args: { _course: string }; Returns: undefined };
+      list_my_classes: {
+        Args: never;
+        Returns: {
+          classroom_id: string;
+          classroom_name: string;
+          course_id: string;
+          course_slug: string;
+          course_title: string;
+          joined_at: string;
+          members: Json;
+          teacher_name: string;
+        }[];
+      };
       list_public_classrooms: {
         Args: { _limit?: number };
         Returns: {
           classroom_id: string;
           classroom_name: string;
           course_id: string;
+          course_slug: string;
           course_title: string;
         }[];
       };
+      owned_org_learner_count: { Args: { _org: string }; Returns: number };
       new_classroom_join_code: { Args: never; Returns: string };
       org_learner_count: {
         Args: { _exclude: string; _org: string };
