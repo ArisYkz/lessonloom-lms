@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { LOCALES } from "@/i18n/dictionary";
 
 export const getMyRoles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -38,7 +39,12 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferredLocale: string;
       avatarPath?: string | null;
       defaultMode?: "student" | "teacher";
-    }) => input,
+    }) => {
+      if (!LOCALES.some((l) => l.code === input.preferredLocale)) {
+        throw new Error("Unsupported locale");
+      }
+      return input;
+    },
   )
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = {
