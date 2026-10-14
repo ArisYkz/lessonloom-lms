@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   dateKey,
+  dayBoundsIso,
   formatDateKey,
   formatTimeRange,
   shiftDateKey,
@@ -33,6 +34,16 @@ describe("week helpers", () => {
     expect(shiftDateKey("2026-10-31", 1)).toBe("2026-11-01");
     expect(shiftDateKey("2026-03-01", -1)).toBe("2026-02-28");
     expect(shiftDateKey("2026-12-31", 1)).toBe("2027-01-01");
+  });
+});
+
+describe("dayBoundsIso", () => {
+  it("spans one local day, so a range keeps every session on its end date", () => {
+    const { from, to } = dayBoundsIso("2026-10-14");
+    // 24 hours less one millisecond: both ends of the day are inside the range.
+    expect(new Date(to).getTime() - new Date(from).getTime()).toBe(86_399_999);
+    expect(new Date(from).getDate()).toBe(14);
+    expect(new Date(to).getDate()).toBe(14);
   });
 });
 

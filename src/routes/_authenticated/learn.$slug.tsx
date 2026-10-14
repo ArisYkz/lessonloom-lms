@@ -6,6 +6,7 @@ import { Check, ChevronLeft, ChevronRight, Download, FileText, PlayCircle } from
 import { toast } from "sonner";
 import { getLessonContent, getPlayer, setLessonComplete } from "@/lib/learn.functions";
 import { useI18n } from "@/i18n/provider";
+import { firstLessonToOpen } from "@/lib/lesson-order";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -49,8 +50,12 @@ function Player() {
   );
 
   useEffect(() => {
-    if (!lessonId && flat.length > 0) setLessonId(flat[0]!.id);
-  }, [flat, lessonId]);
+    if (lessonId || !player || flat.length === 0) return;
+    const doneIds = new Set(
+      player.progress.filter((id) => flat.some((lesson) => lesson.id === id)),
+    );
+    setLessonId(firstLessonToOpen(flat, doneIds)?.id ?? null);
+  }, [flat, lessonId, player]);
 
   const { data: lesson } = useQuery({
     queryKey: ["lesson", lessonId],
@@ -97,8 +102,8 @@ function Player() {
       }
       await queryClient.invalidateQueries({ queryKey: ["player", slug] });
       await queryClient.invalidateQueries({ queryKey: ["my-learning"] });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("common.error"));
+    } catch {
+      toast.error(t("common.error"));
     }
   }
 

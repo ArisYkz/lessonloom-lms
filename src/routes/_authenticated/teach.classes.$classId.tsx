@@ -6,6 +6,7 @@ import { listMyClassrooms } from "@/lib/teach.functions";
 import { useI18n } from "@/i18n/provider";
 import { ClassroomCard } from "@/components/classroom-panel";
 import { SessionPanel } from "@/components/session-panel";
+import { HomeworkDuePanel } from "@/components/homework-due-panel";
 
 export const Route = createFileRoute("/_authenticated/teach/classes/$classId")({
   head: () => ({
@@ -44,6 +45,7 @@ function ClassPage() {
       <div className="mt-8 space-y-12">
         <ClassroomCard classroom={classroom} courseId={classroom.courseId} />
         <SessionPanel classroomId={classroom.id} />
+        <HomeworkDuePanel classroomId={classroom.id} />
       </div>
     </div>
   );

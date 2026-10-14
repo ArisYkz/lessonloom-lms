@@ -22,6 +22,8 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as TeachersSlugRouteImport } from './routes/teachers.$slug'
+import { Route as AuthenticatedCheckinTokenRouteImport } from './routes/_authenticated/checkin.$token'
+import { Route as AuthenticatedJoinCodeRouteImport } from './routes/_authenticated/join.$code'
 import { Route as AuthenticatedLearnSlugRouteImport } from './routes/_authenticated/learn.$slug'
 import { Route as AuthenticatedTeachIndexRouteImport } from './routes/_authenticated/teach.index'
 import { Route as AuthenticatedTeachCourseIdRouteImport } from './routes/_authenticated/teach.$courseId'
@@ -94,6 +96,17 @@ const TeachersSlugRoute = TeachersSlugRouteImport.update({
   path: '/teachers/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCheckinTokenRoute =
+  AuthenticatedCheckinTokenRouteImport.update({
+    id: '/checkin/$token',
+    path: '/checkin/$token',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedJoinCodeRoute = AuthenticatedJoinCodeRouteImport.update({
+  id: '/join/$code',
+  path: '/join/$code',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLearnSlugRoute = AuthenticatedLearnSlugRouteImport.update({
   id: '/learn/$slug',
   path: '/learn/$slug',
@@ -146,6 +159,8 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/teachers/$slug': typeof TeachersSlugRoute
+  '/checkin/$token': typeof AuthenticatedCheckinTokenRoute
+  '/join/$code': typeof AuthenticatedJoinCodeRoute
   '/learn/$slug': typeof AuthenticatedLearnSlugRoute
   '/teach/$courseId': typeof AuthenticatedTeachCourseIdRoute
   '/teach/calendar': typeof AuthenticatedTeachCalendarRoute
@@ -167,6 +182,8 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/teachers/$slug': typeof TeachersSlugRoute
+  '/checkin/$token': typeof AuthenticatedCheckinTokenRoute
+  '/join/$code': typeof AuthenticatedJoinCodeRoute
   '/learn/$slug': typeof AuthenticatedLearnSlugRoute
   '/teach/$courseId': typeof AuthenticatedTeachCourseIdRoute
   '/teach/calendar': typeof AuthenticatedTeachCalendarRoute
@@ -190,6 +207,8 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/teachers/$slug': typeof TeachersSlugRoute
+  '/_authenticated/checkin/$token': typeof AuthenticatedCheckinTokenRoute
+  '/_authenticated/join/$code': typeof AuthenticatedJoinCodeRoute
   '/_authenticated/learn/$slug': typeof AuthenticatedLearnSlugRoute
   '/_authenticated/teach/$courseId': typeof AuthenticatedTeachCourseIdRoute
   '/_authenticated/teach/calendar': typeof AuthenticatedTeachCalendarRoute
@@ -213,6 +232,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/courses/$slug'
     | '/teachers/$slug'
+    | '/checkin/$token'
+    | '/join/$code'
     | '/learn/$slug'
     | '/teach/$courseId'
     | '/teach/calendar'
@@ -234,6 +255,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/courses/$slug'
     | '/teachers/$slug'
+    | '/checkin/$token'
+    | '/join/$code'
     | '/learn/$slug'
     | '/teach/$courseId'
     | '/teach/calendar'
@@ -256,6 +279,8 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/courses/$slug'
     | '/teachers/$slug'
+    | '/_authenticated/checkin/$token'
+    | '/_authenticated/join/$code'
     | '/_authenticated/learn/$slug'
     | '/_authenticated/teach/$courseId'
     | '/_authenticated/teach/calendar'
@@ -368,6 +393,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeachersSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/checkin/$token': {
+      id: '/_authenticated/checkin/$token'
+      path: '/checkin/$token'
+      fullPath: '/checkin/$token'
+      preLoaderRoute: typeof AuthenticatedCheckinTokenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/join/$code': {
+      id: '/_authenticated/join/$code'
+      path: '/join/$code'
+      fullPath: '/join/$code'
+      preLoaderRoute: typeof AuthenticatedJoinCodeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/learn/$slug': {
       id: '/_authenticated/learn/$slug'
       path: '/learn/$slug'
@@ -427,6 +466,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedCheckinTokenRoute: typeof AuthenticatedCheckinTokenRoute
+  AuthenticatedJoinCodeRoute: typeof AuthenticatedJoinCodeRoute
   AuthenticatedLearnSlugRoute: typeof AuthenticatedLearnSlugRoute
   AuthenticatedTeachCourseIdRoute: typeof AuthenticatedTeachCourseIdRoute
   AuthenticatedTeachCalendarRoute: typeof AuthenticatedTeachCalendarRoute
@@ -443,6 +484,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedCheckinTokenRoute: AuthenticatedCheckinTokenRoute,
+  AuthenticatedJoinCodeRoute: AuthenticatedJoinCodeRoute,
   AuthenticatedLearnSlugRoute: AuthenticatedLearnSlugRoute,
   AuthenticatedTeachCourseIdRoute: AuthenticatedTeachCourseIdRoute,
   AuthenticatedTeachCalendarRoute: AuthenticatedTeachCalendarRoute,

@@ -135,16 +135,6 @@ export function SiteHeader() {
       )}
       {user ? (
         <Link
-          to="/classes"
-          className={linkCls}
-          activeProps={activeCls}
-          onClick={() => setOpen(false)}
-        >
-          {t("nav.classes")}
-        </Link>
-      ) : null}
-      {user ? (
-        <Link
           to="/calendar"
           className={linkCls}
           activeProps={activeCls}

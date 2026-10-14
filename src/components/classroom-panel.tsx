@@ -8,7 +8,10 @@ import {
   ArchiveRestore,
   ArrowRight,
   Copy,
+  Link2,
+  Pencil,
   Plus,
+  QrCode,
   RefreshCw,
   Trash2,
   Users,
@@ -19,16 +22,29 @@ import {
   listClassroomMembers,
   listClassrooms,
   removeClassroomMember,
+  renameClassroom,
   rotateClassroomJoinCode,
   setClassroomListed,
+  setClassroomOffering,
   setClassroomStatus,
 } from "@/lib/teach.functions";
 import { classroomErrorKey } from "@/lib/classroom-errors";
+import type { Dict } from "@/i18n/dictionary";
 import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { QrCodeImage } from "@/components/qr-code-image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +57,127 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type ClassroomRow = { id: string; name: string; status: string; listed: boolean };
+function joinLink(code: string) {
+  return `${window.location.origin}/join/${code}`;
+}
+
+type ClassroomRow = {
+  id: string;
+  name: string;
+  status: string;
+  listed: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  capacity: number | null;
+  priceKzt: number | null;
+  enrollmentOpen: boolean;
+};
+
+function offeringErrorKey(err: unknown): keyof Dict {
+  const message = err instanceof Error ? err.message : "";
+  if (message === "Invalid dates") return "offering.invalidDates";
+  if (message === "Invalid capacity") return "offering.invalidCapacity";
+  if (message === "Invalid price") return "offering.invalidPrice";
+  if (message === "Capacity below current members") return "offering.capacityBelow";
+  return "offering.error";
+}
+
+function OfferingForm({ classroom, courseId }: { classroom: ClassroomRow; courseId: string }) {
+  const { t } = useI18n();
+  const queryClient = useQueryClient();
+  const save = useServerFn(setClassroomOffering);
+  const [startDate, setStartDate] = useState(classroom.startDate ?? "");
+  const [endDate, setEndDate] = useState(classroom.endDate ?? "");
+  const [capacity, setCapacity] = useState(classroom.capacity?.toString() ?? "");
+  const [price, setPrice] = useState(classroom.priceKzt?.toString() ?? "");
+  const [enrollmentOpen, setEnrollmentOpen] = useState(classroom.enrollmentOpen);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await save({
+        data: {
+          classroomId: classroom.id,
+          startDate: startDate || null,
+          endDate: endDate || null,
+          capacity: capacity ? Number(capacity) : null,
+          priceKzt: price ? Number(price) : null,
+          enrollmentOpen,
+        },
+      });
+      queryClient.invalidateQueries({ queryKey: ["classrooms", courseId] });
+      toast.success(t("offering.saved"));
+    } catch (err) {
+      toast.error(t(offeringErrorKey(err)));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
+      <div>
+        <Label>{t("offering.startDate")}</Label>
+        <Input
+          type="date"
+          className="mt-1"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>{t("offering.endDate")}</Label>
+        <Input
+          type="date"
+          className="mt-1"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>{t("offering.capacity")}</Label>
+        <Input
+          type="number"
+          min={1}
+          max={500}
+          className="mt-1"
+          value={capacity}
+          onChange={(e) => setCapacity(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>{t("offering.price")}</Label>
+        <Input
+          type="number"
+          min={0}
+          className="mt-1"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+      </div>
+      <div className="flex items-start gap-3 sm:col-span-2">
+        <Switch
+          id={`enroll-${classroom.id}`}
+          checked={enrollmentOpen}
+          onCheckedChange={setEnrollmentOpen}
+        />
+        <div>
+          <label htmlFor={`enroll-${classroom.id}`} className="text-sm font-medium">
+            {t("offering.enrollmentOpen")}
+          </label>
+          <p className="mt-1 text-xs text-muted-foreground">{t("offering.enrollmentOpenHelp")}</p>
+        </div>
+      </div>
+      <div className="sm:col-span-2">
+        <Button type="submit" size="sm" disabled={busy}>
+          {t("offering.save")}
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 export function ClassroomPanel({ courseId }: { courseId: string }) {
   const { t } = useI18n();
@@ -63,6 +199,7 @@ export function ClassroomPanel({ courseId }: { courseId: string }) {
       await create({ data: { courseId, name: name.trim() } });
       setName("");
       queryClient.invalidateQueries({ queryKey: ["classrooms", courseId] });
+      queryClient.invalidateQueries({ queryKey: ["my-classrooms"] });
     } catch (err) {
       toast.error(t(classroomErrorKey(err)));
     } finally {
@@ -102,6 +239,73 @@ export function ClassroomPanel({ courseId }: { courseId: string }) {
   );
 }
 
+function RenameClassroomDialog({
+  classroom,
+  courseId,
+}: {
+  classroom: ClassroomRow;
+  courseId: string;
+}) {
+  const { t } = useI18n();
+  const queryClient = useQueryClient();
+  const rename = useServerFn(renameClassroom);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(classroom.name);
+  const [busy, setBusy] = useState(false);
+  const clean = name.trim();
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await rename({ data: { classroomId: classroom.id, name: clean } });
+      toast.success(t("classroom.renamed"));
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["classrooms", courseId] });
+      queryClient.invalidateQueries({ queryKey: ["my-classrooms"] });
+    } catch (err) {
+      toast.error(t(classroomErrorKey(err)));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) setName(classroom.name);
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" disabled={busy}>
+          <Pencil className="size-4" /> {t("classroom.rename")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form onSubmit={submit} className="space-y-4">
+          <DialogHeader>
+            <DialogTitle>{t("classroom.renameTitle")}</DialogTitle>
+          </DialogHeader>
+          <div>
+            <Label>{t("classroom.nameLabel")}</Label>
+            <Input
+              className="mt-1"
+              maxLength={120}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <Button type="submit" disabled={busy || !clean || clean === classroom.name}>
+            {t("classroom.rename")}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function ClassroomCard({
   classroom,
   courseId,
@@ -129,10 +333,11 @@ export function ClassroomCard({
     queryFn: () => fetchMembers({ data: { classroomId: classroom.id } }),
   });
 
-  async function run(action: () => Promise<unknown>) {
+  async function run(action: () => Promise<unknown>, successKey?: keyof Dict) {
     setBusy(true);
     try {
       await action();
+      if (successKey) toast.success(t(successKey));
       queryClient.invalidateQueries({ queryKey: ["classrooms", courseId] });
       queryClient.invalidateQueries({ queryKey: ["my-classrooms"] });
       queryClient.invalidateQueries({ queryKey: ["classroom-code", classroom.id] });
@@ -154,10 +359,21 @@ export function ClassroomCard({
     }
   }
 
+  async function copyLink() {
+    if (!codeData) return;
+    try {
+      await navigator.clipboard.writeText(joinLink(codeData.code));
+      toast.success(t("classroom.linkCopied"));
+    } catch {
+      toast.error(t("classroom.error"));
+    }
+  }
+
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-5">
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-medium">{classroom.name}</span>
+        <RenameClassroomDialog classroom={classroom} courseId={courseId} />
         <Badge variant={active ? "secondary" : "outline"}>
           {t(active ? "classroom.active" : "classroom.archived")}
         </Badge>
@@ -174,6 +390,27 @@ export function ClassroomCard({
           <Button variant="outline" size="sm" disabled={!codeData} onClick={copyCode}>
             <Copy className="size-4" /> {t("classroom.copy")}
           </Button>
+          <Button variant="outline" size="sm" disabled={!codeData} onClick={copyLink}>
+            <Link2 className="size-4" /> {t("classroom.copyLink")}
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" disabled={!codeData}>
+                <QrCode className="size-4" /> {t("classroom.showQr")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("classroom.qrTitle")}</DialogTitle>
+                <DialogDescription>{t("classroom.qrHelp")}</DialogDescription>
+              </DialogHeader>
+              {codeData ? (
+                <div className="flex justify-center">
+                  <QrCodeImage value={joinLink(codeData.code)} />
+                </div>
+              ) : null}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -194,34 +431,85 @@ export function ClassroomCard({
         </div>
       </div>
 
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium">{t("offering.title")}</h3>
+        <OfferingForm classroom={classroom} courseId={courseId} />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={busy}
-            onClick={() => run(() => rotate({ data: { classroomId: classroom.id } }))}
-          >
-            <RefreshCw className="size-4" /> {t("classroom.rotate")}
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" disabled={busy}>
+                <RefreshCw className="size-4" /> {t("classroom.rotate")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("classroom.rotate")}</AlertDialogTitle>
+                <AlertDialogDescription>{t("classroom.rotateConfirm")}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() =>
+                    run(
+                      () => rotate({ data: { classroomId: classroom.id } }),
+                      "classroom.codeRotated",
+                    )
+                  }
+                >
+                  {t("classroom.rotate")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <p className="mt-2 text-xs text-muted-foreground">{t("classroom.rotateHelp")}</p>
         </div>
         <div>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={busy}
-            onClick={() =>
-              run(() =>
-                setStatus({
-                  data: { classroomId: classroom.id, status: active ? "archived" : "active" },
-                }),
-              )
-            }
-          >
-            {active ? <Archive className="size-4" /> : <ArchiveRestore className="size-4" />}{" "}
-            {t(active ? "classroom.archive" : "classroom.restore")}
-          </Button>
+          {active ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={busy}>
+                  <Archive className="size-4" /> {t("classroom.archive")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("classroom.archive")}</AlertDialogTitle>
+                  <AlertDialogDescription>{t("classroom.archiveConfirm")}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() =>
+                      run(
+                        () =>
+                          setStatus({ data: { classroomId: classroom.id, status: "archived" } }),
+                        "classroom.archiveDone",
+                      )
+                    }
+                  >
+                    {t("classroom.archive")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() =>
+                run(
+                  () => setStatus({ data: { classroomId: classroom.id, status: "active" } }),
+                  "classroom.restoreDone",
+                )
+              }
+            >
+              <ArchiveRestore className="size-4" /> {t("classroom.restore")}
+            </Button>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">{t("classroom.archiveHelp")}</p>
         </div>
       </div>

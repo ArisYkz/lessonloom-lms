@@ -12,6 +12,7 @@ import {
   updateMyOrg,
 } from "@/lib/teach.functions";
 import { useI18n } from "@/i18n/provider";
+import { formatNumber } from "@/lib/format";
 import type { Dict } from "@/i18n/dictionary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 type Org = NonNullable<Awaited<ReturnType<typeof getMyOrg>>>;
 
 function OrgProfile({ org }: { org: Org }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const save = useServerFn(updateMyOrg);
@@ -46,8 +47,8 @@ function OrgProfile({ org }: { org: Org }) {
       await save({ data: { name, headline, about, ...extra } });
       await queryClient.invalidateQueries({ queryKey: ["my-org"] });
       toast.success(t("builder.saved"));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("common.error"));
+    } catch {
+      toast.error(t("common.error"));
     } finally {
       setBusy(false);
     }
@@ -115,15 +116,24 @@ function OrgProfile({ org }: { org: Org }) {
         <p className="text-sm text-muted-foreground">{t("plan.title")}</p>
         <p className="title-panel mt-1">{plan.name}</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {`${plan.price_kzt.toLocaleString("ru-RU")} ₸ ${t("plan.perMonth")}`} ·{" "}
-          {t("plan.courses")}: {plan.max_courses ?? t("plan.unlimited")}
+          {`${formatNumber(plan.price_kzt, locale)} ₸ ${t("plan.perMonth")}`} · {t("plan.courses")}:{" "}
+          {plan.max_courses ?? t("plan.unlimited")}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("plan.students")}: {plan.max_students?.toLocaleString("ru-RU") ?? t("plan.unlimited")}
+          {t("plan.students")}:{" "}
+          {plan.max_students !== null
+            ? formatNumber(plan.max_students, locale)
+            : t("plan.unlimited")}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("plan.classes")}: {plan.max_classrooms ?? t("plan.unlimited")}
         </p>
         {plan.max_courses !== null ? (
           <p className="mt-4 text-sm text-muted-foreground">{t("plan.upgradeSoon")}</p>
         ) : null}
+        <Button asChild variant="outline" size="sm" className="mt-4">
+          <Link to="/teach/plan">{t("plan.viewDetails")}</Link>
+        </Button>
       </div>
     </div>
   );
@@ -179,7 +189,8 @@ function OrgSetup() {
       await queryClient.invalidateQueries({ queryKey: ["my-org"] });
       toast.success(t("builder.saved"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("common.error"));
+      const missingName = err instanceof Error && err.message === "Name is required";
+      toast.error(t(missingName ? "teach.orgNameRequired" : "common.error"));
     } finally {
       setBusy(false);
     }

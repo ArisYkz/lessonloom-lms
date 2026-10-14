@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { pickHomeworkToShow, type HomeworkDueEntry } from "@/lib/homework-due";
 import { LOCALES } from "@/i18n/dictionary";
 
 export const getMyRoles = createServerFn({ method: "POST" })
@@ -68,6 +69,18 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+type NextSession = {
+  title: string;
+  startsAt: string;
+  durationMinutes: number;
+  timeZone: string;
+  format: string;
+  meetingUrl: string | null;
+  location: string | null;
+};
+
+type HomeworkDue = { title: string; dueAt: string; overdue: boolean };
+
 type CourseCard = {
   id: string;
   slug: string;
@@ -102,19 +115,86 @@ export const getMyLearning = createServerFn({ method: "POST" })
           .in("id", classroomIds)
           .eq("status", "active")
       : { data: [] };
-    const classroomByCourse = new Map<string, string>();
+    const courseByClassroom = new Map<string, string>();
+    const firstClassroomByCourse = new Map<string, string>();
     for (const c of classrooms ?? []) {
-      if (!enrolled.has(c.course_id) && !classroomByCourse.has(c.course_id)) {
-        classroomByCourse.set(c.course_id, c.id);
-      }
+      courseByClassroom.set(c.id, c.course_id);
+      if (!firstClassroomByCourse.has(c.course_id)) firstClassroomByCourse.set(c.course_id, c.id);
     }
-    const classCourseIds = [...classroomByCourse.keys()];
+    const classCourseIds = [...firstClassroomByCourse.keys()].filter((id) => !enrolled.has(id));
     const { data: classCourses } = classCourseIds.length
       ? await context.supabase
           .from("courses")
           .select("id, slug, title, thumbnail_url, organizations(name)")
           .in("id", classCourseIds)
       : { data: [] };
+
+    const classCardIds = [...courseByClassroom.keys()];
+    const nowIso = new Date().toISOString();
+    const { data: upcoming } = classCardIds.length
+      ? await context.supabase
+          .from("class_sessions")
+          .select(
+            "classroom_id, title, starts_at, duration_minutes, time_zone, format, meeting_url, location",
+          )
+          .in("classroom_id", classCardIds)
+          .eq("status", "scheduled")
+          .gte("starts_at", nowIso)
+          .order("starts_at", { ascending: true })
+      : { data: [] };
+    // Past due dates come too, so a missed assignment can be surfaced as overdue.
+    const { data: dueRows } = classCardIds.length
+      ? await context.supabase
+          .from("classroom_homework_due")
+          .select("classroom_id, homework_id, due_at, homework(lessons(title))")
+          .in("classroom_id", classCardIds)
+      : { data: [] };
+    const dueHomeworkIds = (dueRows ?? []).map((d) => d.homework_id);
+    const { data: submittedRows } = dueHomeworkIds.length
+      ? await context.supabase
+          .from("homework_submissions")
+          .select("homework_id")
+          .eq("user_id", context.userId)
+          .in("homework_id", dueHomeworkIds)
+      : { data: [] };
+    const submitted = new Set((submittedRows ?? []).map((s) => s.homework_id));
+
+    const nextByCourse = new Map<string, { classroomId: string; session: NextSession }>();
+    for (const s of upcoming ?? []) {
+      const courseId = courseByClassroom.get(s.classroom_id);
+      if (courseId && !nextByCourse.has(courseId)) {
+        nextByCourse.set(courseId, {
+          classroomId: s.classroom_id,
+          session: {
+            title: s.title,
+            startsAt: s.starts_at,
+            durationMinutes: s.duration_minutes,
+            timeZone: s.time_zone,
+            format: s.format,
+            meetingUrl: s.meeting_url,
+            location: s.location,
+          },
+        });
+      }
+    }
+    const dueByCourse = new Map<string, HomeworkDueEntry[]>();
+    for (const d of dueRows ?? []) {
+      const courseId = courseByClassroom.get(d.classroom_id);
+      if (!courseId) continue;
+      const hw = d.homework as unknown as { lessons: { title: string } | null } | null;
+      const entries = dueByCourse.get(courseId) ?? [];
+      entries.push({
+        homeworkId: d.homework_id,
+        title: hw?.lessons?.title ?? "",
+        dueAt: d.due_at,
+      });
+      dueByCourse.set(courseId, entries);
+    }
+    const homeworkDueByCourse = new Map<string, HomeworkDue>();
+    for (const [courseId, entries] of dueByCourse) {
+      const shown = pickHomeworkToShow(entries, submitted, new Date(nowIso));
+      if (shown) homeworkDueByCourse.set(courseId, shown);
+    }
 
     const cards = [
       ...rows.map((r) => r.courses as unknown as CourseCard),
@@ -138,12 +218,15 @@ export const getMyLearning = createServerFn({ method: "POST" })
     return cards.map((c) => {
       const total = (lessons ?? []).filter((l) => l.course_id === c.id).length;
       const done = (progress ?? []).filter((p) => p.course_id === c.id).length;
+      const next = nextByCourse.get(c.id);
       return {
         courseId: c.id,
         slug: c.slug,
         title: c.title,
         teacherName: c.organizations?.name ?? "",
-        classroomId: classroomByCourse.get(c.id) ?? null,
+        classroomId: next?.classroomId ?? firstClassroomByCourse.get(c.id) ?? null,
+        nextSession: next?.session ?? null,
+        homeworkDue: homeworkDueByCourse.get(c.id) ?? null,
         thumbnailUrl: c.thumbnail_url ? (signed.get(c.thumbnail_url) ?? null) : null,
         total,
         done,
@@ -154,17 +237,17 @@ export const getMyLearning = createServerFn({ method: "POST" })
 
 export const getMySessions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { from?: string } | undefined) => input ?? {})
+  .inputValidator((input: { from?: string; to?: string } | undefined) => input ?? {})
   .handler(async ({ data, context }) => {
     // Sessions are RLS-scoped to active class members of active classes.
     let query = context.supabase
       .from("class_sessions")
       .select(
-        "id, title, starts_at, duration_minutes, time_zone, meeting_url, classroom_id, classrooms(name)",
+        "id, title, starts_at, duration_minutes, time_zone, format, meeting_url, location, status, classroom_id, classrooms(name)",
       )
-      .eq("status", "scheduled")
       .order("starts_at", { ascending: true });
     if (data.from) query = query.gte("starts_at", data.from);
+    if (data.to) query = query.lte("starts_at", data.to);
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
     return (rows ?? []).map((s) => ({
@@ -173,7 +256,10 @@ export const getMySessions = createServerFn({ method: "POST" })
       startsAt: s.starts_at,
       durationMinutes: s.duration_minutes,
       timeZone: s.time_zone,
+      format: s.format,
       meetingUrl: s.meeting_url,
+      location: s.location,
+      status: s.status,
       classroomId: s.classroom_id,
       classroomName: s.classrooms?.name ?? "",
     }));
@@ -218,19 +304,53 @@ export const enrollFree = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const JOIN_ERROR_CODES: [string, string][] = [
+  ["Invalid join code", "INVALID_JOIN_CODE"],
+  ["Class is full", "CLASS_FULL"],
+  ["Enrollment is closed", "ENROLLMENT_CLOSED"],
+];
+
 export const joinClassroom = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { code: string }) => input)
   .handler(async ({ data, context }) => {
+    // join_classroom returns the class silently for existing members, so detect that here.
+    const { data: before } = await context.supabase
+      .from("classroom_memberships")
+      .select("classroom_id")
+      .eq("user_id", context.userId)
+      .eq("status", "active");
     const { data: classroomId, error } = await context.supabase.rpc("join_classroom", {
       _code: data.code,
     });
     if (error) {
-      throw new Error(
-        error.message.includes("Invalid join code") ? "INVALID_JOIN_CODE" : error.message,
-      );
+      const match = JOIN_ERROR_CODES.find(([text]) => error.message.includes(text));
+      throw new Error(match ? match[1] : error.message);
     }
-    return { classroomId };
+    const alreadyMember = (before ?? []).some((m) => m.classroom_id === classroomId);
+    return { classroomId, alreadyMember };
+  });
+
+const CHECKIN_ERROR_CODES: [string, string][] = [
+  ["Invalid check-in code", "CHECKIN_INVALID"],
+  ["Check-in is not open", "CHECKIN_NOT_OPEN"],
+  ["Not a class member", "NOT_CLASS_MEMBER"],
+  ["Session is cancelled", "SESSION_CANCELLED"],
+  ["Class is archived", "CHECKIN_CLASS_ARCHIVED"],
+];
+
+export const checkInToSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { token: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: sessionId, error } = await context.supabase.rpc("check_in_to_session", {
+      _token: data.token,
+    });
+    if (error) {
+      const match = CHECKIN_ERROR_CODES.find(([text]) => error.message.includes(text));
+      throw new Error(match ? match[1] : error.message);
+    }
+    return { sessionId };
   });
 
 export const leaveClassCourse = createServerFn({ method: "POST" })
@@ -240,6 +360,19 @@ export const leaveClassCourse = createServerFn({ method: "POST" })
     const { error } = await context.supabase.rpc("leave_course_classes", {
       _course: data.courseId,
     });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const unenrollCourse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { courseId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("enrollments")
+      .delete()
+      .eq("user_id", context.userId)
+      .eq("course_id", data.courseId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

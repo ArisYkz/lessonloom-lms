@@ -2,16 +2,22 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen, Clock } from "lucide-react";
 import type { CourseCard as CourseCardData } from "@/lib/catalog.functions";
 import { useI18n } from "@/i18n/provider";
-import type { Dict } from "@/i18n/dictionary";
+import type { Dict, Locale } from "@/i18n/dictionary";
+import { formatNumber } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 
-export function formatPrice(priceModel: string, priceKzt: number, t: (k: keyof Dict) => string) {
+export function formatPrice(
+  priceModel: string,
+  priceKzt: number,
+  t: (k: keyof Dict) => string,
+  locale: Locale,
+) {
   if (priceModel === "free") return t("price.free");
-  return `${priceKzt.toLocaleString("ru-RU")} ₸ ${t("price.perMonth")}`;
+  return `${formatNumber(priceKzt, locale)} ₸ ${t("price.perMonth")}`;
 }
 
 export function CourseCard({ course }: { course: CourseCardData }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   return (
     <Link
       to="/courses/$slug"
@@ -49,7 +55,7 @@ export function CourseCard({ course }: { course: CourseCardData }) {
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
           <span className="text-sm text-muted-foreground">{course.teacherName}</span>
           <span className="text-sm font-medium text-foreground">
-            {formatPrice(course.priceModel, course.priceKzt, t)}
+            {formatPrice(course.priceModel, course.priceKzt, t, locale)}
           </span>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { getMyLearning, joinClassroom, leaveClassCourse } from "@/lib/learn.functions";
 import { classroomErrorKey } from "@/lib/classroom-errors";
+import { formatTimeRange, viewerTimeZone } from "@/lib/calendar";
 import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const queryClient = useQueryClient();
   const fetchLearning = useServerFn(getMyLearning);
   const join = useServerFn(joinClassroom);
@@ -51,9 +52,10 @@ function Dashboard() {
     e.preventDefault();
     setBusy(true);
     try {
-      await join({ data: { code: code.trim() } });
+      const { alreadyMember } = await join({ data: { code: code.trim() } });
       setCode("");
-      toast.success(t("join.success"));
+      if (alreadyMember) toast.info(t("join.alreadyMember"));
+      else toast.success(t("join.success"));
       queryClient.invalidateQueries({ queryKey: ["my-learning"] });
       queryClient.invalidateQueries({ queryKey: ["enrollment"] });
     } catch (err) {
@@ -116,6 +118,28 @@ function Dashboard() {
                       {t("join.viaClass")}
                     </Badge>
                   ) : null}
+                  {c.nextSession ? (
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">{t("classes.nextSession")}: </span>
+                      {c.nextSession.title} ·{" "}
+                      {formatTimeRange(
+                        c.nextSession.startsAt,
+                        c.nextSession.durationMinutes,
+                        viewerTimeZone(),
+                        locale,
+                      )}
+                      {c.nextSession.location ? ` · ${c.nextSession.location}` : null}
+                    </p>
+                  ) : null}
+                  {c.homeworkDue ? (
+                    <p className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">{t("learn.homeworkDue")}: </span>
+                      {c.homeworkDue.title} · {formatDueAt(c.homeworkDue.dueAt, locale)}
+                      {c.homeworkDue.overdue ? (
+                        <Badge variant="destructive">{t("learn.overdue")}</Badge>
+                      ) : null}
+                    </p>
+                  ) : null}
                   <div className="mt-auto pt-3">
                     <Progress value={c.percent} />
                     <p className="mt-2 text-xs text-muted-foreground">
@@ -125,12 +149,31 @@ function Dashboard() {
                 </div>
               </Link>
               {c.classroomId ? <LeaveClassButton courseId={c.courseId} /> : null}
+              {c.nextSession?.meetingUrl ? (
+                <a
+                  href={c.nextSession.meetingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary underline-offset-4 hover:underline"
+                >
+                  {t("session.join")}
+                </a>
+              ) : null}
             </div>
           ))}
         </div>
       )}
     </div>
   );
+}
+
+function formatDueAt(iso: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
 }
 
 function LeaveClassButton({ courseId }: { courseId: string }) {

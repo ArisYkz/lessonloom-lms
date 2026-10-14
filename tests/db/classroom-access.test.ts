@@ -59,6 +59,7 @@ beforeAll(async () => {
     insert into public.teacher_plans (code, name, price_kzt, max_courses, position, max_students)
       values ('tiny', 'Tiny', 0, null, 9, 2);
     insert into public.org_subscriptions (organization_id, plan_code) values ('${LIMIT_ORG}', 'tiny');
+    insert into public.org_subscriptions (organization_id, plan_code) values ('${ORG}', 'pro');
   `);
   const row = await asUser<{ id: string }>(
     db,

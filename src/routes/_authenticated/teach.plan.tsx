@@ -2,8 +2,9 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
-import { getMyCourses, getMyLearnerCount, getMyOrg } from "@/lib/teach.functions";
+import { getMyCourses, getMyLearnerCount, getMyOrg, listMyClassrooms } from "@/lib/teach.functions";
 import { useI18n } from "@/i18n/provider";
+import { formatNumber } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/_authenticated/teach/plan")({
@@ -14,16 +15,21 @@ export const Route = createFileRoute("/_authenticated/teach/plan")({
 });
 
 function PlanPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const fetchOrg = useServerFn(getMyOrg);
   const fetchLearners = useServerFn(getMyLearnerCount);
   const fetchCourses = useServerFn(getMyCourses);
+  const fetchClassrooms = useServerFn(listMyClassrooms);
   const { data: org, isLoading } = useQuery({ queryKey: ["my-org"], queryFn: () => fetchOrg() });
   const { data: learners } = useQuery({
     queryKey: ["my-learner-count"],
     queryFn: () => fetchLearners(),
   });
   const { data: courses } = useQuery({ queryKey: ["my-courses"], queryFn: () => fetchCourses() });
+  const { data: classrooms } = useQuery({
+    queryKey: ["my-classrooms"],
+    queryFn: () => fetchClassrooms(),
+  });
 
   if (isLoading) {
     return (
@@ -35,6 +41,7 @@ function PlanPage() {
   const plan = org.plan;
   const studentsUsed = learners?.learners ?? 0;
   const coursesUsed = courses?.courses.length ?? 0;
+  const activeClassesUsed = classrooms?.filter((c) => c.status === "active").length ?? 0;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-12">
@@ -42,7 +49,7 @@ function PlanPage() {
         <p className="text-sm text-muted-foreground">{t("plan.title")}</p>
         <p className="title-panel mt-1">{plan.name}</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {`${plan.price_kzt.toLocaleString("ru-RU")} ₸ ${t("plan.perMonth")}`}
+          {`${formatNumber(plan.price_kzt, locale)} ₸ ${t("plan.perMonth")}`}
         </p>
       </div>
 
@@ -58,6 +65,12 @@ function PlanPage() {
           label={t("plan.coursesUsed")}
           used={coursesUsed}
           max={plan.max_courses}
+          unlimited={t("plan.unlimited")}
+        />
+        <Usage
+          label={t("plan.classesUsed")}
+          used={activeClassesUsed}
+          max={plan.max_classrooms}
           unlimited={t("plan.unlimited")}
         />
         <p className="text-sm text-muted-foreground">{t("plan.upgradeSoon")}</p>

@@ -73,7 +73,7 @@ export const getMyOrg = createServerFn({ method: "POST" })
     const planCode = sub && sub.status === "ACTIVE" ? sub.plan_code : "starter";
     const { data: plan } = await context.supabase
       .from("teacher_plans")
-      .select("code, name, price_kzt, max_courses, max_students")
+      .select("code, name, price_kzt, max_courses, max_students, max_classrooms")
       .eq("code", planCode)
       .maybeSingle();
     return {
@@ -84,6 +84,7 @@ export const getMyOrg = createServerFn({ method: "POST" })
         price_kzt: 4990,
         max_courses: 3,
         max_students: 3,
+        max_classrooms: 1,
       },
     };
   });
@@ -512,11 +513,23 @@ export const listClassrooms = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: classrooms, error } = await context.supabase
       .from("classrooms")
-      .select("id, name, status, listed, created_at")
+      .select(
+        "id, name, status, listed, created_at, start_date, end_date, capacity, price_kzt, enrollment_open",
+      )
       .eq("course_id", data.courseId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return classrooms ?? [];
+    return (classrooms ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      status: c.status,
+      listed: c.listed,
+      startDate: c.start_date,
+      endDate: c.end_date,
+      capacity: c.capacity,
+      priceKzt: c.price_kzt,
+      enrollmentOpen: c.enrollment_open,
+    }));
   });
 
 export const createClassroom = createServerFn({ method: "POST" })
@@ -563,6 +576,18 @@ export const setClassroomStatus = createServerFn({ method: "POST" })
     const { error } = await context.supabase.rpc("set_classroom_status", {
       _classroom: data.classroomId,
       _status: data.status,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const renameClassroom = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string; name: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("rename_classroom", {
+      _classroom: data.classroomId,
+      _name: data.name,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -623,12 +648,39 @@ export const setClassroomListed = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setClassroomOffering = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: {
+      classroomId: string;
+      startDate: string | null;
+      endDate: string | null;
+      capacity: number | null;
+      priceKzt: number | null;
+      enrollmentOpen: boolean;
+    }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("set_classroom_offering", {
+      _classroom: data.classroomId,
+      _start_date: data.startDate,
+      _end_date: data.endDate,
+      _capacity: data.capacity,
+      _price_kzt: data.priceKzt,
+      _enrollment_open: data.enrollmentOpen,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const listMyClassrooms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data: classrooms, error } = await context.supabase
       .from("classrooms")
-      .select("id, name, status, listed, course_id")
+      .select(
+        "id, name, status, listed, course_id, start_date, end_date, capacity, price_kzt, enrollment_open",
+      )
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
@@ -643,6 +695,11 @@ export const listMyClassrooms = createServerFn({ method: "POST" })
       name: c.name,
       status: c.status,
       listed: c.listed,
+      startDate: c.start_date,
+      endDate: c.end_date,
+      capacity: c.capacity,
+      priceKzt: c.price_kzt,
+      enrollmentOpen: c.enrollment_open,
       courseId: c.course_id,
       courseTitle: titles.get(c.course_id) ?? "",
     }));
@@ -654,7 +711,9 @@ export const listClassSessions = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: sessions, error } = await context.supabase
       .from("class_sessions")
-      .select("id, title, starts_at, duration_minutes, time_zone, meeting_url, status")
+      .select(
+        "id, title, starts_at, duration_minutes, time_zone, format, meeting_url, location, status",
+      )
       .eq("classroom_id", data.classroomId)
       .order("starts_at", { ascending: true });
     if (error) throw new Error(error.message);
@@ -664,7 +723,9 @@ export const listClassSessions = createServerFn({ method: "POST" })
       startsAt: s.starts_at,
       durationMinutes: s.duration_minutes,
       timeZone: s.time_zone,
+      format: s.format,
       meetingUrl: s.meeting_url,
+      location: s.location,
       status: s.status,
     }));
   });
@@ -676,7 +737,7 @@ export const listTeacherSessions = createServerFn({ method: "POST" })
     const { data, error } = await context.supabase
       .from("class_sessions")
       .select(
-        "id, classroom_id, title, starts_at, duration_minutes, time_zone, meeting_url, status, classrooms(name)",
+        "id, classroom_id, title, starts_at, duration_minutes, time_zone, format, meeting_url, location, status, classrooms(name)",
       )
       .order("starts_at", { ascending: true });
     if (error) throw new Error(error.message);
@@ -688,7 +749,9 @@ export const listTeacherSessions = createServerFn({ method: "POST" })
       startsAt: s.starts_at,
       durationMinutes: s.duration_minutes,
       timeZone: s.time_zone,
+      format: s.format,
       meetingUrl: s.meeting_url,
+      location: s.location,
       status: s.status,
     }));
   });
@@ -702,7 +765,9 @@ export const createClassSession = createServerFn({ method: "POST" })
       startsAt: string;
       durationMinutes: number;
       timeZone: string;
+      format: "online" | "in_person";
       meetingUrl: string;
+      location: string;
     }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -712,7 +777,9 @@ export const createClassSession = createServerFn({ method: "POST" })
       _starts_at: data.startsAt,
       _duration_minutes: data.durationMinutes,
       _time_zone: data.timeZone,
+      _format: data.format,
       _meeting_url: data.meetingUrl,
+      _location: data.location,
     });
     if (error) throw new Error(error.message);
     return { id };
@@ -724,6 +791,137 @@ export const cancelClassSession = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("cancel_class_session", {
       _session: data.sessionId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const restoreClassSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { sessionId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("restore_class_session", {
+      _session: data.sessionId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateClassSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: {
+      sessionId: string;
+      title: string;
+      startsAt: string;
+      durationMinutes: number;
+      timeZone: string;
+      format: "online" | "in_person";
+      meetingUrl: string;
+      location: string;
+    }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("update_class_session", {
+      _session: data.sessionId,
+      _title: data.title,
+      _starts_at: data.startsAt,
+      _duration_minutes: data.durationMinutes,
+      _time_zone: data.timeZone,
+      _format: data.format,
+      _meeting_url: data.meetingUrl,
+      _location: data.location,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const rotateSessionCheckin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { sessionId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: token, error } = await context.supabase.rpc("rotate_session_checkin", {
+      _session: data.sessionId,
+    });
+    if (error) throw new Error(error.message);
+    return { token };
+  });
+
+export const listSessionCheckins = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { sessionId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("session_checkins")
+      .select("user_id, checked_in_at")
+      .eq("session_id", data.sessionId)
+      .order("checked_in_at", { ascending: true });
+    if (error) throw new Error(error.message);
+
+    const list = rows ?? [];
+    if (list.length === 0) return [];
+    // Profile names are not readable by teachers under RLS, same as listClassroomMembers.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name")
+      .in(
+        "id",
+        list.map((r) => r.user_id),
+      );
+    const names = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? ""]));
+    return list.map((r) => ({
+      userId: r.user_id,
+      name: names.get(r.user_id) ?? "",
+      checkedInAt: r.checked_in_at,
+    }));
+  });
+
+export const listClassHomework = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { classroomId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: classroom, error: classError } = await context.supabase
+      .from("classrooms")
+      .select("course_id")
+      .eq("id", data.classroomId)
+      .maybeSingle();
+    if (classError) throw new Error(classError.message);
+    if (!classroom) return [];
+
+    const [{ data: homework, error }, { data: due, error: dueError }] = await Promise.all([
+      context.supabase
+        .from("homework")
+        .select("id, instructions, lessons(title)")
+        .eq("course_id", classroom.course_id)
+        .order("created_at", { ascending: true }),
+      context.supabase
+        .from("classroom_homework_due")
+        .select("homework_id, due_at")
+        .eq("classroom_id", data.classroomId),
+    ]);
+    if (error) throw new Error(error.message);
+    if (dueError) throw new Error(dueError.message);
+
+    const dueByHomework = new Map((due ?? []).map((d) => [d.homework_id, d.due_at]));
+    return (homework ?? []).map((h) => ({
+      homeworkId: h.id,
+      lessonTitle: (h.lessons as unknown as { title: string } | null)?.title ?? "",
+      instructions: h.instructions,
+      dueAt: dueByHomework.get(h.id) ?? null,
+    }));
+  });
+
+export const setClassroomHomeworkDue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: { classroomId: string; homeworkId: string; dueAt: string | null }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("set_classroom_homework_due", {
+      _classroom: data.classroomId,
+      _homework: data.homeworkId,
+      _due_at: data.dueAt,
     });
     if (error) throw new Error(error.message);
     return { ok: true };

@@ -31,12 +31,14 @@ function schedule(
     duration?: number;
     timeZone?: string;
     meetingUrl?: string | null;
+    format?: "online" | "in_person";
+    location?: string | null;
   } = {},
 ) {
   return asUser<{ id: string }>(
     db,
     user,
-    "select public.create_class_session($1, $2, $3, $4, $5, $6) as id",
+    "select public.create_class_session($1, $2, $3, $4, $5, $6, $7, $8) as id",
     [
       classroomId,
       overrides.title ?? "Q&A",
@@ -44,6 +46,8 @@ function schedule(
       overrides.duration ?? 60,
       overrides.timeZone ?? "Asia/Almaty",
       overrides.meetingUrl === undefined ? "https://meet.example.com/abc" : overrides.meetingUrl,
+      overrides.format ?? "online",
+      overrides.location ?? null,
     ],
   );
 }
@@ -100,9 +104,19 @@ describe("owner schedules sessions", () => {
     expect(r).toEqual({ time_zone: "Asia/Almaty", meeting_url: "https://meet.example.com/abc" });
   });
 
-  it("accepts a session without a meeting link", async () => {
-    const r = await schedule(OWNER, classroom, { meetingUrl: "   " });
+  it("accepts an in-person session with a location and no meeting link", async () => {
+    const r = await schedule(OWNER, classroom, {
+      meetingUrl: "   ",
+      format: "in_person",
+      location: "Room 204",
+    });
     expect(r!.id).toBeDefined();
+  });
+
+  it("refuses an online session without a meeting link", async () => {
+    await expect(schedule(OWNER, classroom, { meetingUrl: "   " })).rejects.toThrow(
+      /Meeting link required/,
+    );
   });
 
   it("refuses a session in a class owned by another teacher", async () => {

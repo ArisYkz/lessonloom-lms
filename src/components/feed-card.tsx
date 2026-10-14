@@ -3,6 +3,7 @@ import { BookOpen } from "lucide-react";
 import type { FeedCard as FeedCardData } from "@/lib/catalog.functions";
 import { useI18n } from "@/i18n/provider";
 import { formatPrice } from "@/components/course-card";
+import { formatNumber } from "@/lib/format";
 
 function duration(min: number) {
   if (!min) return null;
@@ -12,7 +13,7 @@ function duration(min: number) {
 }
 
 export function FeedCard({ course }: { course: FeedCardData }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const d = duration(course.estimatedMinutes);
   return (
     <div className="group flex w-full flex-col gap-3">
@@ -34,7 +35,7 @@ export function FeedCard({ course }: { course: FeedCardData }) {
           </div>
         )}
         <span className="absolute left-2 top-2 rounded-md bg-background/90 px-2 py-0.5 text-xs font-medium text-foreground">
-          {formatPrice(course.priceModel, course.priceKzt, t)}
+          {formatPrice(course.priceModel, course.priceKzt, t, locale)}
         </span>
         {d ? (
           <span className="absolute bottom-2 right-2 rounded-md bg-foreground/85 px-1.5 py-0.5 text-xs font-medium text-background">
@@ -62,7 +63,7 @@ export function FeedCard({ course }: { course: FeedCardData }) {
             {course.teacherName}
           </Link>
           <p className="text-sm text-muted-foreground">
-            {course.students.toLocaleString("ru-RU")} {t("feed.students")}
+            {formatNumber(course.students, locale)} {t("feed.students")}
           </p>
         </div>
       </div>

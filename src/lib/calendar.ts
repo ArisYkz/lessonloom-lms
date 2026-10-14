@@ -31,6 +31,15 @@ export function weekDayKeys(startKey: string): string[] {
   return Array.from({ length: 7 }, (_, i) => shiftDateKey(startKey, i));
 }
 
+// A date picker gives a plain day; a session query needs the instants that bound it.
+export function dayBoundsIso(key: string): { from: string; to: string } {
+  const [y, m, d] = parseKey(key);
+  return {
+    from: new Date(y, m - 1, d, 0, 0, 0, 0).toISOString(),
+    to: new Date(y, m - 1, d, 23, 59, 59, 999).toISOString(),
+  };
+}
+
 export function formatDateKey(key: string, locale: string, options: Intl.DateTimeFormatOptions) {
   const [y, m, d] = parseKey(key);
   return new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(

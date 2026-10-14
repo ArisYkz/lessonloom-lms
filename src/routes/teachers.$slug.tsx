@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getTeacherBySlug } from "@/lib/catalog.functions";
 import { CourseCard } from "@/components/course-card";
 import { useI18n } from "@/i18n/provider";
+import { formatNumber } from "@/lib/format";
 import { Avatar } from "@/components/feed-card";
 
 const teacherQuery = (slug: string) =>
@@ -42,7 +43,7 @@ export const Route = createFileRoute("/teachers/$slug")({
 
 function TeacherPage() {
   const { slug } = Route.useParams();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { data } = useSuspenseQuery(teacherQuery(slug));
   if (!data) return null;
 
@@ -62,7 +63,7 @@ function TeacherPage() {
             <h1 className="title-page">{data.name}</h1>
             {data.headline ? <p className="mt-1 text-muted-foreground">{data.headline}</p> : null}
             <p className="mt-1 text-sm text-muted-foreground">
-              {data.courses.length} {t("feed.courses")} · {data.students.toLocaleString("ru-RU")}{" "}
+              {data.courses.length} {t("feed.courses")} · {formatNumber(data.students, locale)}{" "}
               {t("feed.students")}
             </p>
           </div>

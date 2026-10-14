@@ -12,8 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { dayBoundsIso } from "@/lib/calendar";
 import { WeekAgenda } from "@/components/week-agenda";
 import { SessionRow } from "@/components/session-row";
+import { SessionRangeFilter, type SessionRange } from "@/components/session-range-filter";
 
 export const Route = createFileRoute("/_authenticated/teach/calendar")({
   head: () => ({
@@ -33,6 +35,7 @@ function TeacherCalendar() {
   const fetchSessions = useServerFn(listTeacherSessions);
   const fetchClassrooms = useServerFn(listMyClassrooms);
   const [classFilter, setClassFilter] = useState(ALL_CLASSES);
+  const [range, setRange] = useState<SessionRange>({ from: "", to: "" });
 
   const { data: sessions, isLoading } = useQuery({
     queryKey: ["teacher-sessions"],
@@ -43,11 +46,18 @@ function TeacherCalendar() {
     queryFn: () => fetchClassrooms(),
   });
 
-  const visible = useMemo(
-    () =>
-      (sessions ?? []).filter((s) => classFilter === ALL_CLASSES || s.classroomId === classFilter),
-    [sessions, classFilter],
-  );
+  const visible = useMemo(() => {
+    const bounds = {
+      from: range.from ? dayBoundsIso(range.from).from : null,
+      to: range.to ? dayBoundsIso(range.to).to : null,
+    };
+    return (sessions ?? []).filter(
+      (s) =>
+        (classFilter === ALL_CLASSES || s.classroomId === classFilter) &&
+        (bounds.from === null || s.startsAt >= bounds.from) &&
+        (bounds.to === null || s.startsAt <= bounds.to),
+    );
+  }, [sessions, classFilter, range]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -68,6 +78,14 @@ function TeacherCalendar() {
         </Select>
       </div>
 
+      <div className="mt-6">
+        <SessionRangeFilter
+          value={range}
+          onChange={setRange}
+          onReset={() => setRange({ from: "", to: "" })}
+        />
+      </div>
+
       <div className="mt-8">
         {isLoading ? (
           <p className="text-muted-foreground">{t("common.loading")}</p>
@@ -82,7 +100,9 @@ function TeacherCalendar() {
                 startsAt={s.startsAt}
                 durationMinutes={s.durationMinutes}
                 classroomName={s.classroomName}
+                format={s.format}
                 meetingUrl={s.meetingUrl}
+                location={s.location}
                 cancelled={s.status === "cancelled"}
               />
             )}

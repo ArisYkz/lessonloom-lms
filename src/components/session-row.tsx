@@ -10,19 +10,31 @@ type SessionRowProps = {
   startsAt: string;
   durationMinutes: number;
   classroomName: string;
+  format: string;
   meetingUrl: string | null;
+  location: string | null;
   cancelled: boolean;
   attendees?: { avatarUrl: string | null }[] | undefined;
 };
 
 const STACK_LIMIT = 5;
+const JOIN_OPENS_BEFORE_MS = 15 * 60_000;
+
+export function joinWindow(startsAt: string, durationMinutes: number, now = Date.now()) {
+  const startMs = new Date(startsAt).getTime();
+  if (now < startMs - JOIN_OPENS_BEFORE_MS) return "upcoming" as const;
+  if (now > startMs + durationMinutes * 60_000) return "ended" as const;
+  return "open" as const;
+}
 
 export function SessionRow({
   title,
   startsAt,
   durationMinutes,
   classroomName,
+  format,
   meetingUrl,
+  location,
   cancelled,
   attendees,
 }: SessionRowProps) {
@@ -30,6 +42,8 @@ export function SessionRow({
   const time = formatTimeRange(startsAt, durationMinutes, viewerTimeZone(), locale);
   const shown = (attendees ?? []).slice(0, STACK_LIMIT);
   const extra = (attendees?.length ?? 0) - shown.length;
+  const where = format === "in_person" ? location : null;
+  const window = joinWindow(startsAt, durationMinutes);
 
   return (
     <div
@@ -39,6 +53,7 @@ export function SessionRow({
         <p className="font-medium">{title}</p>
         <p className="text-sm text-muted-foreground">
           {time} · {classroomName}
+          {where ? ` · ${where}` : null}
         </p>
       </div>
       {shown.length > 0 ? (
@@ -58,12 +73,14 @@ export function SessionRow({
       ) : null}
       {cancelled ? (
         <Badge variant="outline">{t("session.cancelled")}</Badge>
-      ) : meetingUrl ? (
+      ) : meetingUrl && window === "open" ? (
         <Button asChild size="sm" variant="outline">
           <a href={meetingUrl} target="_blank" rel="noreferrer">
             {t("session.join")}
           </a>
         </Button>
+      ) : meetingUrl && window === "upcoming" ? (
+        <p className="text-xs text-muted-foreground">{t("session.linkOpens")}</p>
       ) : null}
     </div>
   );
