@@ -91,10 +91,14 @@ describe("rotate_session_checkin", () => {
     ).rejects.toThrow("Forbidden");
   });
 
-  it("refuses online sessions", async () => {
-    await expect(
-      asUser(db, OWNER, "select public.rotate_session_checkin($1) as t", [online]),
-    ).rejects.toThrow("Check-in is only for scheduled in-person sessions");
+  it("issues a token for an online session too, so a class with no room still takes attendance", async () => {
+    const token = (await asUser<{ t: string }>(
+      db,
+      OWNER,
+      "select public.rotate_session_checkin($1) as t",
+      [online],
+    ))!.t;
+    expect(token).toMatch(/^[0-9a-f]{64}$/);
   });
 });
 

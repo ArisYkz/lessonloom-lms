@@ -528,7 +528,7 @@ const en = {
   "classHomework.error": "Could not save the due date.",
   "checkin.title": "Check-in for this class",
   "checkin.help":
-    "Students scan this in the room. The code changes every 25 seconds, so a photo of it stops working.",
+    "Students scan this during the session, in the room or on the call. The code changes every 25 seconds, so a photo of it stops working.",
   "checkin.count": "Checked in",
   "checkin.none": "No one has checked in yet.",
   "checkin.checking": "Checking you in…",
@@ -1057,7 +1057,7 @@ const ru: Dict = {
   "classHomework.error": "Не удалось сохранить срок.",
   "checkin.title": "Отметка на занятии",
   "checkin.help":
-    "Ученики сканируют его в аудитории. Код меняется каждые 25 секунд, поэтому фото кода быстро перестаёт работать.",
+    "Ученики сканируют его во время занятия — в аудитории или в созвоне. Код меняется каждые 25 секунд, поэтому фото кода быстро перестаёт работать.",
   "checkin.count": "Отметились",
   "checkin.none": "Пока никто не отметился.",
   "checkin.checking": "Отмечаем вас…",
@@ -1582,7 +1582,7 @@ const kk: Dict = {
   "classHomework.error": "Мерзімді сақтау мүмкін болмады.",
   "checkin.title": "Осы сабаққа белгілеу",
   "checkin.help":
-    "Оқушылар мұны аудиторияда сканерлейді. Код әр 25 секунд сайын өзгереді, сондықтан кодтың суреті жұмыс істемейді.",
+    "Оқушылар мұны сабақ кезінде — аудиторияда немесе қоңырауда сканерлейді. Код әр 25 секунд сайын өзгереді, сондықтан кодтың суреті жұмыс істемейді.",
   "checkin.count": "Белгіленді",
   "checkin.none": "Әлі ешкім белгіленбеді.",
   "checkin.checking": "Сізді белгілеп жатырмыз…",

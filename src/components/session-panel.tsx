@@ -376,7 +376,7 @@ export function SessionPanel({ classroomId }: { classroomId: string }) {
             </a>
           ) : null}
         </div>
-        {s.format === "in_person" && !cancelled ? <CheckinQrDialog sessionId={s.id} /> : null}
+        {!cancelled ? <CheckinQrDialog sessionId={s.id} /> : null}
         {cancelled ? <Badge variant="outline">{t("session.cancelled")}</Badge> : null}
         {cancelled && startsInFuture ? (
           <Button variant="ghost" size="sm" disabled={busy} onClick={() => restoreSession(s.id)}>
