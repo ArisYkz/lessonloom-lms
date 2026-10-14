@@ -37,7 +37,11 @@ export const Route = createFileRoute("/teachers/$slug")({
     };
   },
   component: TeacherPage,
-  errorComponent: ({ error }) => <div className="p-10 text-center text-sm">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-10 text-center text-sm">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-20 text-center text-muted-foreground">Not found</div>,
 });
 

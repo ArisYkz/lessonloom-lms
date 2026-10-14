@@ -63,7 +63,11 @@ export const Route = createFileRoute("/catalog")({
     ],
   }),
   component: Catalog,
-  errorComponent: ({ error }) => <div className="p-10 text-center text-sm">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-10 text-center text-sm">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-10 text-center">404</div>,
 });
 
