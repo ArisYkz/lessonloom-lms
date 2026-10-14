@@ -1,6 +1,7 @@
 # Handover
 
-Snapshot as of **2026-10-14**. `main` = `origin/main` = `d68581d`.
+Snapshot as of **2026-10-14** (updated after the first browser pass). `main` = `origin/main` = `d68581d`
+plus the recording commit that follows it.
 
 This records what is built, what is verified, and what still needs a human. Update it rather
 than starting a new one.
@@ -10,10 +11,58 @@ than starting a new one.
 The classroom layer is feature-complete for the plan's Tier 1 and Tier 2, and five of the six
 Tier 3 items. Everything is committed and pushed. The database is migrated through **0029**.
 
-The one thing that has never happened: **nobody has used the app in a browser as a signed-in
-user.** Every claim below rests on the test suite, `tsc`, lint and a production build. A single
-change — the auth error wording — was confirmed in a real browser, and it was confirmed only
-because the sign-in it exercises is blocked, which is how the blocker surfaced.
+A first browser pass has now run (2026-10-14) — see below for what it covered and what it could
+not, because a **local environment gap blocks the rest**.
+
+## Browser pass — first run, 2026-10-14
+
+Run with `smoke-scratch/journey.mjs`, `flow.mjs`, `flow-student.mjs`, `flow-teacher.mjs`
+(outside the repo) against a local dev server. Verified working, in a real browser:
+
+- Sign-in for both roles.
+- **Student**: joining a class with a code, the dashboard class card showing the course, teacher
+  and "Ближайшее занятие" with the time and location, the session on the calendar, the date-range
+  filter, and check-in confirming "Вы отмечены."
+- **Teacher**: the class page with join code, **copy link putting
+  `http://<host>/join/<CODE>` on the clipboard**, copying the code, the QR dialog, renaming a
+  class with its toast, and `/teach/classes` listing the class with its status and course.
+
+**Blocked locally by a missing environment variable.** `src/integrations/supabase/client.server.ts`
+throws unless `SUPABASE_SERVICE_ROLE_KEY` is set, and the local `.env` has only the publishable
+key. The dev server logs `[Supabase] Missing Supabase environment variable(s):
+SUPABASE_SERVICE_ROLE_KEY`. Anything that uses the admin client therefore fails locally:
+
+- **Creating a teacher profile** (`createMyOrg`) — see the finding below.
+- **The roster CSV export button** — it renders only when members load, and member names come
+  from the admin client, so the button never appears locally.
+
+Add `SUPABASE_SERVICE_ROLE_KEY` to `.env` (Supabase dashboard → Settings → API) to finish the
+pass locally, or run it against Lovable, where the variable exists.
+
+### Finding: creating a teacher profile is not atomic
+
+`createMyOrg` inserts the organization with the user's client, then grants the `teacher` role
+through the admin client. The second result is **not checked**, and there is no transaction. If
+that grant fails for any reason, the organization is left behind with no teacher role: the
+header never enters teacher mode, so `/teach/classes` is unreachable from the nav, and
+re-submitting the form hits the unique slug on the existing organization. Reproduced locally
+through the missing key, but reachable on Lovable on any transient failure of that one insert.
+
+### Smaller observations
+
+- The student dashboard card shows the course title, teacher and a "Через класс" badge, but not
+  the class name; a student in two classes on one course sees two near-identical cards.
+- `/classes` (student) redirects to `/dashboard` — the route was stubbed and its nav link
+  removed, which matches an earlier audit.
+
+### Test accounts
+
+`teacher2@test.com` and `student2@test.com`, password `LessonLoom-Test-2026!`. "Confirm email" is
+now **off** on the project, so new signups work immediately. The older `teacher@test.com` and
+`student@test.com` were never confirmed and still cannot sign in — confirming them in the
+dashboard is the only fix, and progress does not depend on it. Two junk accounts,
+`probe-check@test.com` and `probe2-check@test.com`, were created while diagnosing this and can be
+deleted.
 
 ## Verifying the current state
 
@@ -66,19 +115,19 @@ npx vite build    # succeeds
 
 ## What is next
 
-**1. The browser pass — the only real gap, and it is blocked on you.**
+**1. Finish the browser pass — blocked on `SUPABASE_SERVICE_ROLE_KEY` in the local `.env`.**
 
-`teacher@test.com` and `student@test.com` cannot sign in. They return `email_not_confirmed`,
-and `test.com` is not a real inbox, so the link can never be clicked. In the Supabase dashboard
-either confirm both users under **Authentication → Users**, or turn off **Confirm email** under
-**Authentication → Sign In / Providers** for this dev project.
+The student journey and most of the teacher journey are now verified in a browser (see above).
+What is left needs the admin client, so add the service-role key (Supabase dashboard → Settings →
+API) to `.env` and re-run, or run the pass against Lovable:
 
-The harness is ready: `D:\0PROJECTS\bilim\smoke-scratch\journey.mjs` signs in as both accounts,
-walks the teacher and student routes, and dumps each page's headings, buttons, links and fields
-alongside console errors and screenshots. Run it with `BASE` pointed at a running dev server.
+- Creating a teacher profile end to end, and therefore the teacher nav including `/teach/classes`.
+- The roster CSV export — its button only appears once members load.
+- Member names in the class panel.
 
-Worth driving once sign-in works: create a class, copy the join link, join as the student,
-schedule a session, check in with the QR, set a homework due date, and export the roster.
+Still unexercised in any browser, service key or not: setting a homework due date, the overdue
+homework state, scheduling and editing a session through the UI, cancelling and restoring one,
+the reminder notifications, and leaving a directly enrolled course.
 
 **2. Confirm the pg_cron job actually scheduled.** Migration 0029 prints either
 `Session reminders scheduled every 5 minutes.` or a warning saying it was not — the code
