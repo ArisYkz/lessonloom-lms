@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n/provider";
+import { authErrorKey } from "@/lib/auth-errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,7 +69,7 @@ function AuthPage() {
         navigate({ to: target, replace: true });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("common.error"));
+      toast.error(t(authErrorKey(err)));
     } finally {
       setBusy(false);
     }
@@ -153,7 +154,7 @@ function AuthPage() {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
               redirectTo: `${window.location.origin}/reset-password`,
             });
-            if (error) return void toast.error(error.message);
+            if (error) return void toast.error(t(authErrorKey(error)));
             toast.success(t("auth.resetSent"));
           }}
         >
