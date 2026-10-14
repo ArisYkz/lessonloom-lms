@@ -8,6 +8,7 @@ import {
   ArchiveRestore,
   ArrowRight,
   Copy,
+  Download,
   Link2,
   Pencil,
   Plus,
@@ -29,6 +30,7 @@ import {
   setClassroomStatus,
 } from "@/lib/teach.functions";
 import { classroomErrorKey } from "@/lib/classroom-errors";
+import { toCsv } from "@/lib/csv";
 import type { Dict } from "@/i18n/dictionary";
 import { useI18n } from "@/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -369,6 +371,23 @@ export function ClassroomCard({
     }
   }
 
+  // Excel only reads Cyrillic and Kazakh names as UTF-8 when the file starts with a BOM.
+  const BOM = String.fromCharCode(0xfeff);
+
+  // The roster carries names and join dates only; member emails are not readable by teachers.
+  function exportRoster(rows: { name: string; joined: string }[]) {
+    const csv = toCsv([
+      [t("classroom.rosterName"), t("classroom.joined")],
+      ...rows.map((m) => [m.name, m.joined.slice(0, 10)]),
+    ]);
+    const url = URL.createObjectURL(new Blob([BOM + csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${classroom.name.replace(/[\\/:*?"<>|]/g, "").trim() || "class"}-roster.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-5">
       <div className="flex flex-wrap items-center gap-3">
@@ -515,7 +534,14 @@ export function ClassroomCard({
       </div>
 
       <div>
-        <h3 className="mb-2 text-sm font-medium">{t("classroom.students")}</h3>
+        <div className="mb-2 flex items-center gap-3">
+          <h3 className="text-sm font-medium">{t("classroom.students")}</h3>
+          {members && members.length > 0 ? (
+            <Button variant="outline" size="sm" onClick={() => exportRoster(members)}>
+              <Download className="size-4" /> {t("classroom.exportCsv")}
+            </Button>
+          ) : null}
+        </div>
         {members && members.length > 0 ? (
           <ul className="divide-y divide-border">
             {members.map((m) => (

@@ -4,7 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
-import { getMyLearning, joinClassroom, leaveClassCourse } from "@/lib/learn.functions";
+import {
+  getMyLearning,
+  joinClassroom,
+  leaveClassCourse,
+  unenrollCourse,
+} from "@/lib/learn.functions";
 import { classroomErrorKey } from "@/lib/classroom-errors";
 import { formatTimeRange, viewerTimeZone } from "@/lib/calendar";
 import { useI18n } from "@/i18n/provider";
@@ -148,7 +153,7 @@ function Dashboard() {
                   </div>
                 </div>
               </Link>
-              {c.classroomId ? <LeaveClassButton courseId={c.courseId} /> : null}
+              <LeaveCourseButton courseId={c.courseId} viaClass={Boolean(c.classroomId)} />
               {c.nextSession?.meetingUrl ? (
                 <a
                   href={c.nextSession.meetingUrl}
@@ -176,16 +181,21 @@ function formatDueAt(iso: string, locale: string) {
   }).format(new Date(iso));
 }
 
-function LeaveClassButton({ courseId }: { courseId: string }) {
+// A course reached through a class is left by leaving the class; a directly enrolled one
+// is left by deleting the enrollment, which is what unenrollCourse does.
+function LeaveCourseButton({ courseId, viaClass }: { courseId: string; viaClass: boolean }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
-  const leave = useServerFn(leaveClassCourse);
+  const leaveClass = useServerFn(leaveClassCourse);
+  const unenroll = useServerFn(unenrollCourse);
   const [busy, setBusy] = useState(false);
+  const action = viaClass ? "join.leave" : "learn.unenroll";
 
   async function confirmLeave() {
     setBusy(true);
     try {
-      await leave({ data: { courseId } });
+      if (viaClass) await leaveClass({ data: { courseId } });
+      else await unenroll({ data: { courseId } });
       queryClient.invalidateQueries({ queryKey: ["my-learning"] });
       queryClient.invalidateQueries({ queryKey: ["enrollment"] });
     } catch (err) {
@@ -199,17 +209,19 @@ function LeaveClassButton({ courseId }: { courseId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="ghost" size="sm" disabled={busy} className="self-start">
-          {t("join.leave")}
+          {t(action)}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t("join.leave")}</AlertDialogTitle>
-          <AlertDialogDescription>{t("join.leaveConfirm")}</AlertDialogDescription>
+          <AlertDialogTitle>{t(action)}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t(viaClass ? "join.leaveConfirm" : "learn.unenrollConfirm")}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-          <AlertDialogAction onClick={confirmLeave}>{t("join.leave")}</AlertDialogAction>
+          <AlertDialogAction onClick={confirmLeave}>{t(action)}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

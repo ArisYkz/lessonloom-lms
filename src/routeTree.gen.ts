@@ -30,6 +30,7 @@ import { Route as AuthenticatedTeachCourseIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedTeachCalendarRouteImport } from './routes/_authenticated/teach.calendar'
 import { Route as AuthenticatedTeachInboxRouteImport } from './routes/_authenticated/teach.inbox'
 import { Route as AuthenticatedTeachPlanRouteImport } from './routes/_authenticated/teach.plan'
+import { Route as AuthenticatedTeachClassesIndexRouteImport } from './routes/_authenticated/teach.classes.index'
 import { Route as AuthenticatedTeachClassesClassIdRouteImport } from './routes/_authenticated/teach.classes.$classId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -139,6 +140,12 @@ const AuthenticatedTeachPlanRoute = AuthenticatedTeachPlanRouteImport.update({
   path: '/teach/plan',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTeachClassesIndexRoute =
+  AuthenticatedTeachClassesIndexRouteImport.update({
+    id: '/teach/classes/',
+    path: '/teach/classes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTeachClassesClassIdRoute =
   AuthenticatedTeachClassesClassIdRouteImport.update({
     id: '/teach/classes/$classId',
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/teach/plan': typeof AuthenticatedTeachPlanRoute
   '/teach/': typeof AuthenticatedTeachIndexRoute
   '/teach/classes/$classId': typeof AuthenticatedTeachClassesClassIdRoute
+  '/teach/classes/': typeof AuthenticatedTeachClassesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -191,6 +199,7 @@ export interface FileRoutesByTo {
   '/teach/plan': typeof AuthenticatedTeachPlanRoute
   '/teach': typeof AuthenticatedTeachIndexRoute
   '/teach/classes/$classId': typeof AuthenticatedTeachClassesClassIdRoute
+  '/teach/classes': typeof AuthenticatedTeachClassesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -216,6 +225,7 @@ export interface FileRoutesById {
   '/_authenticated/teach/plan': typeof AuthenticatedTeachPlanRoute
   '/_authenticated/teach/': typeof AuthenticatedTeachIndexRoute
   '/_authenticated/teach/classes/$classId': typeof AuthenticatedTeachClassesClassIdRoute
+  '/_authenticated/teach/classes/': typeof AuthenticatedTeachClassesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/teach/plan'
     | '/teach/'
     | '/teach/classes/$classId'
+    | '/teach/classes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/teach/plan'
     | '/teach'
     | '/teach/classes/$classId'
+    | '/teach/classes'
   id:
     | '__root__'
     | '/'
@@ -288,6 +300,7 @@ export interface FileRouteTypes {
     | '/_authenticated/teach/plan'
     | '/_authenticated/teach/'
     | '/_authenticated/teach/classes/$classId'
+    | '/_authenticated/teach/classes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeachPlanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/teach/classes/': {
+      id: '/_authenticated/teach/classes/'
+      path: '/teach/classes'
+      fullPath: '/teach/classes/'
+      preLoaderRoute: typeof AuthenticatedTeachClassesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/teach/classes/$classId': {
       id: '/_authenticated/teach/classes/$classId'
       path: '/teach/classes/$classId'
@@ -475,6 +495,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTeachPlanRoute: typeof AuthenticatedTeachPlanRoute
   AuthenticatedTeachIndexRoute: typeof AuthenticatedTeachIndexRoute
   AuthenticatedTeachClassesClassIdRoute: typeof AuthenticatedTeachClassesClassIdRoute
+  AuthenticatedTeachClassesIndexRoute: typeof AuthenticatedTeachClassesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -493,6 +514,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTeachPlanRoute: AuthenticatedTeachPlanRoute,
   AuthenticatedTeachIndexRoute: AuthenticatedTeachIndexRoute,
   AuthenticatedTeachClassesClassIdRoute: AuthenticatedTeachClassesClassIdRoute,
+  AuthenticatedTeachClassesIndexRoute: AuthenticatedTeachClassesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

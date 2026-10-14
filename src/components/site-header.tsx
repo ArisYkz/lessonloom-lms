@@ -75,6 +75,14 @@ export function SiteHeader() {
         {t("nav.teach")}
       </Link>
       <Link
+        to="/teach/classes"
+        className={linkCls}
+        activeProps={activeCls}
+        onClick={() => setOpen(false)}
+      >
+        {t("nav.classes")}
+      </Link>
+      <Link
         to="/teach/inbox"
         className={linkCls}
         activeProps={activeCls}
